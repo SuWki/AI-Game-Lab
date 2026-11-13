@@ -306,12 +306,17 @@ class RepositoryTest extends AbstractRepositoryTest {
 
     @Test
     void eventReplayAfterIdAndRecent() {
+        // Cursor is a persisted event id, not an index within this Run. Other Runs may already have events.
+        eventRepo.insert(new AgentEvent(null,"preexisting-other-run","STEP_STARTED","2","1","{}",null));
+        long afterId=0;
         for (int i = 1; i <= 5; i++) {
-            eventRepo.insert(new AgentEvent(null, "evt-" + i, "STEP_STARTED",
+            var saved=eventRepo.insert(new AgentEvent(null, "evt-" + i, "STEP_STARTED",
                     String.valueOf(1), String.valueOf(1), "{\"seq\":" + i + "}", null));
+            if(i==2)afterId=saved.id();
         }
-        // Last-Event-ID 补发：id>2 之后的事件
-        List<AgentEvent> replay = eventRepo.findByRunIdAfter(1, 2, 1000);
+        // Last-Event-ID 补发：第二条事件实际游标之后的事件。
+        assertThat(afterId).isGreaterThan(2);
+        List<AgentEvent> replay = eventRepo.findByRunIdAfter(1, afterId, 1000);
         assertThat(replay).hasSize(3);
         assertThat(replay).extracting(AgentEvent::eventId)
                 .containsExactly("evt-3", "evt-4", "evt-5"); // id 升序

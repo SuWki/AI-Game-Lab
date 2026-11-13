@@ -18,6 +18,8 @@ BuilderRuntimeTest 覆盖：读取实际前轮工具观察后才能推进；共�
 
 最终本地验收：后端全量 713 项（95 suites），0 failures/errors/skipped；前端构建及 69 项测试通过；Node 模板/执行器 8 项通过；git diff --check 与新增文档链接检查通过。
 
+首轮 Linux CI 的前端/模板通过，后端发现旧 RepositoryTest 将事件游标硬编码为 2；SQLite 的自增序列不因测试删行而归零，因执行顺序不同暴露。修正为使用第二条插入结果的实际 ID，并预置另一 Run 的事件，确保非初始游标也能精确回放。未修改正确的生产查询或放宽结果断言；更新后再等待远端全量检查。
+
 新增 GitHub Actions 对 Java 21/Node 20 环境运行后端、前端及模板检查。现有历史开发与测试调整、文档、模板和证据纳入本次交付快照；本地数据库、生成工作区、依赖/构建缓存和用户预置 PRE_BUILDER_FULL_CODE_AUDIT.md 不提交。
 
 ## GitHub 交付方式
