@@ -1,0 +1,19 @@
+{
+  "url": "http://127.0.0.1:4174/game-demo/",
+  "startedAt": "2026-11-12T02:25:42.100Z",
+  "status": "PASS",
+  "mode": "Browser DOM handlers and QA fixtures; not natural gameplay",
+  "checks": [
+    {
+      "suite": "interaction",
+      "passed": 6,
+      "evidence": "interaction/summary.json"
+    },
+    {
+      "suite": "results",
+      "passed": 6,
+      "evidence": "results/summary.json"
+    }
+  ],
+  "finishedAt": "2026-11-12T02:26:41.048Z"
+}

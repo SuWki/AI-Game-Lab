@@ -1,0 +1,12 @@
+[
+  {
+    "id": "protocol-example",
+    "name": "独立协议样例（含可修复失败）",
+    "workingDirectory": "D:/AI-Game-Designer/scripts/local-tests/example-game",
+    "command": ["D:/nodejs/node.exe", "check.mjs"],
+    "timeoutSeconds": 120,
+    "resultPath": "output/test-result.json",
+    "versionFiles": ["config.json", "check.mjs"],
+    "artifactFiles": ["output/normalized-config.json"]
+  }
+]

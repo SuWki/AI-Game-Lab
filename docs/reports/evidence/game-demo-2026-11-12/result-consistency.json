@@ -1,0 +1,154 @@
+{
+  "id": "GD-F01",
+  "baseline": "bf3e44bf2c32fd3a585cc6b982531f16ef807d13",
+  "checked": 18,
+  "rule": "A committed or matured build must not be described as unformed solely because the run ended in defeat.",
+  "status": "FAIL",
+  "count": 16,
+  "failures": [
+    {
+      "seed": 11,
+      "preferredRoute": "crit",
+      "policy": "orbit",
+      "outcome": "defeat",
+      "buildStage": "committed",
+      "summary": "流派已成型，但伤害输出不足。",
+      "buildSummary": "暴击流派未成型"
+    },
+    {
+      "seed": 29,
+      "preferredRoute": "crit",
+      "policy": "orbit",
+      "outcome": "defeat",
+      "buildStage": "committed",
+      "summary": "流派已成型，但伤害输出不足。",
+      "buildSummary": "暴击流派未成型"
+    },
+    {
+      "seed": 47,
+      "preferredRoute": "crit",
+      "policy": "orbit",
+      "outcome": "defeat",
+      "buildStage": "committed",
+      "summary": "流派已成型，但伤害输出不足。",
+      "buildSummary": "暴击流派未成型"
+    },
+    {
+      "seed": 11,
+      "preferredRoute": "pierce",
+      "policy": "orbit",
+      "outcome": "defeat",
+      "buildStage": "matured",
+      "summary": "穿透流派已成型，但最终伤害不足。",
+      "buildSummary": "穿透流派未成型"
+    },
+    {
+      "seed": 29,
+      "preferredRoute": "pierce",
+      "policy": "orbit",
+      "outcome": "defeat",
+      "buildStage": "matured",
+      "summary": "穿透流派已成型，但最终伤害不足。",
+      "buildSummary": "穿透流派未成型"
+    },
+    {
+      "seed": 47,
+      "preferredRoute": "pierce",
+      "policy": "orbit",
+      "outcome": "defeat",
+      "buildStage": "committed",
+      "summary": "前排已突破，但尚未穿透至后排。",
+      "buildSummary": "穿透流派未成型"
+    },
+    {
+      "seed": 29,
+      "preferredRoute": "dash",
+      "policy": "orbit",
+      "outcome": "defeat",
+      "buildStage": "matured",
+      "summary": "穿梭流派已成型，但最终阶段未能坚持。",
+      "buildSummary": "穿梭流派未成型"
+    },
+    {
+      "seed": 47,
+      "preferredRoute": "dash",
+      "policy": "orbit",
+      "outcome": "defeat",
+      "buildStage": "committed",
+      "summary": "反击能力已成型，但输出仍有不足。",
+      "buildSummary": "穿梭流派未成型"
+    },
+    {
+      "seed": 11,
+      "preferredRoute": "crit",
+      "policy": "seek-xp",
+      "outcome": "defeat",
+      "buildStage": "matured",
+      "summary": "流派已成型，但最终阶段未能坚持。",
+      "buildSummary": "暴击流派未成型"
+    },
+    {
+      "seed": 29,
+      "preferredRoute": "crit",
+      "policy": "seek-xp",
+      "outcome": "defeat",
+      "buildStage": "committed",
+      "summary": "流派已成型，但伤害输出不足。",
+      "buildSummary": "暴击流派未成型"
+    },
+    {
+      "seed": 47,
+      "preferredRoute": "crit",
+      "policy": "seek-xp",
+      "outcome": "defeat",
+      "buildStage": "committed",
+      "summary": "流派已成型，但伤害输出不足。",
+      "buildSummary": "暴击流派未成型"
+    },
+    {
+      "seed": 11,
+      "preferredRoute": "pierce",
+      "policy": "seek-xp",
+      "outcome": "defeat",
+      "buildStage": "matured",
+      "summary": "穿透流派已成型，但最终伤害不足。",
+      "buildSummary": "穿透流派未成型"
+    },
+    {
+      "seed": 29,
+      "preferredRoute": "pierce",
+      "policy": "seek-xp",
+      "outcome": "defeat",
+      "buildStage": "matured",
+      "summary": "穿透流派已成型，但最终伤害不足。",
+      "buildSummary": "穿透流派未成型"
+    },
+    {
+      "seed": 47,
+      "preferredRoute": "pierce",
+      "policy": "seek-xp",
+      "outcome": "defeat",
+      "buildStage": "committed",
+      "summary": "前排已突破，但尚未穿透至后排。",
+      "buildSummary": "穿透流派未成型"
+    },
+    {
+      "seed": 11,
+      "preferredRoute": "dash",
+      "policy": "seek-xp",
+      "outcome": "defeat",
+      "buildStage": "matured",
+      "summary": "穿梭流派已成型，但最终阶段未能坚持。",
+      "buildSummary": "穿梭流派未成型"
+    },
+    {
+      "seed": 29,
+      "preferredRoute": "dash",
+      "policy": "seek-xp",
+      "outcome": "defeat",
+      "buildStage": "matured",
+      "summary": "穿梭流派已成型，但最终阶段未能坚持。",
+      "buildSummary": "穿梭流派未成型"
+    }
+  ]
+}

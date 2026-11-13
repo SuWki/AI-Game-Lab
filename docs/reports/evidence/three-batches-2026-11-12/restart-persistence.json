@@ -1,0 +1,13 @@
+{
+  "proposalId": "c9f1d288-6f8b-4919-bc8a-d551d125f7e8",
+  "demoChecks": 12,
+  "status": "PASS",
+  "validationDecision": "PASS",
+  "findingIds": [
+    2
+  ],
+  "baselineDecision": "FAIL",
+  "method": "Read via API after controlled backend stop and restart",
+  "demoDecision": "PASS",
+  "proposalStatus": "VALIDATED"
+}

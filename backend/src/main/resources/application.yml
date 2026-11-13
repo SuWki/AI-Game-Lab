@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ai-game-lab
+  datasource:
+    # PRAGMA 参数写在 URL 中，对连接池的每条新连接自动生效
+    url: jdbc:sqlite:./data/agl.db?journal_mode=WAL&busy_timeout=5000&synchronous=NORMAL&foreign_keys=ON
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      # SQLite 同一时刻只允许一个写者：单连接池从根上消除 SQLITE_BUSY（蓝图 §3）
+      maximum-pool-size: 1
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+logging:
+  level:
+    com.aigamelab: INFO
+
+# LLM Gateway 占位配置（P2 阶段实现，此处仅冻结配置键）
+llm:
+  gateway:
+    api-key: ${DEEPSEEK_API_KEY:}
+    base-url: https://api.deepseek.com
+    model: deepseek-chat
+    temperature: 0.4
+    max-tokens: 4096
+    timeout-seconds: 120
+
+# TH：真实 Web Search 凭据（环境变量化，绝不硬编码；为空则 web_search 报 BLOCKED）
+research:
+  search:
+    api-key: ${SERPAPI_API_KEY:}
+    base-url: https://serpapi.com/search.json
+    timeout-seconds: 15

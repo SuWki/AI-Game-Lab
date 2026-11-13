@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "game": {
+    "name": "auto-shooter-demo",
+    "version": "0.2.0",
+    "sourceRevision": null
+  },
+  "exportedAt": "2026-11-12T02:32:18.525Z",
+  "captureMode": "result-snapshot",
+  "facts": {
+    "outcome": "defeat",
+    "routeId": "crit",
+    "buildStage": "matured",
+    "buildLabel": "成型",
+    "endingKind": "hpDepleted",
+    "endingLabel": "生命值耗尽",
+    "endingReason": "在「连击中断」中生命值耗尽",
+    "finalNodeTitle": "连击中断",
+    "finalNodeType": "battle",
+    "runDurationSec": 88,
+    "nodesCleared": 4,
+    "battleWins": 18,
+    "levelReached": 6,
+    "routeTrace": [
+      {
+        "id": "qa-upgrade",
+        "type": "upgrade",
+        "title": "QA 升级"
+      },
+      {
+        "id": "qa-anomaly",
+        "type": "anomaly",
+        "title": "QA 异常转折"
+      },
+      {
+        "id": "qa-battle-crit",
+        "type": "battle",
+        "title": "暴击实战"
+      },
+      {
+        "id": "qa-break-node",
+        "type": "battle",
+        "title": "连击中断"
+      },
+      {
+        "id": "qa-result-node-defeat",
+        "type": "battle",
+        "title": "连击中断"
+      }
+    ],
+    "eventHistory": [
+      {
+        "eventId": "crit-reroute-window",
+        "eventName": "暴击抉择",
+        "optionId": "crit-reroute-window-direction",
+        "optionLabel": "稳住暴击",
+        "nodeIndex": 1,
+        "routeId": "crit",
+        "anomalyClass": "routeWindow",
+        "anomalyRole": "direction"
+      },
+      {
+        "eventId": "crit-reroute-window",
+        "eventName": "暴击抉择",
+        "optionId": "crit-reroute-window-core",
+        "optionLabel": "堆暴击倍率",
+        "nodeIndex": 2,
+        "routeId": "crit",
+        "anomalyClass": "routeWindow",
+        "anomalyRole": "core"
+      },
+      {
+        "eventId": "crit-reroute-window",
+        "eventName": "暴击抉择",
+        "optionId": "crit-reroute-window-transform",
+        "nodeIndex": 3,
+        "routeId": "crit",
+        "anomalyClass": "routeWindow",
+        "anomalyRole": "transform"
+      }
+    ],
+    "selectedUpgrades": [
+      {
+        "id": "crit-primer",
+        "name": "热枪首发",
+        "description": "命中概率触发高伤，抓时机爆发。",
+        "category": "route",
+        "routeId": "crit",
+        "tags": [
+          "starter"
+        ],
+        "selection": {
+          "baseWeight": 5.4,
+          "maxRound": 2,
+          "phaseBonuses": {
+            "opening": 1.6,
+            "mid": 0.5
+          },
+          "noDominantRouteBonus": 7.5,
+          "hintedRouteBonus": 1.8,
+          "dominantRouteBonus": 2.6,
+          "offRouteMultiplier": 0.22
+        },
+        "effects": [
+          {
+            "type": "stats",
+            "modifiers": {
+              "flawDurationBonus": 0.15
+            }
+          },
+          {
+            "type": "route",
+            "routeId": "crit"
+          }
+        ]
+      },
+      {
+        "id": "crit-aim",
+        "name": "弱点初现",
+        "description": "过载暴击+3%，回复8HP",
+        "category": "route",
+        "routeId": "crit",
+        "tags": [
+          "starter",
+          "crit-bridge-focus"
+        ],
+        "selection": {
+          "baseWeight": 6,
+          "maxRound": 2,
+          "phaseBonuses": {
+            "opening": 1.5,
+            "mid": 0.4
+          },
+          "noDominantRouteBonus": 8,
+          "hintedRouteBonus": 1.8,
+          "dominantRouteBonus": 2.8,
+          "offRouteMultiplier": 0.22
+        },
+        "effects": [
+          {
+            "type": "stats",
+            "modifiers": {
+              "critOverdriveCritBonus": 0.03
+            }
+          },
+          {
+            "type": "route",
+            "routeId": "crit"
+          }
+        ]
+      },
+      {
+        "id": "crit-afterglow",
+        "name": "破绽残留",
+        "description": "破绽持续+25%",
+        "category": "route",
+        "routeId": "crit",
+        "tags": [
+          "bridge",
+          "crit-afterglow"
+        ],
+        "selection": {
+          "baseWeight": 3.96,
+          "minRound": 2,
+          "maxRound": 3,
+          "phaseBonuses": {
+            "mid": 1.54,
+            "late": 0.4
+          },
+          "hintedRouteBonus": 2.42,
+          "dominantRouteBonus": 3.98,
+          "committedRouteBonus": 1.8,
+          "offRouteMultiplier": 0.38
+        },
+        "effects": [
+          {
+            "type": "stats",
+            "modifiers": {
+              "flawDurationBonus": 0.25
+            }
+          },
+          {
+            "type": "route",
+            "routeId": "crit"
+          }
+        ]
+      },
+      {
+        "id": "crit-burst",
+        "name": "连发强化",
+        "description": "暴击率暴伤一起堆。",
+        "category": "route",
+        "routeId": "crit",
+        "tags": [
+          "bridge",
+          "crit-bridge-focus"
+        ],
+        "selection": {
+          "baseWeight": 4,
+          "minRound": 2,
+          "phaseBonuses": {
+            "mid": 1.4,
+            "late": 0.6
+          },
+          "hintedRouteBonus": 2.1,
+          "dominantRouteBonus": 4.2,
+          "committedRouteBonus": 2.2,
+          "finalPrepBonus": 2,
+          "offRouteMultiplier": 0.42
+        },
+        "effects": [
+          {
+            "type": "stats",
+            "modifiers": {
+              "flawDurationBonus": 0.18
+            }
+          }
+        ]
+      },
+      {
+        "id": "crit-linekeep",
+        "name": "压线灼烧",
+        "description": "暴击和弹道强化。",
+        "category": "route",
+        "routeId": "crit",
+        "tags": [
+          "bridge",
+          "crit-bridge-focus"
+        ],
+        "selection": {
+          "baseWeight": 3.78,
+          "minRound": 2,
+          "maxRound": 4,
+          "phaseBonuses": {
+            "mid": 1.58,
+            "late": 0.92,
+            "finalPrep": 0.28
+          },
+          "hintedRouteBonus": 1.82,
+          "dominantRouteBonus": 4.52,
+          "committedRouteBonus": 3.88,
+          "maturedRouteBonus": 1.56,
+          "finalPrepBonus": 0.72,
+          "offRouteMultiplier": 0.28
+        },
+        "effects": [
+          {
+            "type": "stats",
+            "modifiers": {
+              "critOverdriveDurationBonus": 0.22
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "interpretation": {
+    "summary": "流派已成型，但最终阶段未能坚持。",
+    "buildSummary": "◆ 暴击成型：爆发伤害大幅提升。",
+    "replayPrompt": "结束于「连击中断」",
+    "source": "game-generated"
+  },
+  "availability": {
+    "routeTrace": "last-up-to-6-nodes",
+    "damageTimeline": false,
+    "inputReplay": false,
+    "deterministicSeed": false,
+    "sourceRevision": false
+  }
+}

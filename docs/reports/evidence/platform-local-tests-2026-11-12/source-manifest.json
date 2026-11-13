@@ -1,0 +1,38 @@
+[
+  {
+    "path": "backend/src/main/java/com/aigamelab/localtest/LocalTestService.java",
+    "sha256": "fe6c12b6655b6db0154910e1a7e903d3ced3eb5ceb3401776e418fe0df7eb6a9"
+  },
+  {
+    "path": "backend/src/main/java/com/aigamelab/api/LocalTestController.java",
+    "sha256": "b2b7b39137a0b239ea5da0b4d231870affae586352edca0b78eb2ff7bda25085"
+  },
+  {
+    "path": "backend/src/main/resources/schema.sql",
+    "sha256": "8fc7f5549c0914b95dc6a9072e12cc2093eda281f02d1f65dd4b1bf5a4c7372d"
+  },
+  {
+    "path": "frontend/src/pages/LocalTestsPage.tsx",
+    "sha256": "20dd4133c359c15db99b4d4a9db39f6d1f985b6fd7b7f2a207c2ec18522c366a"
+  },
+  {
+    "path": "frontend/src/api.ts",
+    "sha256": "df0e9689955bcc67662caece3cb67d66e43672980ffab921d14c22fd81c12a77"
+  },
+  {
+    "path": "frontend/src/App.tsx",
+    "sha256": "65ac252027e1f042fa31f563a83e562d0976dde9c675885bedd8ba7827d88563"
+  },
+  {
+    "path": "backend/src/test/java/com/aigamelab/localtest/LocalTestServiceTest.java",
+    "sha256": "25fe2d24115c7cda7cc25ba457933b14d94ac6f4e2d0f7daf27b13c684217b0d"
+  },
+  {
+    "path": "backend/src/test/java/com/aigamelab/api/LocalTestControllerTest.java",
+    "sha256": "c92b2b3703ae51c8121cbdafb47f12b34dd8fb08b28280ed0bc6d943470a76d9"
+  },
+  {
+    "path": "frontend/src/pages/LocalTestsPage.test.tsx",
+    "sha256": "ec608e7820a8432a0acd1ad49da6f4c213dbef07eaad186ef09a7a6bf1dd274d"
+  }
+]

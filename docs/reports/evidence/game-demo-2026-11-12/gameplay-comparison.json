@@ -1,0 +1,32 @@
+{
+  "checked": 18,
+  "status": "PASS",
+  "fields": [
+    "seed",
+    "preferredRoute",
+    "policy",
+    "status",
+    "simulatedSec",
+    "bossSeen",
+    "picks",
+    "outcome",
+    "buildStage",
+    "endingKind",
+    "finalNodeTitle"
+  ],
+  "source": {
+    "revision": "bf3e44bf2c32fd3a585cc6b982531f16ef807d13",
+    "engineSha256": "f4c5d5119e9258f953844a904e05ab2f7f6edbd39fd82a8fa89b02b94d51cd86",
+    "lockSha256": "aa4567ecbc211cb6b5571f4945f0bc21124bb648209e6117e927660e17479b53",
+    "harnessSha256": "8d1112cda7297b2c501d804b160aeb11d8aae8beeeb59961f8620fcf57aca60a",
+    "policyVersion": 1,
+    "clockHz": 60,
+    "seeds": [
+      11,
+      29,
+      47
+    ],
+    "replayScope": "seed 11 / crit / orbit"
+  },
+  "differences": []
+}

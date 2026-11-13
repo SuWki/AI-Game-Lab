@@ -1,0 +1,446 @@
+{
+  "url": "http://127.0.0.1:4173/game-demo/",
+  "mode": "local built game / QA result fixtures / DOM handlers",
+  "checks": [
+    {
+      "routeId": "crit",
+      "resultMode": "victory",
+      "pass": true,
+      "text": "✓\n通关成功\n\n已完成全部关卡\n\n路线节点\n5 个节点\n强化\nQA 升级\n异常\nQA 异常转折\n战斗\n暴击实战\nBoss\nQA 收尾\nBoss\n暴击实战结束\n存活时间\n1:52\n击杀数\n29\n流派\n◆ 暴击\n所有强化\n6 张牌\n◆ 暴击\n热枪首发\n◆ 暴击\n◆ 暴击\n弱点初现\n◆ 暴击\n◆ 暴击\n破绽残留\n◆ 暴击\n◆ 暴击\n连发强化\n◆ 暴击\n◆ 暴击\n冠火连环\n◆ 暴击\n◆ 暴击\n终极引爆\n◆ 暴击\n等级\nLv.8\n关卡\n5\n▶\n再来一局\n立刻重开\n回到机库"
+    },
+    {
+      "routeId": "crit",
+      "resultMode": "defeat",
+      "pass": true,
+      "text": "✗\n通关失败\n\n本局未能完成\n\n在「连击中断」中生命值耗尽\n\n路线节点\n5 个节点\n强化\nQA 升级\n异常\nQA 异常转折\n战斗\n暴击实战\n战斗\n连击中断\n战斗\n连击中断\n存活时间\n1:28\n击杀数\n18\n流派\n◆ 暴击\n所有强化\n5 张牌\n◆ 暴击\n热枪首发\n◆ 暴击\n◆ 暴击\n弱点初现\n◆ 暴击\n◆ 暴击\n破绽残留\n◆ 暴击\n◆ 暴击\n连发强化\n◆ 暴击\n◆ 暴击\n压线灼烧\n◆ 暴击\n等级\nLv.6\n关卡\n4\n▶\n再来一局\n立刻重开\n回到机库"
+    },
+    {
+      "routeId": "pierce",
+      "resultMode": "victory",
+      "pass": true,
+      "text": "✓\n通关成功\n\n已完成全部关卡\n\n路线节点\n5 个节点\n强化\nQA 升级\n异常\nQA 异常转折\n战斗\n穿透实战\nBoss\nQA 收尾\nBoss\n穿透实战结束\n存活时间\n1:36\n击杀数\n0\n流派\n║ 穿透\n所有强化\n6 张牌\n║ 穿透\n穿透弹头\n║ 穿透\n║ 穿透\n贯穿校准\n║ 穿透\n║ 穿透\n破甲弹头\n║ 穿透\n║ 穿透\n裂轨分叉\n║ 穿透\n║ 穿透\n裂隙扩散\n║ 穿透\n║ 穿透\n扇面裂开\n║ 穿透\n等级\nLv.1\n关卡\n0\n▶\n再来一局\n立刻重开\n回到机库"
+    },
+    {
+      "routeId": "pierce",
+      "resultMode": "defeat",
+      "pass": true,
+      "text": "✗\n通关失败\n\n本局未能完成\n\n在「穿透中断」中超时\n\n路线节点\n5 个节点\n强化\nQA 升级\n异常\nQA 异常转折\n战斗\n穿透实战\n战斗\n穿透中断\n战斗\n穿透中断\n存活时间\n1:24\n击杀数\n16\n流派\n║ 穿透\n所有强化\n5 张牌\n║ 穿透\n穿透弹头\n║ 穿透\n║ 穿透\n贯穿校准\n║ 穿透\n║ 穿透\n破甲弹头\n║ 穿透\n║ 穿透\n裂隙扩散\n║ 穿透\n║ 穿透\n穿脊连锁\n║ 穿透\n等级\nLv.6\n关卡\n4\n▶\n再来一局\n立刻重开\n回到机库"
+    },
+    {
+      "routeId": "dash",
+      "resultMode": "victory",
+      "pass": true,
+      "text": "✓\n通关成功\n\n已完成全部关卡\n\n路线节点\n5 个节点\n强化\nQA 升级\n异常\nQA 异常转折\n战斗\n穿梭实战\nBoss\nQA 收尾\nBoss\n穿梭实战结束\n存活时间\n1:44\n击杀数\n27\n流派\n◌ 穿梭\n所有强化\n6 张牌\n◌ 穿梭\n擦身初现\n◌ 穿梭\n◌ 穿梭\n穿梭加速\n◌ 穿梭\n◌ 穿梭\n侧移加压\n◌ 穿梭\n◌ 穿梭\n回转续拍\n◌ 穿梭\n◌ 穿梭\n贴身定势\n◌ 穿梭\n◌ 穿梭\n瞬返压制\n◌ 穿梭\n等级\nLv.7\n关卡\n5\n▶\n再来一局\n立刻重开\n回到机库"
+    },
+    {
+      "routeId": "dash",
+      "resultMode": "defeat",
+      "pass": true,
+      "text": "✗\n通关失败\n\n本局未能完成\n\n在「穿梭中断」中超时\n\n路线节点\n5 个节点\n强化\nQA 升级\n异常\nQA 异常转折\n战斗\n穿梭实战\n战斗\n穿梭中断\n战斗\n穿梭中断\n存活时间\n1:22\n击杀数\n15\n流派\n◌ 穿梭\n所有强化\n5 张牌\n◌ 穿梭\n擦身初现\n◌ 穿梭\n◌ 穿梭\n穿梭加速\n◌ 穿梭\n◌ 穿梭\n侧移加压\n◌ 穿梭\n◌ 穿梭\n续力回转\n◌ 穿梭\n◌ 穿梭\n回身蓄力\n◌ 穿梭\n等级\nLv.6\n关卡\n4\n▶\n再来一局\n立刻重开\n回到机库"
+    }
+  ],
+  "errors": [],
+  "metrics": {
+    "version": "v1",
+    "updatedAt": "2026-11-12T01:58:11.333Z",
+    "sessions": [
+      {
+        "id": "session_1794448645926",
+        "startedAt": "2026-11-12T01:57:25.926Z",
+        "events": [
+          {
+            "name": "session_start",
+            "at": "2026-11-12T01:57:25.927Z",
+            "runIndex": null
+          },
+          {
+            "name": "click_start_game",
+            "at": "2026-11-12T01:57:27.244Z",
+            "runIndex": null
+          },
+          {
+            "name": "first_run_start",
+            "at": "2026-11-12T01:57:27.245Z",
+            "runIndex": 1
+          },
+          {
+            "name": "battle_template_entered",
+            "at": "2026-11-12T01:57:30.385Z",
+            "runIndex": 1,
+            "payload": {
+              "templateId": "elimination",
+              "title": "起始歼灭",
+              "phase": "opening",
+              "nodeType": "battle",
+              "encounterType": "battle"
+            }
+          },
+          {
+            "name": "first_route_hint_time",
+            "at": "2026-11-12T01:57:32.078Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "crit",
+              "durationSec": 4.83
+            }
+          },
+          {
+            "name": "route_hint_time",
+            "at": "2026-11-12T01:57:32.079Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "crit",
+              "durationSec": 4.83
+            }
+          },
+          {
+            "name": "route_lock_time",
+            "at": "2026-11-12T01:57:32.080Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "crit",
+              "phase": "mid",
+              "pickId": "qa-route:crit-embershard",
+              "durationSec": 4.84
+            }
+          },
+          {
+            "name": "route_committed",
+            "at": "2026-11-12T01:57:32.080Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "crit",
+              "phase": "mid",
+              "pickId": "qa-route:crit-embershard"
+            }
+          },
+          {
+            "name": "build_mature_time",
+            "at": "2026-11-12T01:57:32.080Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "crit",
+              "durationSec": 4.84
+            }
+          },
+          {
+            "name": "route_matured",
+            "at": "2026-11-12T01:57:32.080Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "crit"
+            }
+          },
+          {
+            "name": "run_duration",
+            "at": "2026-11-12T01:57:32.082Z",
+            "runIndex": 1,
+            "payload": {
+              "durationSec": 4.84
+            }
+          },
+          {
+            "name": "run_finished",
+            "at": "2026-11-12T01:57:32.083Z",
+            "runIndex": 1,
+            "payload": {
+              "outcome": "victory",
+              "routeId": "crit",
+              "buildStage": "matured",
+              "buildSummary": "◆ 暴击成型：爆发伤害大幅提升。",
+              "endingKind": "victory",
+              "endingReason": "在「暴击实战结束」中结束",
+              "finalNodeTitle": "暴击实战结束",
+              "finalNodeType": "boss",
+              "durationSec": 112,
+              "battleWins": 29,
+              "nodesCleared": 5,
+              "firstCommitStage": "mid",
+              "firstCommitPick": "qa-route:crit-embershard",
+              "branchSwitchCount": 0,
+              "branchSwitchPhaseCounts": {},
+              "rareSeenCount": 0,
+              "rarePayoffPickCount": 0,
+              "hybridPickCount": 0,
+              "hybridOfferSeenCount": 0,
+              "latePayoffSeenCount": 0,
+              "routeUpgradeOfferSeenCount": 0,
+              "routeUpgradePickCount": 0,
+              "upgradeOfferRarityCounts": {},
+              "upgradeOfferValueBuckets": {},
+              "nodeTypeCounts": {},
+              "anomalySeenCount": 0,
+              "anomalyClassCounts": {},
+              "bossEchoSeenCount": 0,
+              "lateDashWindowMoments": 0,
+              "dashCounterMoments": 0,
+              "eliteCrackSeen": false,
+              "eliteCrackFollowThroughMoments": 0,
+              "bossFirelineCoverage": 0,
+              "bossSafeWindowMoments": 0,
+              "killPickupContinueMoments": 0,
+              "redirectOfferSeenCount": 0,
+              "redirectPickCount": 0,
+              "redirectPickStage": null
+            }
+          },
+          {
+            "name": "first_run_end",
+            "at": "2026-11-12T01:57:32.083Z",
+            "runIndex": 1,
+            "payload": {
+              "outcome": "victory",
+              "routeId": "crit",
+              "buildStage": "matured",
+              "endingKind": "victory",
+              "durationSec": 112
+            }
+          },
+          {
+            "name": "battle_template_entered",
+            "at": "2026-11-12T01:57:36.459Z",
+            "runIndex": 1,
+            "payload": {
+              "templateId": "elimination",
+              "title": "起始歼灭",
+              "phase": "opening",
+              "nodeType": "battle",
+              "encounterType": "battle"
+            }
+          },
+          {
+            "name": "first_route_hint_time",
+            "at": "2026-11-12T01:57:44.875Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "crit",
+              "durationSec": 17.63
+            }
+          },
+          {
+            "name": "battle_template_entered",
+            "at": "2026-11-12T01:57:50.702Z",
+            "runIndex": 1,
+            "payload": {
+              "templateId": "elimination",
+              "title": "起始歼灭",
+              "phase": "opening",
+              "nodeType": "battle",
+              "encounterType": "battle"
+            }
+          },
+          {
+            "name": "first_route_hint_time",
+            "at": "2026-11-12T01:57:58.805Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "pierce",
+              "durationSec": 31.56
+            }
+          },
+          {
+            "name": "route_hint_time",
+            "at": "2026-11-12T01:57:58.806Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "pierce",
+              "durationSec": 31.56
+            }
+          },
+          {
+            "name": "route_lock_time",
+            "at": "2026-11-12T01:57:58.807Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "pierce",
+              "phase": "mid",
+              "pickId": "qa-route:pierce-riftbloom",
+              "durationSec": 31.56
+            }
+          },
+          {
+            "name": "route_committed",
+            "at": "2026-11-12T01:57:58.807Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "pierce",
+              "phase": "mid",
+              "pickId": "qa-route:pierce-riftbloom"
+            }
+          },
+          {
+            "name": "build_mature_time",
+            "at": "2026-11-12T01:57:58.807Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "pierce",
+              "durationSec": 31.56
+            }
+          },
+          {
+            "name": "route_matured",
+            "at": "2026-11-12T01:57:58.808Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "pierce"
+            }
+          },
+          {
+            "name": "battle_template_entered",
+            "at": "2026-11-12T01:58:01.955Z",
+            "runIndex": 1,
+            "payload": {
+              "templateId": "elimination",
+              "title": "起始歼灭",
+              "phase": "opening",
+              "nodeType": "battle",
+              "encounterType": "battle"
+            }
+          },
+          {
+            "name": "first_route_hint_time",
+            "at": "2026-11-12T01:58:03.058Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "pierce",
+              "durationSec": 35.81
+            }
+          },
+          {
+            "name": "battle_template_entered",
+            "at": "2026-11-12T01:58:06.820Z",
+            "runIndex": 1,
+            "payload": {
+              "templateId": "elimination-sweep",
+              "title": "起始歼灭",
+              "phase": "opening",
+              "nodeType": "battle",
+              "encounterType": "battle"
+            }
+          },
+          {
+            "name": "first_route_hint_time",
+            "at": "2026-11-12T01:58:08.178Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "dash",
+              "durationSec": 40.93
+            }
+          },
+          {
+            "name": "route_hint_time",
+            "at": "2026-11-12T01:58:08.178Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "dash",
+              "durationSec": 40.93
+            }
+          },
+          {
+            "name": "route_lock_time",
+            "at": "2026-11-12T01:58:08.178Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "dash",
+              "phase": "mid",
+              "pickId": "qa-anomaly:dash:direction:dash-charge-direction",
+              "durationSec": 40.93
+            }
+          },
+          {
+            "name": "route_committed",
+            "at": "2026-11-12T01:58:08.178Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "dash",
+              "phase": "mid",
+              "pickId": "qa-anomaly:dash:direction:dash-charge-direction"
+            }
+          },
+          {
+            "name": "build_mature_time",
+            "at": "2026-11-12T01:58:08.179Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "dash",
+              "durationSec": 40.93
+            }
+          },
+          {
+            "name": "route_matured",
+            "at": "2026-11-12T01:58:08.179Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "dash"
+            }
+          },
+          {
+            "name": "battle_template_entered",
+            "at": "2026-11-12T01:58:10.380Z",
+            "runIndex": 1,
+            "payload": {
+              "templateId": "elimination",
+              "title": "起始歼灭",
+              "phase": "opening",
+              "nodeType": "battle",
+              "encounterType": "battle"
+            }
+          },
+          {
+            "name": "first_route_hint_time",
+            "at": "2026-11-12T01:58:11.333Z",
+            "runIndex": 1,
+            "payload": {
+              "routeId": "dash",
+              "durationSec": 44.09
+            }
+          }
+        ],
+        "runs": [
+          {
+            "runIndex": 1,
+            "startedAt": "2026-11-12T01:57:27.244Z",
+            "finishedAt": "2026-11-12T01:57:32.083Z",
+            "outcome": "victory",
+            "routeId": "crit",
+            "buildStage": "matured",
+            "buildSummary": "◆ 暴击成型：爆发伤害大幅提升。",
+            "endingKind": "victory",
+            "endingReason": "在「暴击实战结束」中结束",
+            "finalNodeTitle": "暴击实战结束",
+            "finalNodeType": "boss",
+            "durationSec": 112,
+            "battleWins": 29,
+            "nodesCleared": 5,
+            "firstCommitStage": "mid",
+            "firstCommitPick": "qa-route:crit-embershard",
+            "branchSwitchCount": 0,
+            "branchSwitchPhaseCounts": {},
+            "rareSeenCount": 0,
+            "rarePayoffPickCount": 0,
+            "hybridPickCount": 0,
+            "hybridOfferSeenCount": 0,
+            "latePayoffSeenCount": 0,
+            "routeUpgradeOfferSeenCount": 0,
+            "routeUpgradePickCount": 0,
+            "upgradeOfferRarityCounts": {},
+            "upgradeOfferValueBuckets": {},
+            "nodeTypeCounts": {},
+            "anomalySeenCount": 0,
+            "anomalyClassCounts": {},
+            "bossEchoSeenCount": 0,
+            "lateDashWindowMoments": 0,
+            "dashCounterMoments": 0,
+            "eliteCrackSeen": false,
+            "eliteCrackFollowThroughMoments": 0,
+            "bossFirelineCoverage": 0,
+            "bossSafeWindowMoments": 0,
+            "killPickupContinueMoments": 0,
+            "redirectOfferSeenCount": 0,
+            "redirectPickCount": 0
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "id": "e35be20c-fabe-4446-9a37-fa92b5aba918",
+  "target": {
+    "id": "demo-browser",
+    "name": "样例游戏浏览器回归",
+    "workingDirectory": "D:\\game-demo-test",
+    "command": [
+      "D:\\nodejs\\node.exe",
+      "D:/AI-Game-Designer/scripts/game-demo/local-suite.mjs",
+      "D:/game-demo-test",
+      "4175",
+      "--expect-review"
+    ],
+    "timeoutSeconds": 300,
+    "resultPath": "output/qa/platform-result.json"
+  },
+  "status": "PASSED",
+  "startedAt": "2026-11-12T03:07:14.187361100Z",
+  "finishedAt": "2026-11-12T03:08:43.054056400Z",
+  "exitCode": 0,
+  "output": "{\"url\":\"http://127.0.0.1:4175/game-demo/\",\"startedAt\":\"2026-11-12T03:07:14.563Z\",\"status\":\"PASS\",\"mode\":\"Browser DOM handlers and QA fixtures; not natural gameplay\",\"checks\":[{\"suite\":\"interaction\",\"passed\":6,\"evidence\":\"interaction/summary.json\"},{\"suite\":\"results\",\"passed\":6,\"evidence\":\"results/summary.json\"}],\"finishedAt\":\"2026-11-12T03:08:39.926Z\",\"reportPath\":\"D:\\\\game-demo-test\\\\output\\\\qa\\\\local-suite\\\\2026-11-12T03-07-14-560Z\\\\summary.json\"}\n",
+  "evidence": {
+    "url": "http://127.0.0.1:4175/game-demo/",
+    "startedAt": "2026-11-12T03:07:14.563Z",
+    "status": "PASS",
+    "mode": "Browser DOM handlers and QA fixtures; not natural gameplay",
+    "checks": [
+      {
+        "suite": "interaction",
+        "passed": 6,
+        "evidence": "interaction/summary.json"
+      },
+      {
+        "suite": "results",
+        "passed": 6,
+        "evidence": "results/summary.json"
+      }
+    ],
+    "finishedAt": "2026-11-12T03:08:39.926Z",
+    "runId": "e35be20c-fabe-4446-9a37-fa92b5aba918",
+    "reportPath": "D:\\game-demo-test\\output\\qa\\local-suite\\2026-11-12T03-07-14-560Z\\summary.json"
+  },
+  "error": null
+}

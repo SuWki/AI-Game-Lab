@@ -1,0 +1,97 @@
+diff --git a/src/scenes/ResultScene.ts b/src/scenes/ResultScene.ts
+index 97cc5aa..1157b55 100644
+--- a/src/scenes/ResultScene.ts
++++ b/src/scenes/ResultScene.ts
+@@ -1,5 +1,6 @@
+ import Phaser from 'phaser';
+ import type { RunResult, Services } from '../game/types';
++import { downloadRunReview } from '../systems/RunReview';
+ 
+ export class ResultScene extends Phaser.Scene {
+   public constructor() {
+@@ -13,6 +14,13 @@ export class ResultScene extends Phaser.Scene {
+     services.audio.setMusic('result');
+     services.audio.play('result');
+     services.overlay.showResult(data.result, {
++      onExportReview: () => {
++        try {
++          downloadRunReview(data.result);
++        } catch {
++          services.overlay.pushToast('复盘导出失败，请重试。', 'danger');
++        }
++      },
+       onRestart: () => {
+         services.audio.unlock();
+         services.audio.play('start');
+diff --git a/src/ui/OverlayController.ts b/src/ui/OverlayController.ts
+index cee04d7..d0e57ca 100644
+--- a/src/ui/OverlayController.ts
++++ b/src/ui/OverlayController.ts
+@@ -20,6 +20,7 @@ import type {
+ interface ResultActions {
+   onRestart: () => void;
+   onBackToMenu: () => void;
++  onExportReview: () => void;
+ }
+ 
+ interface PauseActions {
+@@ -603,6 +604,9 @@ export class OverlayController {
+               </div>
+             </button>
+             <div class="result-secondary-actions">
++              <button class="combat-action-small" data-action="export-review">
++                <span>导出本局复盘</span>
++              </button>
+               <button class="combat-action-small" data-action="menu">
+                 <span>回到机库</span>
+               </button>
+@@ -613,6 +617,7 @@ export class OverlayController {
+     `;
+     this.bindClick('[data-action="restart"]', actions.onRestart);
+     this.bindClick('[data-action="menu"]', actions.onBackToMenu);
++    this.bindClick('[data-action="export-review"]', actions.onExportReview);
+ 
+     // Animate stats appearing and counting up
+     this.animateResultStats();
+diff --git a/src/systems/RunReview.ts b/src/systems/RunReview.ts
+new file mode 100644
+index 0000000..f2a6d91
+--- /dev/null
++++ b/src/systems/RunReview.ts
+@@ -0,0 +1,36 @@
++import type { RunResult } from '../game/types';
++import { version } from '../../package.json';
++
++/** A portable result snapshot, not an input replay or inferred cause of death. */
++export function createRunReview(result: RunResult, exportedAt = new Date().toISOString()) {
++  const { summary, buildSummary, replayPrompt, ...facts } = result;
++  return JSON.parse(JSON.stringify({
++    schemaVersion: 1,
++    game: { name: 'auto-shooter-demo', version, sourceRevision: null },
++    exportedAt,
++    captureMode: 'result-snapshot',
++    facts,
++    interpretation: { summary, buildSummary, replayPrompt, source: 'game-generated' },
++    availability: {
++      routeTrace: 'last-up-to-6-nodes',
++      damageTimeline: false,
++      inputReplay: false,
++      deterministicSeed: false,
++      sourceRevision: false,
++    },
++  }));
++}
++
++export function downloadRunReview(result: RunResult): void {
++  const content = JSON.stringify(createRunReview(result), null, 2);
++  const url = URL.createObjectURL(new Blob([content], { type: 'application/json;charset=utf-8' }));
++  const link = document.createElement('a');
++  link.href = url;
++  link.download = `run-review-${result.routeId ?? 'unformed'}-${result.outcome}-${Date.now()}.json`;
++  document.body.appendChild(link);
++  try { link.click(); } finally {
++    link.remove();
++    // Allow the browser to begin consuming the download before releasing the URL.
++    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
++  }
++}

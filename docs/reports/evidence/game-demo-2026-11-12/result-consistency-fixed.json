@@ -1,0 +1,9 @@
+{
+  "id": "GD-F01",
+  "baseline": "bf3e44bf2c32fd3a585cc6b982531f16ef807d13",
+  "checked": 18,
+  "rule": "A committed or matured build must not be described as unformed solely because the run ended in defeat.",
+  "status": "PASS",
+  "count": 0,
+  "failures": []
+}

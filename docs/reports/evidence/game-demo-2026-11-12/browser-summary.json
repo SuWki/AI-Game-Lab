@@ -1,0 +1,48 @@
+{
+  "mode": "DOM click handlers and QA fixtures; not physical pointer or natural full run",
+  "url": "http://127.0.0.1:4173/game-demo/",
+  "errors": [],
+  "checks": [
+    {
+      "name": "home",
+      "pass": true
+    },
+    {
+      "name": "pause",
+      "pass": true
+    },
+    {
+      "name": "resume",
+      "pass": true
+    },
+    {
+      "name": "crit-upgrade-fixture",
+      "pass": true,
+      "triggered": true,
+      "expected": "热枪首发"
+    },
+    {
+      "name": "pierce-upgrade-fixture",
+      "pass": true,
+      "triggered": true,
+      "expected": "穿透弹头"
+    },
+    {
+      "name": "dash-upgrade-fixture",
+      "pass": true,
+      "triggered": true,
+      "expected": "擦身初现"
+    }
+  ],
+  "snapshots": [
+    {
+      "text": "PROJECT ORBITAL\n轨道计划 - 短局自动射击肉鸽\n▶\n开始作战\n\nWASD移动，自动射击\n\n出击\n0\n胜利\n0\n上次游玩时长\n--:--\n上把流派\n未成型\n音量调整",
+      "state": null,
+      "actions": [
+        "start",
+        "volume"
+      ]
+    }
+  ],
+  "finalText": "HP\n110 / 110\nEXP Lv.1\n0 / 29\n当前关卡 2 / 5\n暂停\n选择强化\n选择强化\n当前等级\nLv.1\n伤害\n18\n射速\n132/分\n弹速\n360\n暴击率\n6%\n暴伤\n165%\n穿透\n0\n◌\n穿梭\n◌ 穿梭\n擦身初现\n\n贴身命中后更容易攒起脉冲。\n\n◌\n穿梭\n◌ 穿梭\n穿梭加速\n\n穿梭充能+12%。\n\n◌\n穿梭\n◌ 穿梭\n续力回转\n\n反击伤害+18%。"
+}

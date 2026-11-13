@@ -1,0 +1,9 @@
+{
+  "url": "http://127.0.0.1:4173/game-demo/",
+  "startedAt": "2026-11-12T02:24:48.798Z",
+  "status": "FAIL",
+  "mode": "Browser DOM handlers and QA fixtures; not natural gameplay",
+  "checks": [],
+  "failure": "Error: Preview exited: error when starting preview server:\nError: Port 4173 is already in use\n    at httpServerStart (file:///D:/game-demo-test/node_modules/vite/dist/node/chunks/node.js:10635:25)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async preview (file:///D:/game-demo-test/node_modules/vite/dist/node/chunks/node.js:33530:2)\n    at async CAC.<anonymous> (file:///D:/game-demo-test/node_modules/vite/dist/node/cli.js:809:18)\n",
+  "finishedAt": "2026-11-12T02:24:49.363Z"
+}
