@@ -1,0 +1,9 @@
+{
+  "id": "survival-web",
+  "version": "1.0.0",
+  "engine": "browser-canvas-esmodules",
+  "capabilities": ["movement", "auto-fire", "heat-burst", "shield-dash", "settlement", "restart"],
+  "files": ["index.html", "game.mjs", "engine.mjs", "style.css"],
+  "assets": "Original geometric placeholders drawn in canvas; no external assets",
+  "limitations": ["Single arena", "Keyboard and mouse", "No save or multiplayer"]
+}

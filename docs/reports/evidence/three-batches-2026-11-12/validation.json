@@ -1,0 +1,708 @@
+{
+  "backend": {
+    "failures": 0.0,
+    "errors": 0.0,
+    "command": "mvn -q test",
+    "total": 695.0,
+    "suites": [
+      {
+        "suite": "com.aigamelab.api.ApiResponseEnvelopeTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.api.ConfigControllerTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.api.DashboardControllerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.api.ExperimentControllerTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.api.LocalTestControllerTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.api.QaControllerTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.api.ResearchControllerTest",
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.api.RunControllerReadTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.api.TaskControllerTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.api.TesterControllerTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.ApplicationTests",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.config.ApprovalServiceTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.config.ConfigDifferTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.config.ConfigVersionServiceTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.config.MergePatchApplierTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.domain.TesterDomainTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.event.EventPublishSseTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.experiment.EvaluationServiceTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.experiment.ExperimentServiceTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.gameenv.FakeGameEnvironmentTest",
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.llm.DeepSeekClientTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.llm.GatewayRetryTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.llm.LlmDtoSnapshotTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.llm.PromptServiceTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.llm.TestDoubleTest",
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.llm.TesterPromptImportTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.localtest.LocalTestServiceTest",
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.localtest.LocalWorkflowIntegrationTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.p8.P8E2EExceptionPathTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.p8.P8E2EGoldenPathTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.qa.ContractMatrixTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.qa.QaBuildShareDeriverTest",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.qa.QaP1_1Test",
+        "tests": 17,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.qa.QaP1_2Test",
+        "tests": 22,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.qa.QaP1_3Test",
+        "tests": 26,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.qa.QaP1_5Test",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.qa.QaPhase2OrchestrationTest",
+        "tests": 29,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.qa.QaReleaseGateServiceTest",
+        "tests": 26,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.qa.QaToolIsolationTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.qa.support.QaTestFixtureTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.repository.RepositoryTest",
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.repository.ResearchRepositoryTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.repository.TesterRepositoryTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.research.ExtractClaimsSourceIdsTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.research.ReportContractAndDedupTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.research.ResearchAgentEndToEndTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.research.ResearchEventPublishTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.research.ResearchToDesignerE2ETest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.research.ResearchToolHardeningTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.research.SerpApiSearchClientTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.research.WebSearchToolTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.runtime.AgentLoopTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.runtime.AgentTypeResolverTest",
+        "tests": 20,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.runtime.BudgetGuardTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.runtime.LoopDetectorTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.runtime.RunControlServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.runtime.RunStateMachineTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.runtime.RuntimeIntegrityTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.runtime.TesterRunWiringTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.runtime.ToolExecutorTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.sim.AggregatorTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.sim.BatchSimulatorTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.sim.GameConfigTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.sim.GameSimulatorTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.ConfigProposalApprovalRegressionIntegrationTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.ConfigVersionTesterExecutionIntegrationTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.ConfigVersionTestPlanEvidenceIntegrationTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.FindingFingerprintServiceTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.FindingRegressionServiceIntegrationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.InvariantEngineTest",
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.InvariantIntegrationTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.TesterChallengeTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.TesterEndToEndTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.TesterEventPublishTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.TesterExperimentIntegrationTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.TesterLongRunBudgetLoopIntegrationTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.TesterReadToolsTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.TesterRegressionIntegrationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.TesterServicesTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.TesterWriteToolsTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.TestReportExperimentResultIntegrationTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tester.TestReportRegressionSectionIntegrationTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tool.AnalyzeExperimentToolTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tool.CompareExperimentsToolTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tool.CreateChangeProposalToolTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tool.CreateDesignDocumentToolTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tool.DesignerResearchToolsTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tool.GetGameConfigToolTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tool.ModifyGameConfigToolTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tool.SimulateGameToolTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tool.ToolRegistryIntegrationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.aigamelab.tool.ToolRegistryTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "skipped": 0.0
+  },
+  "frontend": {
+    "typecheck": "PASS",
+    "tests": 65,
+    "build": "PASS",
+    "testFiles": 11
+  },
+  "sourceHashes": [
+    {
+      "path": "backend/src/main/java/com/aigamelab/runtime/RuntimeConversation.java",
+      "sha256": "49e1ee15c03d0564e144fc06c6eab12e614f67a15a04a7eafdac7f3a4ddb018f"
+    },
+    {
+      "path": "backend/src/main/java/com/aigamelab/runtime/AgentLoop.java",
+      "sha256": "2817bf49055dcc80b6720b56195c13f8efb531f52e6514c466411f3a2d250164"
+    },
+    {
+      "path": "backend/src/main/java/com/aigamelab/runtime/ToolExecutor.java",
+      "sha256": "96c3a062fb06f31064a0722525a76c306e22f359b6a382fe31e922e8aeec20f3"
+    },
+    {
+      "path": "backend/src/main/java/com/aigamelab/runtime/RunControlService.java",
+      "sha256": "0dfd87d4582bd23edd90444913a2df1f9b913f69a542fd315a1938d9d1e26803"
+    },
+    {
+      "path": "backend/src/main/java/com/aigamelab/localtest/LocalEvidenceService.java",
+      "sha256": "237fa09138bf068a83e640979f918473f24f98f398907e199e6c4a2c9ba92737"
+    },
+    {
+      "path": "backend/src/main/java/com/aigamelab/localtest/LocalChangeService.java",
+      "sha256": "b7dc1f83a83cf3fe8a78af4bb3937c7b1144d8218cee9620083dea02ad47883b"
+    },
+    {
+      "path": "backend/src/main/java/com/aigamelab/localtest/LocalTestService.java",
+      "sha256": "9ccc6a84d22b3d8a0e9d68a4df38d30f9577175f7b60fb6ffb0fdeb455a56870"
+    },
+    {
+      "path": "backend/src/main/java/com/aigamelab/localtest/LocalTestTools.java",
+      "sha256": "2534e4e29a9356f3f9be18e2ae57978aae9688c452ebb7c9382ec11dae6e78e1"
+    },
+    {
+      "path": "backend/src/main/resources/schema.sql",
+      "sha256": "001652b0df2f3473618a2e2a59c77cda664bb10c4fc98d91dbe144ce0554016f"
+    },
+    {
+      "path": "frontend/src/pages/LocalEvidencePanel.tsx",
+      "sha256": "8c2552db132eb6a30b5bd2c376119d86a8d70366fa6f18b261b5e50b0d386a2e"
+    },
+    {
+      "path": "frontend/src/pages/LocalChangesPage.tsx",
+      "sha256": "10818ffdf6d274c571393a0809564720c0cdb7d6829382a2c6d95cd0d76a275e"
+    }
+  ],
+  "realProvider": "NOT_RUN: DEEPSEEK_API_KEY absent in execution environment"
+}

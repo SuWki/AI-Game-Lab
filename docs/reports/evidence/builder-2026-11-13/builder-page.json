@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "task": {
+    "id": 2,
+    "title": "Builder: Heat survival specification",
+    "goal": "生成所选规格支持的模板切片，并如实报告产物、未实现需求和验收边界。",
+    "constraintsJson": "{\"agent_type\":\"BUILDER\",\"productionSpecId\":\"bf7d7be6-6b72-448e-9c9e-51852ecd5186\",\"productionSpecRevision\":1,\"productionSourceTaskId\":1}",
+    "maxSteps": 20,
+    "approvalRequired": true,
+    "status": "ACTIVE",
+    "createdAt": "2026-11-13T16:02:40"
+  },
+  "unmarkedRunStart": 400,
+  "unboundCreation": 400,
+  "browserErrors": [],
+  "realProviderRun": "Not executed; this smoke validates binding and UI only"
+}

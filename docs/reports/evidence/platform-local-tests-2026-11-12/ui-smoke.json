@@ -1,0 +1,6 @@
+{
+  "status": "PASS",
+  "url": "http://127.0.0.1:5173/local-tests",
+  "errors": [],
+  "text": "AI Game Lab · 中台\nDashboard\nFindings\nTest Plans\nExperiments\nRun Trace\nConfig & Diff\nRegression\nResearch\nWorkflow\n本地测试\n本地游戏测试\n\n选择已注册的游戏测试目标，执行后查看状态、日志和结果证据。COMPLETED 表示命令结束；PASSED 才表示结果文件报告通过。\n\n测试目标\n平台前端类型检查\n\nD:/AI-Game-Designer/frontend\n\nD:\\nodejs\\node.exe D:/nodejs/node_modules/npm/bin/npm-cli.js run typecheck\n\n超时：120 秒 · 结果文件：未配置\n\n运行测试\n样例游戏浏览器回归\n\nD:/game-demo-test\n\nD:\\nodejs\\node.exe D:/AI-Game-Designer/scripts/game-demo/local-suite.mjs D:/game-demo-test 4175 --expect-review\n\n超时：300 秒 · 结果文件：output/qa/platform-result.json\n\n运行测试\n最近任务\n目标\t状态\t提交时间\t操作\n平台前端类型检查\tCOMPLETED\t2026-11-12T03:08:38.885407800Z\t\n样例游戏浏览器回归\tPASSED\t2026-11-12T03:07:14.187361100Z\t\n平台前端类型检查\tCOMPLETED\t2026-11-12T03:06:52.387077100Z\t\n任务详情 · COMPLETED\n\ndf193834-9c6f-4f11-8d60-256d74a4d23e · 退出码：0\n\n输出日志（结束后可见，最多保留末尾 64K 字符）\n\n> ai-game-lab-frontend@0.1.0 typecheck\n> tsc -b --noEmit\n\n\n结果证据\n未提供有效结果证据"
+}

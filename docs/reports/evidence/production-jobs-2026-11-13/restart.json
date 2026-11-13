@@ -1,0 +1,8 @@
+{
+  "method": "GET after controlled backend stop and restart",
+  "productionStatus": "BUILT",
+  "buildId": "build-16133b99-f119-4bcb-b9ef-5e52891e7dd5",
+  "id": "02e13d6c-5ea3-435b-a037-db393c6baa0c",
+  "status": "PASS",
+  "specHash": "30e6835768a5c0a10d45454bc985dee94ab35342f0a819f4ae3bc210e8dc47aa"
+}

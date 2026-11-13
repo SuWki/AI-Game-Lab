@@ -1,0 +1,108 @@
+{
+  "version": "v001",
+  "player": {
+    "maxHp": 100.0,
+    "moveSpeed": 5.0,
+    "pickupRadius": 2.0,
+    "armor": 0.1,
+    "hpRegenPerSec": 3.0,
+    "levelUpIntervalSec": 15.0,
+    "buildType": "crit"
+  },
+  "weapons": [
+    {
+      "id": "nova_sniper",
+      "name": "Nova Sniper",
+      "buildType": "crit",
+      "damage": 60.0,
+      "fireIntervalMs": 800.0,
+      "projectileSpeed": 30.0,
+      "range": 20.0,
+      "projectileCount": 1,
+      "critChance": 0.35,
+      "critMultiplier": 2.8,
+      "pierceCount": 1,
+      "armorPenetration": 0.0
+    },
+    {
+      "id": "railgun",
+      "name": "Railgun",
+      "buildType": "penetration",
+      "damage": 55.0,
+      "fireIntervalMs": 1000.0,
+      "projectileSpeed": 40.0,
+      "range": 25.0,
+      "projectileCount": 1,
+      "critChance": 0.1,
+      "critMultiplier": 1.5,
+      "pierceCount": 1,
+      "armorPenetration": 0.15
+    },
+    {
+      "id": "gauss_smg",
+      "name": "Gauss SMG",
+      "buildType": "attack_speed",
+      "damage": 10.0,
+      "fireIntervalMs": 100.0,
+      "projectileSpeed": 25.0,
+      "range": 15.0,
+      "projectileCount": 1,
+      "critChance": 0.15,
+      "critMultiplier": 1.6,
+      "pierceCount": 0,
+      "armorPenetration": 0.0
+    },
+    {
+      "id": "plasma_cannon",
+      "name": "Plasma Cannon",
+      "buildType": "attack_speed",
+      "damage": 30.0,
+      "fireIntervalMs": 400.0,
+      "projectileSpeed": 20.0,
+      "range": 18.0,
+      "projectileCount": 1,
+      "critChance": 0.2,
+      "critMultiplier": 2.0,
+      "pierceCount": 0,
+      "armorPenetration": 0.1
+    }
+  ],
+  "upgrades": [
+    {"id": "u_crit_chance", "name": "Crit Boost", "buildType": "crit", "weight": 1.0, "effect": {"stat": "critChance", "op": "ADD", "value": 0.05}},
+    {"id": "u_crit_dmg", "name": "Crit Damage", "buildType": "crit", "weight": 1.0, "effect": {"stat": "critMultiplier", "op": "MUL", "value": 1.1}},
+    {"id": "u_pen_armor", "name": "Armor Pierce", "buildType": "penetration", "weight": 1.0, "effect": {"stat": "armorPenetration", "op": "ADD", "value": 0.1}},
+    {"id": "u_pen_count", "name": "Pierce +1", "buildType": "penetration", "weight": 1.0, "effect": {"stat": "pierceCount", "op": "ADD", "value": 1.0}},
+    {"id": "u_as_rate", "name": "Fire Rate", "buildType": "attack_speed", "weight": 1.0, "effect": {"stat": "fireIntervalMs", "op": "MUL", "value": 0.9}},
+    {"id": "u_as_dmg", "name": "Damage Up", "buildType": "attack_speed", "weight": 1.0, "effect": {"stat": "damage", "op": "MUL", "value": 1.1}}
+  ],
+  "enemy": {
+    "hp": 50.0,
+    "damage": 4.0,
+    "speed": 2.0,
+    "defense": 0.1,
+    "radius": 0.5
+  },
+  "wave": {
+    "totalWaves": 20,
+    "waveDurationSec": 30.0,
+    "enemyHpGrowthPerWave": 0.10,
+    "enemyDamageGrowthPerWave": 0.06,
+    "spawnRate": 0.4,
+    "bossEveryNWaves": 5
+  },
+  "difficulty": {
+    "enemyHpMultiplier": 1.0,
+    "enemyDamageMultiplier": 1.0,
+    "spawnRateMultiplier": 1.0
+  },
+  "targets": {
+    "targetWinRate": 0.5,
+    "acceptableBuildDpsVariance": 0.15,
+    "maxDominantBuildShare": 0.7
+  },
+  "sim": {
+    "dt": 0.02,
+    "totalTimeSec": 600.0,
+    "baseSeed": 12345
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "status": "PASS",
+  "method": "Actual browser form, shared Node execution, API idempotency and local-mutation guard",
+  "job": {
+    "id": "02e13d6c-5ea3-435b-a037-db393c6baa0c",
+    "taskId": 1,
+    "specId": "bf7d7be6-6b72-448e-9c9e-51852ecd5186",
+    "specRevision": 1,
+    "specHash": "30e6835768a5c0a10d45454bc985dee94ab35342f0a819f4ae3bc210e8dc47aa",
+    "requestKey": "e9cbcb54-5637-4886-be4a-a77caa0c0f42",
+    "status": "BUILT",
+    "createdAt": "2026-11-13T07:39:13.514512100Z",
+    "localRunId": "5574d0b2-0fb0-4ecb-805c-e1688334affe",
+    "templateHash": "aa301015935821702574c806be58290718d273a90faca4cf11a3946463d69b8b",
+    "jobDirectory": "D:\\AI-Game-Designer\\backend\\data\\productions\\02e13d6c-5ea3-435b-a037-db393c6baa0c",
+    "result": {
+      "workspace": "D:\\AI-Game-Designer\\backend\\data\\productions\\02e13d6c-5ea3-435b-a037-db393c6baa0c\\output\\f7d921ce-9a82-4aa2-ae2a-f81ba4c7b6dd",
+      "build": {
+        "schemaVersion": 1,
+        "buildId": "build-16133b99-f119-4bcb-b9ef-5e52891e7dd5",
+        "files": {
+          "index.html": "dd3132276144e11c9ecf511eb1cb63ab17319f63e5c633e068220d2553e7ee7f",
+          "game.mjs": "65b095c533fc3c05c1dec8d2942ca84c1aa5ae5f14cc23d63c39bdd6e83c0904",
+          "engine.mjs": "d073f422e17e442ab68c7c471461fca38f62b004718808b84059368d7e327456",
+          "style.css": "9f0f95f1e7bd043b53e0ca3fececab3c92bc7fd0cac261d2612dfbc4c285a412",
+          "config.json": "13ff0522b77058e010ab168a44eb368cd85d06f7ce3fa1d38e9d10ad0eaafc53"
+        },
+        "productionManifestHash": "68b611f8eb71f58f8765f45dbad6b8de724f6ef93f7b5c56edc3f18b0cf26887",
+        "spec": {
+          "id": "bf7d7be6-6b72-448e-9c9e-51852ecd5186",
+          "revision": 1,
+          "hash": "30e6835768a5c0a10d45454bc985dee94ab35342f0a819f4ae3bc210e8dc47aa"
+        }
+      },
+      "provenance": {
+        "schemaVersion": 1,
+        "template": {
+          "id": "survival-web",
+          "version": "1.0.0",
+          "manifestHash": "241bbfa86a6de8c45eef396b99065a4b0307064a4310cd5d2ef85647d50a08ae",
+          "files": {
+            "index.html": "dd3132276144e11c9ecf511eb1cb63ab17319f63e5c633e068220d2553e7ee7f",
+            "game.mjs": "65b095c533fc3c05c1dec8d2942ca84c1aa5ae5f14cc23d63c39bdd6e83c0904",
+            "engine.mjs": "d073f422e17e442ab68c7c471461fca38f62b004718808b84059368d7e327456",
+            "style.css": "9f0f95f1e7bd043b53e0ca3fececab3c92bc7fd0cac261d2612dfbc4c285a412"
+          }
+        },
+        "spec": {
+          "id": "bf7d7be6-6b72-448e-9c9e-51852ecd5186",
+          "revision": 1,
+          "hash": "30e6835768a5c0a10d45454bc985dee94ab35342f0a819f4ae3bc210e8dc47aa"
+        },
+        "mode": "deterministic-template-instantiation",
+        "limitations": [
+          "Only supported survivalWeb parameters are implemented; other specification requirements need separate implementation and acceptance.",
+          "No AI coding or quality acceptance has occurred."
+        ]
+      }
+    }
+  },
+  "retryId": "02e13d6c-5ea3-435b-a037-db393c6baa0c",
+  "missingHeaderStatus": 400,
+  "browserErrors": []
+}

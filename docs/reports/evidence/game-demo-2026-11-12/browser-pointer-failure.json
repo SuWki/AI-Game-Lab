@@ -1,0 +1,21 @@
+{
+  "url": "http://127.0.0.1:4173/game-demo/",
+  "errors": [],
+  "checks": [
+    {
+      "name": "home",
+      "pass": true
+    }
+  ],
+  "snapshots": [
+    {
+      "text": "PROJECT ORBITAL\n轨道计划 - 短局自动射击肉鸽\n▶\n开始作战\n\nWASD移动，自动射击\n\n出击\n0\n胜利\n0\n上次游玩时长\n--:--\n上把流派\n未成型\n音量调整",
+      "state": null,
+      "actions": [
+        "start",
+        "volume"
+      ]
+    }
+  ],
+  "failure": "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-action=\"pause\"]')\u001b[22m\n\u001b[2m    - locator resolved to <button data-action=\"pause\" class=\"hud-pause-button\">暂停</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n"
+}

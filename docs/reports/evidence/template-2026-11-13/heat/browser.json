@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "method": "Real browser clicks, key input and elapsed game time; no forced state hooks",
+  "config": {
+    "title": "Heat Garden",
+    "mechanic": "heat-burst",
+    "duration": 6,
+    "enemySpeed": 70,
+    "spawnInterval": 1,
+    "seed": 42
+  },
+  "checks": [
+    "build-load",
+    "start",
+    "natural-settlement",
+    "restart"
+  ],
+  "errors": [],
+  "build": {
+    "schemaVersion": 1,
+    "buildId": "build-23ec7afe-9921-4940-abb6-e4f780cabbca",
+    "files": {
+      "index.html": "dd3132276144e11c9ecf511eb1cb63ab17319f63e5c633e068220d2553e7ee7f",
+      "game.mjs": "65b095c533fc3c05c1dec8d2942ca84c1aa5ae5f14cc23d63c39bdd6e83c0904",
+      "engine.mjs": "d073f422e17e442ab68c7c471461fca38f62b004718808b84059368d7e327456",
+      "style.css": "9f0f95f1e7bd043b53e0ca3fececab3c92bc7fd0cac261d2612dfbc4c285a412",
+      "config.json": "e2e0fa1efb62b6281eae412e9c71d728c1f1d635d97b1a5f97c6f98f9d1e7c34"
+    },
+    "productionManifestHash": "972850ce4519ccee1fbb2a69e052b199a7060ff2c9c60910f09e5cce22a52e9e",
+    "spec": {
+      "id": "8848da0b-ee3a-4c12-91be-04c33f55d656",
+      "revision": 1,
+      "hash": "acb8fe536f1ae1ae1e13ea3542cc0073829c7c629478c092ba13f1fb4b42166c"
+    }
+  }
+}

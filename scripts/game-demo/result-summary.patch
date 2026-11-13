@@ -1,0 +1,53 @@
+diff --git a/src/systems/RunEngine.ts b/src/systems/RunEngine.ts
+index ab95d4c..b787a89 100644
+--- a/src/systems/RunEngine.ts
++++ b/src/systems/RunEngine.ts
+@@ -1436,7 +1436,7 @@ export class RunEngine implements SafeZoneHost, DashMomentHost, PressureWindowHo
+     const buildStage = this.getResultBuildStage(routeId, selectedUpgrades, [...this.state.eventHistory]);
+     const replayProfile = this.getReplayProfile(routeId);
+     const buildLabel = getBuildStageLabel(buildStage);
+-    const buildSummary = this.getBuildSummary(routeId, buildStage, replayProfile, outcome, [...this.state.eventHistory]);
++    const buildSummary = this.getBuildSummary(routeId, buildStage, outcome);
+     const endingLabel = getEndingLabel(endingKind);
+     const finalNodeTitle = this.state.currentNode?.title ?? getPhaseLabel(this.state.phase);
+     const finalNodeType = this.state.currentNode?.type ?? null;
+@@ -1509,37 +1509,14 @@ export class RunEngine implements SafeZoneHost, DashMomentHost, PressureWindowHo
+   private getBuildSummary(
+     routeId: RouteId | null,
+     buildStage: RouteBuildStage,
+-    replayProfile: ReplayProfile,
+     outcome: RunOutcome,
+-    eventHistory: PickedEventRecord[],
+   ): string {
+     if (!routeId) {
+       return outcome === 'victory' ? '通关成功' : '本局未形成完整流派';
+     }
+ 
+-    if (outcome === 'victory') {
+-      switch (routeId) {
+-        case 'crit':
+-          return '暴击已就绪';
+-        case 'pierce':
+-          return '穿透已就绪';
+-        case 'dash':
+-          return '穿梭已就绪';
+-        default:
+-          return `${ROUTE_NAME_MAP[routeId]}已就绪`;
+-      }
+-    }
+-
+-    switch (routeId) {
+-      case 'crit':
+-        return '暴击流派未成型';
+-      case 'pierce':
+-        return '穿透流派未成型';
+-      case 'dash':
+-        return '穿梭流派未成型';
+-      default:
+-        return `${ROUTE_NAME_MAP[routeId]}流派未成型`;
+-    }
++    // Build progression is independent of whether the player survived.
++    return RouteProgression.getRouteStageNarrative(routeId, buildStage);
+   }
+ 
+   private resetQaSmokeState(): void {

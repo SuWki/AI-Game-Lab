@@ -1,0 +1,12 @@
+// Creates a specification handoff, not a generated playable game.
+const base=process.argv[2]||'http://127.0.0.1:8080';
+const parsed=new URL(base);
+if(!['127.0.0.1','localhost','[::1]'].includes(parsed.hostname))throw Error('Use a local platform endpoint');
+async function post(route,body){const r=await fetch(base+'/api/'+route,{method:'POST',headers:{'Content-Type':'application/json','X-AGL-Local-Test':'1'},body:JSON.stringify(body)});const result=await r.json();if(!r.ok||result.code!==0)throw Error(JSON.stringify(result));return result.data;}
+const task=await post('tasks',{title:'Heat survival production specification',goal:'Produce a short survival game with heat management',agentType:'DESIGNER',maxSteps:20,approvalRequired:true});
+const save=(kind,content,inputRefs=[])=>post('production-artifacts',{taskId:task.id,kind,content,inputRefs});
+const ref=a=>({id:a.artifactId,revision:a.revision,hash:a.contentHash});
+const brief=await save('ProductionBrief',{title:'Heat survival',mode:'NEW',genre:'survival',targetPlatform:'web',targetPlayer:'casual',scope:'One short playable loop with heat management'});
+const spec=await save('GameSpec',{title:'Heat survival specification',briefRef:brief.artifactId,genre:'survival',targetPlatform:'web',coreLoop:'Move, avoid enemies and choose when to spend heat for burst damage',controls:['keyboard movement','burst action'],states:['menu','playing','result'],endConditions:'Survive the round or lose all health',restartBehavior:'Reset health, heat, score and round timer',systems:{survivalWeb:{mechanic:'heat-burst',duration:20,enemySpeed:70,spawnInterval:1,seed:42}},contentScope:['one arena','one enemy archetype'],assetNeeds:['geometric placeholder graphics'],requirements:[{id:'R1',description:'Restart produces a clean round',acceptanceIds:['A1']}],acceptanceCriteria:[{id:'A1',requirementId:'R1',expected:'Restart resets health, heat, score and timer to their configured initial values',method:'browser'}],exclusions:['network play'],openQuestions:[]},[ref(brief)]);
+const acceptance=await save('AcceptanceContract',{title:'Heat survival acceptance draft',specHash:spec.contentHash,checks:spec.content.acceptanceCriteria.map(({id,expected,method})=>({id,expected,method}))},[ref(spec)]);
+console.log(JSON.stringify({taskId:task.id,brief:ref(brief),spec:ref(spec),acceptance:ref(acceptance),note:'Specification persistence only; no build or gameplay validation executed'},null,2));

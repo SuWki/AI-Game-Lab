@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "kind": "GameSpec",
+  "artifactId": "28132bf8-f7a0-481e-b091-4ee556f557e2",
+  "revision": 1,
+  "taskId": 2,
+  "producerRunId": null,
+  "inputRefs": [
+    {
+      "id": "21bf20bc-41ca-49bf-baa6-b0b359454544",
+      "revision": 1,
+      "hash": "dd725e8c87ac85bfd5a3c851a3cfcd614ec3d05efcea0ae62476fc1701edac2a"
+    }
+  ],
+  "content": {
+    "acceptanceCriteria": [
+      {
+        "expected": "Restart resets health, energy, score and timer to their configured initial values",
+        "id": "A1",
+        "method": "browser",
+        "requirementId": "R1"
+      }
+    ],
+    "assetNeeds": [
+      "geometric placeholder graphics"
+    ],
+    "briefRef": "21bf20bc-41ca-49bf-baa6-b0b359454544",
+    "contentScope": [
+      "one arena",
+      "one enemy archetype"
+    ],
+    "controls": [
+      "keyboard movement",
+      "burst action"
+    ],
+    "coreLoop": "Recover energy and dash under a protective shield",
+    "endConditions": "Survive the round or lose all health",
+    "exclusions": [
+      "network play"
+    ],
+    "genre": "survival",
+    "openQuestions": [],
+    "requirements": [
+      {
+        "acceptanceIds": [
+          "A1"
+        ],
+        "description": "Restart produces a clean round",
+        "id": "R1"
+      }
+    ],
+    "restartBehavior": "Reset health, heat, score and round timer",
+    "states": [
+      "menu",
+      "playing",
+      "result"
+    ],
+    "systems": {
+      "survivalWeb": {
+        "duration": 6,
+        "enemySpeed": 70,
+        "mechanic": "shield-dash",
+        "seed": 42,
+        "spawnInterval": 1
+      }
+    },
+    "targetPlatform": "web",
+    "title": "Shield Runner"
+  },
+  "contentHash": "8b1928ea3148dec9f9955f9c85506b37cb2ac840cfe62f54ac8638508a20491f"
+}

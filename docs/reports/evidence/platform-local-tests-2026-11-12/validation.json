@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-12",
+  "backendFull": {
+    "failures": 0,
+    "errors": 0,
+    "tests": 667
+  },
+  "backendLaterFocused": {
+    "failures": 0,
+    "errors": 0,
+    "tests": 17
+  },
+  "frontend": {
+    "build": "PASS",
+    "typecheck": "PASS",
+    "tests": 61
+  },
+  "liveApi": {
+    "frontendCheck": "COMPLETED",
+    "restartPersistence": "PASS",
+    "demoBrowser": "PASSED"
+  }
+}

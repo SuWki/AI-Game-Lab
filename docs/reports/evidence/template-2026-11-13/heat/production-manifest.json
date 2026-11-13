@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "template": {
+    "id": "survival-web",
+    "version": "1.0.0",
+    "manifestHash": "241bbfa86a6de8c45eef396b99065a4b0307064a4310cd5d2ef85647d50a08ae",
+    "files": {
+      "index.html": "dd3132276144e11c9ecf511eb1cb63ab17319f63e5c633e068220d2553e7ee7f",
+      "game.mjs": "65b095c533fc3c05c1dec8d2942ca84c1aa5ae5f14cc23d63c39bdd6e83c0904",
+      "engine.mjs": "d073f422e17e442ab68c7c471461fca38f62b004718808b84059368d7e327456",
+      "style.css": "9f0f95f1e7bd043b53e0ca3fececab3c92bc7fd0cac261d2612dfbc4c285a412"
+    }
+  },
+  "spec": {
+    "id": "8848da0b-ee3a-4c12-91be-04c33f55d656",
+    "revision": 1,
+    "hash": "acb8fe536f1ae1ae1e13ea3542cc0073829c7c629478c092ba13f1fb4b42166c"
+  },
+  "mode": "deterministic-template-instantiation",
+  "limitations": [
+    "Only supported survivalWeb parameters are implemented; other specification requirements need separate implementation and acceptance.",
+    "No AI coding or quality acceptance has occurred."
+  ]
+}

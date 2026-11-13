@@ -1,0 +1,128 @@
+{
+  "status": "PASS",
+  "method": "API baseline + browser DOM form submission and approval",
+  "baselineRunId": "0be08566-36d3-455a-bf66-ae552cf6d81b",
+  "before": {
+    "localTestRunId": "0be08566-36d3-455a-bf66-ae552cf6d81b",
+    "decision": "FAIL",
+    "binding": {
+      "targetId": "protocol-example",
+      "versioned": true,
+      "root": "D:\\AI-Game-Designer\\scripts\\local-tests\\example-game",
+      "source": {
+        "check.mjs": "6cae485a7452fa02bf51c21c9982fc260ef3f631af5dd51420e3cf9fa50782f0",
+        "config.json": "7e2a52288b8c3af31c2f10da6b0ee18542424c51b2ba4a461f9750ba8856fbe7"
+      },
+      "versionFiles": [
+        "config.json",
+        "check.mjs"
+      ],
+      "commandHash": "fcc8fce5db3a873019dd39e304b93a66d5582137a68c2f0377b943c8855f7efa",
+      "version": "local-7e27be55e26585b6cf652afbdc574d5db70a9f6a3ecf50cb3d0a25ec63e20b6d",
+      "artifacts": {
+        "output/normalized-config.json": "2c3d9a530a31e01f9b727798c746a854b3331a9049a9372c1f3a4bcbdb79454c"
+      },
+      "taskId": 2,
+      "testPlanId": 2,
+      "findingIds": [
+        2
+      ]
+    },
+    "failedChecks": 1,
+    "totalChecks": 2
+  },
+  "proposal": {
+    "id": "c9f1d288-6f8b-4919-bc8a-d551d125f7e8",
+    "status": "VALIDATED",
+    "baseRunId": "0be08566-36d3-455a-bf66-ae552cf6d81b",
+    "title": "平台闭环验收：修正独立样例的初始生命值",
+    "edits": [
+      {
+        "path": "config.json",
+        "beforeSha256": "7e2a52288b8c3af31c2f10da6b0ee18542424c51b2ba4a461f9750ba8856fbe7",
+        "beforeText": "{\n  \"schemaVersion\": 1,\n  \"player\": { \"maxHp\": 0 }\n}\n",
+        "afterText": "{\n  \"schemaVersion\": 1,\n  \"player\": {\n    \"maxHp\": 100\n  }\n}\n"
+      }
+    ],
+    "workspace": "D:\\AI-Game-Designer\\backend\\data\\local-workspaces\\c9f1d288-6f8b-4919-bc8a-d551d125f7e8",
+    "validationRunId": "0a020b40-681c-4e77-81fb-ab648db8ba1f",
+    "error": null
+  },
+  "after": {
+    "localTestRunId": "0a020b40-681c-4e77-81fb-ab648db8ba1f",
+    "decision": "PASS",
+    "binding": {
+      "targetId": "protocol-example",
+      "versioned": true,
+      "root": "D:\\AI-Game-Designer\\backend\\data\\local-workspaces\\c9f1d288-6f8b-4919-bc8a-d551d125f7e8",
+      "source": {
+        "check.mjs": "6cae485a7452fa02bf51c21c9982fc260ef3f631af5dd51420e3cf9fa50782f0",
+        "config.json": "3c8e0e1e60de401010a607449d4b181a8f1fd05c5a5d3ea2e68f8dab0217775a"
+      },
+      "versionFiles": [
+        "config.json",
+        "check.mjs"
+      ],
+      "commandHash": "fcc8fce5db3a873019dd39e304b93a66d5582137a68c2f0377b943c8855f7efa",
+      "version": "local-342a9b4d795cbece20b97bfb7f6c65d0ef9f15a6915d343ac6e4d31109156f28",
+      "artifacts": {
+        "output/normalized-config.json": "aca0366639af410e25912426dd1619f55e4e682b22ddfbaee748dd3f1762d2ad"
+      }
+    },
+    "failedChecks": 0,
+    "totalChecks": 2
+  },
+  "originalMaxHp": 0,
+  "workspaceMaxHp": 100,
+  "browserErrors": [],
+  "baselineEvidence": {
+    "runId": "0be08566-36d3-455a-bf66-ae552cf6d81b",
+    "status": "FAIL",
+    "coverageComplete": true,
+    "checks": [
+      {
+        "id": "schema-version",
+        "title": "配置格式版本",
+        "status": "PASS",
+        "expected": "schemaVersion = 1",
+        "actual": "1",
+        "severity": "MEDIUM",
+        "category": "UNEXPECTED_STATE"
+      },
+      {
+        "id": "player-positive-health",
+        "title": "玩家初始生命值必须为正",
+        "status": "FAIL",
+        "expected": "player.maxHp > 0",
+        "actual": "0",
+        "severity": "HIGH",
+        "category": "INVARIANT_VIOLATION"
+      }
+    ]
+  },
+  "validationEvidence": {
+    "runId": "0a020b40-681c-4e77-81fb-ab648db8ba1f",
+    "status": "PASS",
+    "coverageComplete": true,
+    "checks": [
+      {
+        "id": "schema-version",
+        "title": "配置格式版本",
+        "status": "PASS",
+        "expected": "schemaVersion = 1",
+        "actual": "1",
+        "severity": "MEDIUM",
+        "category": "UNEXPECTED_STATE"
+      },
+      {
+        "id": "player-positive-health",
+        "title": "玩家初始生命值必须为正",
+        "status": "PASS",
+        "expected": "player.maxHp > 0",
+        "actual": "100",
+        "severity": "HIGH",
+        "category": "INVARIANT_VIOLATION"
+      }
+    ]
+  }
+}
