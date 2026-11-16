@@ -16,4 +16,5 @@ public class ProductionJobController {
     @GetMapping("/{id}") public ApiResp<JsonNode> get(@PathVariable String id){return ApiResp.ok(service.get(id));}
     @PostMapping public ApiResp<JsonNode> start(@RequestBody ProductionJobService.Request body,@RequestHeader(value="X-AGL-Local-Test",required=false)String marker,HttpServletRequest request){LocalTestController.requireLocal(marker,request);return ApiResp.ok(service.start(body));}
     @PostMapping("/{id}/cancel") public ApiResp<JsonNode> cancel(@PathVariable String id,@RequestHeader(value="X-AGL-Local-Test",required=false)String marker,HttpServletRequest request){LocalTestController.requireLocal(marker,request);return ApiResp.ok(service.cancel(id));}
+    @PostMapping("/{id}/validate") public ApiResp<JsonNode> validate(@PathVariable String id,@RequestHeader(value="X-AGL-Local-Test",required=false)String marker,HttpServletRequest request){LocalTestController.requireLocal(marker,request);return ApiResp.ok(service.validate(id,null));}
 }

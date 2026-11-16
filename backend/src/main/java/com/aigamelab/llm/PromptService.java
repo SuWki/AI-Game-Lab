@@ -50,6 +50,7 @@ public class PromptService {
     // R5 Phase 2：8 个 QA Role Prompt 种子（inactive、幂等导入；重复启动不重复插入）
     private static final String[][] QA_P2_SEEDS = {
             {"builder_p001", "prompts/builder_p001.md", "Bounded template production Builder"},
+            {"builder_p002", "prompts/builder_p002.md", "Builder independent verification and reviewed source proposals"},
             {"qa_lead_p001", "prompts/qa_lead_p001.md", "qa_lead_p001 编排角色（R5 §8.2）"},
             {"qa_player_novice_p001", "prompts/qa_player_novice_p001.md", "qa_player_novice_p001 Player NOVICE（R5 §8.2）"},
             {"qa_player_aggressive_p001", "prompts/qa_player_aggressive_p001.md", "qa_player_aggressive_p001 Player AGGRESSIVE（R5 §8.2）"},

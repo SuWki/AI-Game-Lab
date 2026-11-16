@@ -13,6 +13,12 @@ const proposal:LocalChange={id:"proposal-a",status:"PENDING",baseRunId:run.id,ti
 function show(node:React.ReactNode){const qc=new QueryClient({defaultOptions:{queries:{retry:false,cacheTime:0}}});return render(<QueryClientProvider client={qc}><MemoryRouter>{node}</MemoryRouter></QueryClientProvider>);}
 beforeEach(()=>{vi.restoreAllMocks();vi.spyOn(api,"localAssessment").mockResolvedValue(assessment);});
 describe("Versioned local workflow",()=>{
+ it("keeps protected execution inputs read-only in the proposal editor",async()=>{
+  vi.spyOn(api,"localAssessment").mockResolvedValue({...assessment,binding:{...assessment.binding,protectedFiles:["source/config.txt"]}});
+  vi.spyOn(api,"localSource").mockResolvedValue({path:"source/config.txt",sha256:sha,text:"fixed contract"});show(<LocalEvidencePanel run={run}/>);
+  fireEvent.change(await screen.findByLabelText("源文件"),{target:{value:"source/config.txt"}});fireEvent.click(screen.getByRole("button",{name:"读取源文件"}));
+  expect(await screen.findByLabelText("修改后")).toHaveAttribute("readonly");expect(screen.getByRole("button",{name:"生成修改提案"})).toBeDisabled();
+ });
  it("imports complete evidence into the existing finding workflow",async()=>{
   const fn=vi.spyOn(api,"importLocalChecks").mockResolvedValue({...assessment.binding,findingIds:[9],taskId:2,testPlanId:3});show(<LocalEvidencePanel run={run}/>);
   fireEvent.click(await screen.findByRole("button",{name:"导入测试计划与 Finding"}));

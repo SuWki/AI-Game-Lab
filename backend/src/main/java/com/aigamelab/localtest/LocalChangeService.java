@@ -40,6 +40,10 @@ public class LocalChangeService {
                     if(file.equals(selected)||(Files.isDirectory(selected)&&file.startsWith(selected)))allowed=true;
                 }
                 if(!allowed||!paths.add(name)||edit.afterText()==null)throw new IllegalArgumentException("Edit must target a unique declared source file");
+                for(String protectedName:base.target().protectedFiles()){
+                    Path protectedPath=LocalEvidenceService.resolve(root,protectedName);
+                    if(file.equals(protectedPath)||file.startsWith(protectedPath))throw BusinessException.conflict("Protected acceptance or execution input cannot be edited: "+name);
+                }
                 chars+=edit.afterText().getBytes(StandardCharsets.UTF_8).length;if(chars>1048576)throw new IllegalArgumentException("Proposal exceeds 1 MiB of UTF-8 text");
                 String expected=binding.path("source").path(name).isMissingNode()?null:binding.path("source").path(name).asText();
                 if(!Objects.equals(expected,edit.beforeSha256()))throw BusinessException.conflict("Edit base hash does not match tested source: "+name);
@@ -76,7 +80,7 @@ public class LocalChangeService {
             }
             var owners=db.queryForList("SELECT run_id FROM tool_call WHERE approval_status='PENDING' AND CASE WHEN json_valid(result_json) THEN json_extract(result_json,'$.localProposalId') END=?",Long.class,p.id());
             Long owner=owners.isEmpty()?null:owners.get(0);
-            var target=base.target();var run=tests.startWorkspace(new LocalTestService.Target(target.id(),target.name(),workspace.toString(),command,target.timeoutSeconds(),target.resultPath(),target.versionFiles(),target.artifactFiles()),owner);
+            var target=base.target();var run=tests.startWorkspace(new LocalTestService.Target(target.id(),target.name(),workspace.toString(),command,target.timeoutSeconds(),target.resultPath(),target.versionFiles(),target.artifactFiles(),target.protectedFiles()),owner);
             validationId=run.id();p=new Proposal(p.id(),"VALIDATING",p.baseRunId(),p.title(),p.edits(),workspace.toString(),validationId,null);
         }catch(Exception e){p=new Proposal(p.id(),"FAILED",p.baseRunId(),p.title(),p.edits(),workspace==null?null:workspace.toString(),validationId,e.getClass().getSimpleName()+": "+e.getMessage());}
         save(p);return get(p.id());

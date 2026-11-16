@@ -4,11 +4,11 @@ AI Game Lab 是本地运行的游戏 AI 工作平台：Designer 通过工具和�
 
 产品方向（2026-11-12 更新）：支持**已有游戏的分析改进**与**同类型新游戏的设计制造**。平台支持本地命令测试、源码/产物版本证据、TestPlan/Finding 导入、受限 Agent 工具，以及人工批准后的独立工作区修改与回归。game-demo 是验证样例。见 [三批开发交付与审查](docs/reports/THREE_BATCH_DELIVERY_2026-11-12.md) 和 [后续开发路线](docs/design/DEVELOPMENT_ROADMAP.md)。
 
-> 文档更新：2026-11-12；当前开发基于 `724f01a` 的工作区变更。进度与验收记录见 [task-state.md](docs/state/task-state.md)，完整导航见 [文档索引](docs/index.md)。
+> 文档更新：2026-11-16。进度与验收记录见 [task-state.md](docs/state/task-state.md)，完整导航见 [文档索引](docs/index.md)。
 
 ## 当前能力与边界
 
-整体范围与五模块职责见 [产品总设计](docs/architecture/GAME_LAB_PRODUCT_DESIGN.md)，生产执行见 [Builder 设计](docs/projects/05_AI_Auto_Game_Developer/README.md)。下一步重点是 [独立验收与构建来源](docs/platform/IMPROVEMENT_VALIDATION_DESIGN.md)：当前注册检查通过不能单独证明优化目标达成，这部分为待实施设计。
+整体范围与五模块职责见 [产品总设计](docs/architecture/GAME_LAB_PRODUCT_DESIGN.md)，生产执行见 [Builder 设计](docs/projects/05_AI_Auto_Game_Developer/README.md)。模板目标已接通 [独立引擎验收与受保护源码提案](docs/platform/PRODUCTION_SOURCE_REVIEW.md)；任意游戏的验收适配与完整规格覆盖仍按 [可信验证设计](docs/platform/IMPROVEMENT_VALIDATION_DESIGN.md) 推进。当前注册检查通过不能单独证明优化目标达成。
 
 | 模块 | 仓库中的实现 |
 |---|---|

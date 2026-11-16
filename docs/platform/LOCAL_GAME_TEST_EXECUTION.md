@@ -2,6 +2,8 @@
 
 层级：Platform。更新于 2026-11-12。注册本地游戏的测试命令，绑定版本和证据，复用现有 TestPlan/Finding、共享 Agent Runtime 与 SQLite。契约变更见 [ADR](../decisions/ADR-20261112-RUNTIME-LOCAL-TEST.md)。
 
+2026-11-16：目标配置支持 protectedFiles 相对路径列表，源码提案拒绝修改这些路径及子路径，隔离回归保留该策略；默认空以兼容旧目标。生产目标已接外部固定验收程序与契约，具体范围见 [生产源码审阅](PRODUCTION_SOURCE_REVIEW.md)。该保护不会自动改造旧目录配置。
+
 当前 PASS/VALIDATED 表示注册检查满足本协议。验收逻辑独立性、源码到运行产物的构建关联、优化目标对照仍待实现，见 [可信改进验证设计](IMPROVEMENT_VALIDATION_DESIGN.md)。当前 coverageComplete 为生产测试报告的程序声明，平台不能据此证明场景覆盖充分。
 
 ## 配置与启动

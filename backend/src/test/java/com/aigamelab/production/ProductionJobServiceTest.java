@@ -18,6 +18,7 @@ class ProductionJobServiceTest {
  static{try{ROOT=Files.createTempDirectory("agl-production-jobs-");Path cwd=Path.of("").toAbsolutePath();REPO=Files.exists(cwd.resolve("scripts/production"))?cwd:cwd.getParent();}catch(Exception e){throw new RuntimeException(e);}}
  @DynamicPropertySource static void props(DynamicPropertyRegistry r){r.add("spring.datasource.url",()->"jdbc:sqlite:"+ROOT.resolve("test.db"));r.add("production.repository-root",()->REPO.toString());r.add("production.workspace-root",()->ROOT.resolve("jobs").toString());r.add("production.node",()->Files.exists(Path.of("D:/nodejs/node.exe"))?"D:/nodejs/node.exe":"node");}
  @Autowired ProductionJobService jobs;@Autowired ProductionArtifactService artifacts;@Autowired TaskRepository tasks;@Autowired ObjectMapper mapper;@Autowired org.springframework.jdbc.core.JdbcTemplate db;
+ @Autowired com.aigamelab.localtest.LocalEvidenceService evidence;@Autowired com.aigamelab.localtest.LocalChangeService changes;
  @Autowired ControlledExecutor executor;
  static class ControlledExecutor extends LocalTestService {
   String mode="real";TestRun controlled;boolean cancelled;
@@ -45,6 +46,25 @@ class ProductionJobServiceTest {
   var first=jobs.start(request("once"));var result=await(first.path("id").asText());assertThat(result.path("status").asText()).isEqualTo("BUILT");
   Path workspace=Path.of(result.path("result").path("workspace").asText());assertThat(workspace).startsWith(ROOT.resolve("jobs"));assertThat(Files.exists(workspace.resolve(result.path("result").path("build").path("buildId").asText()).resolve("index.html"))).isTrue();
   assertThat(result.path("specHash").asText()).isEqualTo(spec.path("contentHash").asText());assertThat(jobs.start(request("once")).path("id")).isEqualTo(first.path("id"));
+ }
+ JsonNode verified(String key)throws Exception{var built=await(jobs.start(request(key)).path("id").asText());jobs.validate(built.path("id").asText(),null);return awaitVerification(built.path("id").asText());}
+ JsonNode awaitVerification(String id)throws Exception{long end=System.nanoTime()+20_000_000_000L;while(System.nanoTime()<end){var j=jobs.get(id);if(!Set.of("QUEUED","RUNNING").contains(j.path("validationStatus").asText()))return j;Thread.sleep(30);}throw new AssertionError("Verification timed out");}
+ LocalTestService.TestRun awaitExecution(String id)throws Exception{long end=System.nanoTime()+20_000_000_000L;while(System.nanoTime()<end){var r=executor.get(id);if(!Set.of("QUEUED","RUNNING").contains(r.status()))return r;Thread.sleep(30);}throw new AssertionError("Execution timed out");}
+ @Test void independentVerificationRebuildsAndProtectsItsExecutionInputs()throws Exception{
+  var j=verified("verified");assertThat(j.path("validationDecision").asText()).isEqualTo("PASS");var run=executor.get(j.path("validationRunId").asText());assertThat(run.evidence().path("checks").size()).isEqualTo(6);assertThat(j.path("validationChecks").size()).isEqualTo(6);assertThat(j.path("validationScope").asText()).isEqualTo("survival-web-engine-v1");
+  assertThat(jobs.validate(j.path("id").asText(),null).path("validationRunId")).isEqualTo(j.path("validationRunId"));
+  assertThat(run.evidence().path("validationBuild").path("buildId").asText()).isNotEqualTo(j.path("result").path("build").path("buildId").asText());
+  for(String file:List.of("config.json","build-project.mjs","specification.json")){
+   String before=evidence.binding(run.id()).path("source").path(file).asText();assertThatThrownBy(()->changes.create(run.id(),"Weaken acceptance",List.of(new com.aigamelab.localtest.LocalChangeService.Edit(file,before,"always pass")))).hasMessageContaining("Protected");
+  }
+ }
+ @Test void brokenEngineProducesFindingAndApprovedIsolatedFixPassesFrozenChecks()throws Exception{
+  var j=await(jobs.start(request("fix-game")).path("id").asText());Path original=Path.of(j.path("result").path("workspace").asText()).resolve("engine.mjs");String good=Files.readString(original),bad=good.replace("*210*dt","*0*dt");assertThat(bad).isNotEqualTo(good);Files.writeString(original,bad);
+  jobs.validate(j.path("id").asText(),null);j=awaitVerification(j.path("id").asText());assertThat(j.path("validationDecision").asText()).isEqualTo("FAIL");String baseline=j.path("validationRunId").asText();var failed=executor.get(baseline);
+  assertThat(evidence.importChecks(failed).path("findingIds").size()).isGreaterThan(0);
+  var p=changes.create(baseline,"Restore movement",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",evidence.binding(baseline).path("source").path("engine.mjs").asText(),good)));
+  var approved=changes.approve(p.id());var result=awaitExecution(approved.validationRunId());assertThat(result.status()).isEqualTo("PASSED");assertThat(changes.get(p.id()).status()).isEqualTo("VALIDATED");
+  assertThat(Files.readString(original)).isEqualTo(bad);assertThat(result.evidence().path("contractHash")).isEqualTo(failed.evidence().path("contractHash"));assertThat(result.target().protectedFiles()).contains("build-project.mjs");
  }
  @Test void rejectsCrossTaskSpecificationBeforeStarting(){assertThatThrownBy(()->jobs.start(new ProductionJobService.Request(task+1000,spec.path("artifactId").asText(),1,"cross"))).hasMessageContaining("does not belong");}
  @Test void invalidTemplateParametersFailWithSpecificEvidence()throws Exception{

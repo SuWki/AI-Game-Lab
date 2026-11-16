@@ -6,7 +6,9 @@
 
 ---
 
-## 当前摘要（2026-11-12 三批交付与五模块设计补全）
+## 当前摘要（2026-11-16 生产源码审阅与独立验收）
+
+- 2026-11-16：生产独立引擎验收、工作区外固定契约/程序 hash、protectedFiles 提案保护、Builder 分页源码读取与需审批修改；复用原审批恢复和隔离回归。builder_p002 新版本保留 p001，40 工具/15 Prompt，业务表仍 23。后端 716、前端 71、Node 10 项通过；追加检查明细后 15 项定向回归通过。真实页面完成故障→Finding→审批→隔离通过，候选游戏完成浏览器烟测。见 [当前协议](../platform/PRODUCTION_SOURCE_REVIEW.md) 与 [交付记录](../reports/PRODUCTION_SOURCE_REVIEW_2026-11-16.md)。不代表全部浏览器/规格验收或恶意代码沙箱。下一步 B-05 的修复预算与阶段恢复。
 
 - 2026-11-13 本批：受限 BUILDER 身份、builder_p001 和 production_context/start/result 接入共享 Runtime；生产页创建绑定规格的 Builder 任务。模型任务只能制造固定模板并读取自身产物，取消前后校验避免迟到子执行。接口与边界见 [Builder Runtime](../platform/BUILDER_RUNTIME.md)。用户已授权本批验收后提交 GitHub 并合并；最终远端结果以 PR 为准。
 - 本批最终本地验收：后端 713 项全量、前端构建/69 项、Node 8 项通过，实际页面创建绑定 Builder 及拒绝未授权启动通过；真实付费模型效果尚未验收。见 [交付记录](../reports/BUILDER_RUNTIME_DELIVERY_2026-11-13.md)。

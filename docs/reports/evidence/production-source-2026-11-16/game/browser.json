@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "method": "Real browser clicks, key input and elapsed game time; no forced state hooks",
+  "config": {
+    "title": "Heat survival specification",
+    "mechanic": "heat-burst",
+    "duration": 20,
+    "enemySpeed": 70,
+    "spawnInterval": 1,
+    "seed": 42
+  },
+  "checks": [
+    "build-load",
+    "start",
+    "natural-settlement",
+    "restart"
+  ],
+  "errors": [],
+  "build": {
+    "schemaVersion": 1,
+    "buildId": "build-dcf4f651-970e-4f2b-94a6-33fd60d2c4f9",
+    "files": {
+      "index.html": "dd3132276144e11c9ecf511eb1cb63ab17319f63e5c633e068220d2553e7ee7f",
+      "game.mjs": "65b095c533fc3c05c1dec8d2942ca84c1aa5ae5f14cc23d63c39bdd6e83c0904",
+      "engine.mjs": "d073f422e17e442ab68c7c471461fca38f62b004718808b84059368d7e327456",
+      "style.css": "9f0f95f1e7bd043b53e0ca3fececab3c92bc7fd0cac261d2612dfbc4c285a412",
+      "config.json": "13ff0522b77058e010ab168a44eb368cd85d06f7ce3fa1d38e9d10ad0eaafc53"
+    },
+    "productionManifestHash": "a660a3f3201797fc238e129bad96de3ca26e5333bc4ddfa3c92ff17249dc737d",
+    "spec": {
+      "id": "3afa9016-1551-4d6f-aa3f-199792064078",
+      "revision": 1,
+      "hash": "7d41702263c8c8aab82dc3d6877bd48cd5f093b7762b2d95141a1caff95612b3"
+    }
+  }
+}

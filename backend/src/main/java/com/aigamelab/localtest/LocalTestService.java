@@ -19,11 +19,12 @@ import java.util.concurrent.*;
 @Service
 public class LocalTestService implements AutoCloseable {
     public record Target(String id, String name, String workingDirectory, List<String> command,
-                         int timeoutSeconds, String resultPath,List<String> versionFiles,List<String> artifactFiles) {
+                         int timeoutSeconds, String resultPath,List<String> versionFiles,List<String> artifactFiles,List<String> protectedFiles) {
+        public Target(String id,String name,String directory,List<String> command,int timeout,String result,List<String> sources,List<String> artifacts){this(id,name,directory,command,timeout,result,sources,artifacts,List.of());}
         public Target(String id,String name,String workingDirectory,List<String> command,int timeoutSeconds,String resultPath) {
             this(id,name,workingDirectory,command,timeoutSeconds,resultPath,List.of(),List.of());
         }
-        public Target {versionFiles=versionFiles==null?List.of():List.copyOf(versionFiles);artifactFiles=artifactFiles==null?List.of():List.copyOf(artifactFiles);}
+        public Target {versionFiles=versionFiles==null?List.of():List.copyOf(versionFiles);artifactFiles=artifactFiles==null?List.of():List.copyOf(artifactFiles);protectedFiles=protectedFiles==null?List.of():List.copyOf(protectedFiles);}
     }
     public record TestRun(String id, Target target, String status, String startedAt, String finishedAt,
                           Integer exitCode, String output, JsonNode evidence, String error) {}
@@ -94,7 +95,7 @@ public class LocalTestService implements AutoCloseable {
                    Path.of(existing.run.target().workingDirectory()).toRealPath().equals(root))
                     throw BusinessException.conflict("Another local test is using this working directory");
             }
-            target=new Target(target.id(),target.name(),root.toString(),List.copyOf(target.command()),target.timeoutSeconds(),target.resultPath(),target.versionFiles(),target.artifactFiles());
+            target=new Target(target.id(),target.name(),root.toString(),List.copyOf(target.command()),target.timeoutSeconds(),target.resultPath(),target.versionFiles(),target.artifactFiles(),target.protectedFiles());
         } catch(IOException e) { throw new IllegalArgumentException("Working directory unavailable",e); }
         Job job=new Job(new TestRun(UUID.randomUUID().toString(),target,"QUEUED",now(),null,null,"",null,null));
         save(job.run);
