@@ -6,6 +6,8 @@
 
 ## 文档导航
 
+最新开发：[生产源码提案与独立引擎验收（2026-11-16）](platform/PRODUCTION_SOURCE_REVIEW.md)。生产页可建立验证基线，Builder 可在人工审批下修改运行源码并隔离重建/回归。
+
 最新 Builder 接线：[模型身份与任务范围](platform/BUILDER_RUNTIME.md)。生产页面可创建绑定规格的 Builder 任务，再使用共享 Workflow 启动；目前仅有模板生产工具。
 
 最新模块交付：[生产任务 API 与中台页面](platform/PRODUCTION_JOBS.md) → [B-02/03 首版实施验证](reports/PRODUCTION_JOBS_2026-11-13.md)。现在可从 `/productions` 页面选择规格并生成项目，仍非模型自主代码生产。

@@ -57,7 +57,7 @@ class ToolRegistryIntegrationTest {
     @Test
     void totalToolCount() {
         // 10 Designer tools (R2-1 +2) + 8 Tester tools + 6 Research tools + 5 QA Phase 2 tools (R5 §6) = 29
-        assertThat(registry.size()).isEqualTo(37);
+        assertThat(registry.size()).isEqualTo(40);
         assertThat(registry.contains("local_test_start")).isTrue();
         assertThat(registry.contains("local_source_read")).isTrue();
     }

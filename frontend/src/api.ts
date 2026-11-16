@@ -2,14 +2,14 @@ import type { ApiResp, Finding, TestPlan, Experiment, ExperimentPair, RunRow, Ru
 
 const BASE = "/api";
 export interface ProductionArtifact {artifactId:string;revision:number;kind:string;taskId:number;contentHash:string;content:{title?:string}}
-export interface ProductionJob {id:string;taskId:number;specId:string;specRevision:number;specHash:string;status:string;localRunId?:string;error?:string;result?:{workspace:string;build:{buildId:string;files:Record<string,string>}}}
+export interface ProductionJob {id:string;taskId:number;specId:string;specRevision:number;specHash:string;status:string;localRunId?:string;validationRunId?:string;validationStatus?:string;validationDecision?:string;error?:string;result?:{workspace:string;build:{buildId:string;files:Record<string,string>}}}
 
 export interface LocalTestTarget {
   id: string; name: string; workingDirectory: string; command: string[];
   timeoutSeconds: number; resultPath: string | null;
-  versionFiles?: string[]; artifactFiles?: string[];
+  versionFiles?: string[]; artifactFiles?: string[]; protectedFiles?:string[];
 }
-export interface LocalBinding { versioned:boolean;version:string|null;source:Record<string,string>;artifacts?:Record<string,string>;taskId?:number;testPlanId?:number;findingIds?:number[] }
+export interface LocalBinding { versioned:boolean;version:string|null;source:Record<string,string>;protectedFiles?:string[];artifacts?:Record<string,string>;taskId?:number;testPlanId?:number;findingIds?:number[] }
 export interface LocalAssessment { localTestRunId:string;decision:"PASS"|"FAIL"|"INCONCLUSIVE";reason?:string;totalChecks?:number;failedChecks?:number;binding:LocalBinding }
 export interface LocalEdit {path:string;beforeSha256:string|null;beforeText?:string|null;afterText:string}
 export interface LocalChange {id:string;status:string;baseRunId:string;title:string;edits:LocalEdit[];workspace:string|null;validationRunId:string|null;error:string|null}
@@ -57,6 +57,7 @@ export interface QaFindingFilter {
 export const api = {
   productionArtifacts:(taskId:number)=>unwrap<ProductionArtifact[]>(fetch(`${BASE}/production-artifacts?taskId=${taskId}`)),
   productionJobs:()=>unwrap<ProductionJob[]>(fetch(`${BASE}/productions`)),
+  validateProduction:(id:string)=>unwrap<ProductionJob>(fetch(`${BASE}/productions/${encodeURIComponent(id)}/validate`,{method:"POST",headers:{"X-AGL-Local-Test":"1"}})),
   createBuilderTask:(body:{taskId:number;specId:string;specRevision:number;goal:string})=>unwrap<TaskRow>(fetch(`${BASE}/productions/agent-task`,{method:"POST",headers:{"Content-Type":"application/json","X-AGL-Local-Test":"1"},body:JSON.stringify(body)})),
   startProduction:(body:{taskId:number;specId:string;specRevision:number;requestKey:string})=>unwrap<ProductionJob>(fetch(`${BASE}/productions`,{method:"POST",headers:{"Content-Type":"application/json","X-AGL-Local-Test":"1"},body:JSON.stringify(body)})),
   cancelProduction:(id:string)=>unwrap<ProductionJob>(fetch(`${BASE}/productions/${encodeURIComponent(id)}/cancel`,{method:"POST",headers:{"X-AGL-Local-Test":"1"}})),

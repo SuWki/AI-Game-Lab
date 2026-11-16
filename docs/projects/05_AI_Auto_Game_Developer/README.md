@@ -2,7 +2,7 @@
 
 把接受的游戏规格转为可玩、可构建、可验证的游戏产物；支持从模板制造同类型新游戏，也支持受控修改已有源码游戏。
 
-**状态：已有模板生产 API/中台及受限 BUILDER 身份，完整 Builder 尚未实现。** 可由 `/productions` 创建绑定规格的 Builder 任务，再在 Workflow 使用模型调用固定生产工具；尚无通用源码修改/修复编排和候选交付包流程。实际工具边界见 [Builder Runtime](../../platform/BUILDER_RUNTIME.md)。
+**状态：已有模板生产、独立引擎验收和需审批的源码修改，完整 Builder 尚未实现。** 可由 `/productions` 创建绑定规格的 Builder 任务，再在 Workflow 使用六项受限工具完成生产、验收、源码读取与提案；批准后在独立工作区回归。验收保护与能力边界见 [源码审阅与验收](../../platform/PRODUCTION_SOURCE_REVIEW.md)。完整修复预算编排、浏览器规格验收及候选交付包仍待实现。
 
 2026-11-13：已新增 [首个可玩模板与 CLI 实例化](../../platform/PLAYABLE_TEMPLATE.md)，能从 ART-01 精确规格生成热量/护盾两种机制项目，保留模板/构建指纹。已有本地源码提案、审批和隔离回归可继续复用。
 

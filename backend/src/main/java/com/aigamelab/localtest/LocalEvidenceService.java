@@ -31,6 +31,7 @@ public class LocalEvidenceService {
             ObjectNode binding=mapper.createObjectNode().put("targetId",run.target().id()).put("versioned",!source.isEmpty()).put("root",run.target().workingDirectory());
             binding.set("source",mapper.valueToTree(source));
             binding.set("versionFiles",mapper.valueToTree(run.target().versionFiles()));
+            binding.set("protectedFiles",mapper.valueToTree(run.target().protectedFiles()));
             binding.put("commandHash",hash(mapper.writeValueAsBytes(run.target().command())));
             binding.put("version",source.isEmpty()?null:"local-"+hash((run.target().id()+":"+mapper.writeValueAsString(source)).getBytes(java.nio.charset.StandardCharsets.UTF_8)));
             if(ownerRunId!=null)binding.put("ownerRunId",ownerRunId);

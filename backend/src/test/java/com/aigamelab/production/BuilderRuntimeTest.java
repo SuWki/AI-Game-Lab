@@ -20,6 +20,7 @@ class BuilderRuntimeTest {
  static class CheckingGateway implements LlmGateway{final Queue<java.util.function.Function<LlmRequest,LlmResponse>> script=new java.util.concurrent.ConcurrentLinkedQueue<>();public LlmResponse complete(LlmRequest r){var f=script.poll();if(f==null)throw new IllegalStateException("Unexpected model call");return f.apply(r);}}
  @org.springframework.boot.test.context.TestConfiguration static class Config{@org.springframework.context.annotation.Bean CheckingGateway gateway(){return new CheckingGateway();}}
  @Autowired ProductionArtifactService artifacts;@Autowired ProductionJobService jobs;@Autowired ProductionTools tools;@Autowired TaskRepository tasks;@Autowired RunRepository runs;@Autowired RuntimeConversation conversation;@Autowired AgentLoop loop;@Autowired CheckingGateway gateway;@Autowired ObjectMapper mapper;@Autowired AgentTypeResolver resolver;
+ @Autowired com.aigamelab.localtest.LocalChangeService changes;@Autowired org.springframework.jdbc.core.JdbcTemplate db;
  JsonNode spec;long sourceTask;
  @BeforeEach void setup()throws Exception{
   gateway.script.clear();sourceTask=tasks.insert(new Task(null,"source","make game","{}",20,true,"ACTIVE",null)).id();
@@ -32,7 +33,7 @@ class BuilderRuntimeTest {
  static LlmResponse call(String id,String name,String args){return new LlmResponse("test","tool_calls",null,List.of(new com.aigamelab.llm.dto.ToolCall(id,name,args)),new TokenUsage(1,1,2,null,null),0L,"test");}
  static LlmResponse stop(){return new LlmResponse("test","stop","Template built; full quality acceptance pending",null,new TokenUsage(1,1,2,null,null),0L,"test");}
  @Test void requestDrivenAgentBuildsThroughSharedRuntimeAndObservesEvidence(){
-  gateway.script.add(r->{assertThat(r.tools()).extracting(t->t.name()).containsExactlyInAnyOrder("production_context","production_start","production_result");return call("context","production_context","{}");});
+  gateway.script.add(r->{assertThat(r.tools()).extracting(t->t.name()).containsExactlyInAnyOrder("production_context","production_start","production_result","production_validate","production_source_read","production_change_propose");return call("context","production_context","{}");});
   gateway.script.add(r->{assertThat(r.messages()).anySatisfy(m->{assertThat(m.toolCallId()).isEqualTo("context");assertThat(m.content()).contains("Bound Builder game");});return call("start","production_start","{}");});
   final String[] id={null};gateway.script.add(r->{var tool=r.messages().stream().filter(m->"start".equals(m.toolCallId())).findFirst().orElseThrow();try{id[0]=mapper.readTree(tool.content()).path("id").asText();}catch(Exception e){throw new RuntimeException(e);}return call("result","production_result","{\"productionId\":\""+id[0]+"\"}");});
   gateway.script.add(r->{assertThat(r.messages()).anySatisfy(m->{assertThat(m.toolCallId()).isEqualTo("result");assertThat(m.content()).contains("BUILT","qualityAccepted", "false");});return stop();});
@@ -43,4 +44,21 @@ class BuilderRuntimeTest {
  @Test void cancelledBuilderCannotCreateAProduction(){var run=builder();conversation.freeze(run,tasks.findById(run.taskId()).orElseThrow());runs.finishIfActive(run.id(),RunStatus.CANCELLED,null,"cancelled");var before=jobs.list().size();assertThat(tools.productionStart().execute(mapper.createObjectNode(),ToolContext.of(run.id(),1L)).status()).isEqualTo("FAILED");assertThat(jobs.list()).hasSize(before);}
  @Test void unboundBuilderFailsBeforeModelInvocation(){var task=tasks.insert(new Task(null,"bad","bad","{\"agent_type\":\"BUILDER\"}",20,true,"ACTIVE",null));var run=runs.insert(new Run(null,task.id(),"PENDING",null,"checking",0,20,100000,0,null,null,null,null,null));loop.run(run.id());assertThat(runs.findById(run.id()).orElseThrow().status()).isEqualTo("FAILED");}
  @Test void otherAgentRolesHaveNoProductionTools(){for(var type:AgentType.values())if(type!=AgentType.BUILDER)assertThat(resolver.toolWhitelist(type)).doesNotContain("production_start","production_context","production_result");}
+ JsonNode observation(LlmRequest r,String id){try{return mapper.readTree(r.messages().stream().filter(m->id.equals(m.toolCallId())).findFirst().orElseThrow().content());}catch(Exception e){throw new RuntimeException(e);}}
+ @Test void sourceProposalWaitsForHumanThenResumesWithIndependentRegression()throws Exception{
+  final String[] production={null};final StringBuilder source=new StringBuilder();final String[] sourceHash={null};
+  gateway.script.add(r->call("start","production_start","{}"));
+  gateway.script.add(r->{production[0]=observation(r,"start").path("id").asText();return call("result","production_result","{\"productionId\":\""+production[0]+"\"}");});
+  gateway.script.add(r->{assertThat(observation(r,"result").path("status").asText()).isEqualTo("BUILT");return call("verify","production_validate","{\"productionId\":\""+production[0]+"\"}");});
+  class Reader implements java.util.function.Function<LlmRequest,LlmResponse>{int page=0;public LlmResponse apply(LlmRequest r){var file=observation(r,"source-"+page);source.append(file.path("text").asText());sourceHash[0]=file.path("sha256").asText();if(source.length()<file.path("totalCharacters").asInt()){page++;gateway.script.add(this);return call("source-"+page,"production_source_read",mapper.createObjectNode().put("productionId",production[0]).put("path","engine.mjs").put("offset",source.length()).put("limit",2000).toString());}
+    gateway.script.add(next->{assertThat(observation(next,"proposal").path("validationStatus").asText()).isEqualTo("VALIDATED");return stop();});
+    var args=mapper.createObjectNode().put("productionId",production[0]).put("title","Adjust movement speed within accepted rules");args.putArray("edits").addObject().put("path","engine.mjs").put("beforeSha256",sourceHash[0]).put("afterText",source.toString().replace("*210*dt","*220*dt"));return call("proposal","production_change_propose",args.toString());
+  }}
+  gateway.script.add(r->{assertThat(observation(r,"verify").path("validationDecision").asText()).isEqualTo("PASS");assertThat(observation(r,"verify").path("validationChecks").size()).isEqualTo(6);gateway.script.add(new Reader());return call("source-0","production_source_read",mapper.createObjectNode().put("productionId",production[0]).put("path","engine.mjs").put("offset",0).put("limit",2000).toString());});
+  var run=builder();loop.run(run.id());assertThat(runs.findById(run.id()).orElseThrow().status()).isEqualTo("WAITING_APPROVAL");
+  String proposalId=mapper.readTree(db.queryForObject("SELECT result_json FROM tool_call WHERE run_id=? AND tool_name='production_change_propose'",String.class,run.id())).path("localProposalId").asText();
+  Path original=Path.of(jobs.get(production[0]).path("result").path("workspace").asText()).resolve("engine.mjs");assertThat(Files.readString(original)).contains("*210*dt");
+  changes.approve(proposalId);long end=System.nanoTime()+20_000_000_000L;while(System.nanoTime()<end&&!"COMPLETED".equals(runs.findById(run.id()).orElseThrow().status()))Thread.sleep(30);
+  assertThat(runs.findById(run.id()).orElseThrow().status()).isEqualTo("COMPLETED");assertThat(changes.get(proposalId).status()).isEqualTo("VALIDATED");assertThat(Files.readString(original)).contains("*210*dt");assertThat(Files.readString(Path.of(changes.get(proposalId).workspace()).resolve("engine.mjs"))).contains("*220*dt");
+ }
 }

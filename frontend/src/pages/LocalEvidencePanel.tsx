@@ -13,6 +13,7 @@ export function LocalEvidencePanel({run}:{run:LocalTestRun}) {
   async function importChecks(){setBusy(true);setError("");try{await api.importLocalChecks(run.id);await qc.invalidateQueries(["local-assessment",run.id]);await qc.invalidateQueries(["findings"]);setMessage("测试计划与 Finding 已导入。");}catch(e){setError(String(e));}finally{setBusy(false);}}
   async function propose(){if(!original)return;setBusy(true);setError("");try{const p=await api.createLocalChange({baseRunId:run.id,title,edits:[{path,beforeSha256:original.sha256,afterText:after}]});setMessage(`修改提案已生成：${p.id}，等待审阅批准。`);setOriginal(null);await qc.invalidateQueries(["local-changes"]);}catch(e){setError(String(e));}finally{setBusy(false);}}
   const assessment=review.data;
+  const protectedSource=(assessment?.binding.protectedFiles??[]).some(p=>path===p||path.startsWith(p+"/"));
   async function createAgent(type:"DESIGNER"|"TESTER") {setBusy(true);setError("");try{const task=await api.createLocalAgentTask(run.id,type,agentGoal);setMessage(`已创建 ${type} 任务 #${task.id}，可在 Workflow 中启动。`);await qc.invalidateQueries(["tasks"]);}catch(e){setError(String(e));}finally{setBusy(false);}}
   return <section style={{border:"1px solid #ddd",padding:16,marginTop:16}}>
     <h3>QA 证据与被测版本</h3>
@@ -29,9 +30,9 @@ export function LocalEvidencePanel({run}:{run:LocalTestRun}) {
       {assessment.decision!=="INCONCLUSIVE"&&<><h4>提出文件修改</h4><p>读取本次测试的源文件，生成修改提案。批准后在独立工作区验证。</p>
         <label>源文件 <select value={path} onChange={e=>{setPath(e.target.value);setOriginal(null);}}><option value="">选择文件</option>{Object.keys(assessment.binding.source).map(name=><option key={name}>{name}</option>)}</select></label>
         <button disabled={busy||!path} onClick={()=>void loadSource()}>读取源文件</button>
-        {original&&<><p><label>提案标题 <input value={title} onChange={e=>setTitle(e.target.value)}/></label></p>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}><label>修改前<textarea readOnly value={original.text} style={{width:"100%",height:240}}/></label><label>修改后<textarea value={after} onChange={e=>setAfter(e.target.value)} style={{width:"100%",height:240}}/></label></div>
-          <button disabled={busy||!title.trim()||after===original.text} onClick={()=>void propose()}>生成修改提案</button></>}
+        {original&&<>{protectedSource&&<p>该文件是受保护的执行或验收输入，仅可查看。</p>}<p><label>提案标题 <input value={title} onChange={e=>setTitle(e.target.value)}/></label></p>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}><label>修改前<textarea readOnly value={original.text} style={{width:"100%",height:240}}/></label><label>修改后<textarea readOnly={protectedSource} value={after} onChange={e=>setAfter(e.target.value)} style={{width:"100%",height:240}}/></label></div>
+          <button disabled={busy||protectedSource||!title.trim()||after===original.text} onClick={()=>void propose()}>生成修改提案</button></>}
       </>}
     </>}
     <p><Link to="/local-tests/changes">审阅修改提案与回归结果</Link></p>

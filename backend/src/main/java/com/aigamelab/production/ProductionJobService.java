@@ -20,6 +20,8 @@ public class ProductionJobService {
     private final JdbcTemplate db;private final ObjectMapper mapper;private final ProductionArtifactService artifacts;private final LocalTestService executor;
     private final Path repo,root;private final String node;
     @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.repository.TaskRepository tasks;
+    @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<com.aigamelab.localtest.LocalEvidenceService> evidence;
+    private static final List<String> PROTECTED=List.of("config.json","production-manifest.json","specification.json","build-project.mjs","serve-project.mjs");
     public record Request(long taskId,String specId,int specRevision,String requestKey){}
     public ProductionJobService(JdbcTemplate db,ObjectMapper mapper,ProductionArtifactService artifacts,LocalTestService executor,
         @Value("${production.repository-root:..}")String repo,@Value("${production.workspace-root:./data/productions}")String root,@Value("${production.node:node}")String node){
@@ -61,9 +63,35 @@ public class ProductionJobService {
             }else if("COMPLETED".equals(state))state="INCONCLUSIVE";
             if("FAILED".equals(state)&&run.evidence()!=null&&run.evidence().path("checks").isArray())for(var check:run.evidence().path("checks"))if("FAIL".equals(check.path("status").asText())){job.put("error",check.path("actual").asText("Production command failed"));break;}
             job.put("status",state);if(run.error()!=null)job.put("error",run.error());save(job);
-        }return job;
+        }
+        if(job.hasNonNull("validationRunId")){var validation=executor.get(job.path("validationRunId").asText());job.put("validationStatus",validation.status());if(!Set.of("QUEUED","RUNNING").contains(validation.status())){job.put("validationDecision",evidence.getObject().assessment(validation).path("decision").asText());if(validation.evidence()!=null){job.set("validationChecks",validation.evidence().path("checks"));job.put("validationScope",validation.evidence().path("scope").asText());}}save(job);}
+        return job;
     }
-    public synchronized JsonNode cancel(String id){var job=require(id);if(!job.path("localRunId").isNull()&&!job.path("localRunId").isMissingNode())executor.cancel(job.path("localRunId").asText());return get(id);}
+    public synchronized JsonNode cancel(String id){var job=require(id);if(!job.path("localRunId").isNull()&&!job.path("localRunId").isMissingNode())executor.cancel(job.path("localRunId").asText());if(job.hasNonNull("validationRunId"))executor.cancel(job.path("validationRunId").asText());return get(id);}
+    public synchronized JsonNode validate(String id,Long ownerRunId){
+        var job=(ObjectNode)get(id);
+        if(ownerRunId!=null&&job.path("ownerRunId").asLong(-1)!=ownerRunId)throw BusinessException.conflict("Production belongs to another Agent Run");
+        if(!"BUILT".equals(job.path("status").asText()))throw BusinessException.conflict("A completed production build is required");
+        if(job.hasNonNull("validationRunId"))return job;
+        try{
+            Path workspace=Path.of(job.path("result").path("workspace").asText()).toRealPath(),directory=Path.of(job.path("jobDirectory").asText()).toRealPath();
+            if(!workspace.startsWith(directory.resolve("output")))throw new IllegalArgumentException("Production workspace is outside the managed output");
+            Path contractPath=directory.resolve("acceptance-contract.json");String contractHash,programHash,builderHash;
+            if(job.hasNonNull("acceptanceContractHash")){contractHash=job.path("acceptanceContractHash").asText();programHash=job.path("acceptanceProgramHash").asText();builderHash=job.path("acceptanceBuilderHash").asText();if(!hash(Files.readAllBytes(contractPath)).equals(contractHash))throw BusinessException.conflict("Frozen acceptance contract changed");}
+            else{
+                byte[] config=Files.readAllBytes(workspace.resolve(job.path("result").path("build").path("buildId").asText()).resolve("config.json"));
+                if(!hash(config).equals(job.path("result").path("build").path("files").path("config.json").asText()))throw BusinessException.conflict("Built configuration changed");
+                ObjectNode protectedHashes=mapper.createObjectNode();for(String name:PROTECTED){Path file=workspace.resolve(name);if(Files.isSymbolicLink(file)||!Files.isRegularFile(file))throw new IllegalArgumentException("Missing protected input: "+name);protectedHashes.put(name,hash(Files.readAllBytes(file)));}
+                var contract=mapper.createObjectNode().put("schemaVersion",1).put("scope","survival-web-engine-v1").put("productionId",id).put("specHash",job.path("specHash").asText());contract.set("config",mapper.readTree(config));contract.set("protectedFiles",protectedHashes);
+                Files.writeString(contractPath,contract.toString(),StandardCharsets.UTF_8,StandardOpenOption.CREATE_NEW);contractHash=hash(Files.readAllBytes(contractPath));
+                programHash=hash(Files.readAllBytes(repo.resolve("scripts/production/acceptance/validate-game.mjs")));builderHash=hash(Files.readAllBytes(repo.resolve("scripts/production/build-project.mjs")));
+                job.put("acceptanceContractHash",contractHash).put("acceptanceProgramHash",programHash).put("acceptanceBuilderHash",builderHash);save(job);
+            }
+            var sources=new ArrayList<>(List.of("engine.mjs","game.mjs","index.html","style.css"));sources.addAll(PROTECTED);
+            var target=new LocalTestService.Target("verify-"+id,"Independent production engine verification",workspace.toString(),List.of(node,repo.resolve("scripts/production/acceptance/validate-game.mjs").toString(),contractPath.toString(),contractHash,programHash,builderHash),60,"acceptance-result.json",sources,List.of("latest-build.json","acceptance-result.json"),PROTECTED);
+            var run=ownerRunId==null?executor.startManaged(target):executor.startManaged(target,ownerRunId);job.put("validationRunId",run.id());save(job);return get(id);
+        }catch(java.io.IOException e){throw BusinessException.conflict("Cannot prepare frozen verification: "+e.getMessage());}catch(java.security.NoSuchAlgorithmException e){throw new IllegalStateException(e);}catch(Exception e){if(e instanceof RuntimeException re)throw re;throw new IllegalStateException(e);}
+    }
     public com.aigamelab.domain.Task createBuilderTask(long taskId,String specId,int revision,String goal){
         var spec=artifacts.get(specId,revision);if(!"GameSpec".equals(spec.path("kind").asText())||spec.path("taskId").asLong()!=taskId)throw BusinessException.conflict("Specification scope mismatch");
         if(goal==null||goal.isBlank()||goal.length()>10000)throw new IllegalArgumentException("Builder goal required, up to 10000 characters");

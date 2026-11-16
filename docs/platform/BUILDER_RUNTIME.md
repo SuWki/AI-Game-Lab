@@ -2,6 +2,8 @@
 
 2026-11-13。BUILDER 是第 9 个 AgentType，使用 builder_p001 版本化 Prompt 和唯一 AgentLoop，不新增执行服务。当前只支持受控模板生产与证据查询，没有任意代码写入、审批、合并或发布工具。
 
+2026-11-16 更新：新 Run 使用 builder_p002，新增验证、分页源码读取和需审批的修改提案，共六项受限工具；历史 p001/三工具记录保留原语义。当前权威补充见 [源码审阅与独立引擎验收](PRODUCTION_SOURCE_REVIEW.md)，不把下文首版限制当作现能力上限。
+
 ## 创建与启动
 
 生产页面选择精确规格后，填写 Builder 目标并点击“创建 Builder 任务”。对应 POST `/api/productions/agent-task`：`{taskId,specId,specRevision,goal}`，taskId 指规格所属任务。服务创建独立 BUILDER Task，绑定原任务、规格 ID 与 revision，之后在 Workflow 启动 Run。

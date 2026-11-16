@@ -91,7 +91,7 @@ class TesterPromptImportTest {
 
     @Test
     void bothPromptsPresentAndExactlyOneActive() {
-        assertThat(countRows()).isEqualTo(14); // 5 原有 + QA Phase 2 8 个角色 prompt（R5 §8.2）
+        assertThat(countRows()).isEqualTo(15); // 5 原有 + QA Phase 2 8 个角色 prompt（R5 §8.2）
         Integer activeCount = jdbc.queryForObject(
                 "SELECT COUNT(*) FROM prompt_version WHERE is_active=1", Integer.class);
         assertThat(activeCount).isEqualTo(1); // 全表至多一条 active
@@ -107,7 +107,7 @@ class TesterPromptImportTest {
                 "--spring.sql.init.mode=always")) {
             PromptService svc2 = ctx2.getBean(PromptService.class);
             assertThat(svc2.getByVersion("tester_p001")).isPresent();
-            assertThat(countRows()).isEqualTo(14); // 仍仅 13 行，无重复（5 原有 + QA Phase 2 8 角色）
+            assertThat(countRows()).isEqualTo(15); // 仍仅 13 行，无重复（5 原有 + QA Phase 2 8 角色）
         }
     }
 

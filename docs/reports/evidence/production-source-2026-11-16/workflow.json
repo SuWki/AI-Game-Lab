@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "method": "Actual Edge forms and local API, controlled movement fault in scratch production, independent acceptance FAIL, Finding import, protected-input rejection, human approval and isolated regression PASS",
+  "productionId": "3900b087-4da5-4059-bdba-a5932a73728a",
+  "baselineRunId": "cd0fa828-497f-4898-850d-fe1357f05cd5",
+  "proposalId": "82c89cb9-957a-41a4-8bd7-31818401f752",
+  "regressionRunId": "0abf15ef-fbb9-4f51-95b8-d4c00058827a",
+  "baselineDecision": "FAIL",
+  "regressionDecision": "PASS",
+  "findingIds": [
+    1
+  ],
+  "protectedMutationStatus": 409,
+  "contractHash": "7d6a107b731d1f78d28ad3918104f3000d4bffd10479e5d1fdcba39737983802",
+  "baselineBuild": "build-afae5fb3-317f-4040-9295-e6d55e05e92d",
+  "regressionBuild": "build-dcf4f651-970e-4f2b-94a6-33fd60d2c4f9",
+  "originalPreserved": true,
+  "regressionChecks": [
+    {
+      "id": "initial-and-restart",
+      "status": "PASS",
+      "expected": "Fresh rounds reset health, score, clock and resources",
+      "actual": "Assertions passed"
+    },
+    {
+      "id": "movement",
+      "status": "PASS",
+      "expected": "Directional movement stays in the arena",
+      "actual": "Assertions passed"
+    },
+    {
+      "id": "deterministic-replay",
+      "status": "PASS",
+      "expected": "Identical seeds and actions reproduce state",
+      "actual": "Assertions passed"
+    },
+    {
+      "id": "settlement",
+      "status": "PASS",
+      "expected": "Round terminates consistently and terminal state stops advancing",
+      "actual": "Assertions passed"
+    },
+    {
+      "id": "damage-and-protection",
+      "status": "PASS",
+      "expected": "Contact damage can defeat player; shield blocks it",
+      "actual": "Assertions passed"
+    },
+    {
+      "id": "resource-mechanic",
+      "status": "PASS",
+      "expected": "Configured resource mechanic has its declared effect",
+      "actual": "Assertions passed"
+    }
+  ],
+  "browserErrors": []
+}
