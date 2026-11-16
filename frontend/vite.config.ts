@@ -4,6 +4,7 @@ import path from "node:path";
 
 // 后端地址：开发期由 Vite 代理 /api 与 /sse 到 :8080，生产由网关统一暴露。
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH || "/",
   plugins: [react()],
   resolve: {
     alias: { "@": path.resolve(__dirname, "src") },

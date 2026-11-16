@@ -1,5 +1,7 @@
 # AI Game Lab 文档索引
 
+站点预览与发布：[GitHub Pages](platform/PAGES_PREVIEW.md)。
+
 > 当前代码包含 Designer、Tester、Research、QA 团队与共享中台，采用单体后端 + SQLite。
 > 文档核对：2026-11-11，基线 `724f01a`。Designer P0–P8、Tester T1–T7、Research R0–R2 和 QA Phase 1–3 均已有实现；人工验收状态以 [task-state.md](state/task-state.md) 顶部摘要及对应记录为准。
 > 首次运行先看 [README](../README.md) 与 [构建环境](BUILD_ENVIRONMENT.md)；下列早期设计和历史报告需结合日期、冻结范围阅读。

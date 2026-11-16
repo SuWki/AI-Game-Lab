@@ -86,16 +86,27 @@ class RunControlServiceTest {
 
     @Test
     void cancelRunningRunCooperatively() throws Exception {
-        // 剧本：无限 tool_calls（预算不会触发，等待取消）
-        StubTool x = new StubTool("x");
-        x.defaultSuccess("{}", "ok");
-        if (!registry.contains("x")) {
-            registry.register(x);
-        }
+        // Hold a real in-flight tool so cancellation cannot race the first step insert.
+        var entered = new java.util.concurrent.CountDownLatch(1);
+        var release = new java.util.concurrent.CountDownLatch(1);
+        StubTool x = new StubTool("cancel_gate") {
+            @Override public com.aigamelab.tool.ToolResult execute(
+                    com.fasterxml.jackson.databind.JsonNode args, com.aigamelab.tool.ToolContext ctx) {
+                entered.countDown();
+                try {
+                    if (!release.await(10, java.util.concurrent.TimeUnit.SECONDS))
+                        return com.aigamelab.tool.ToolResult.failure("Test gate timed out");
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return com.aigamelab.tool.ToolResult.success("{}", "released");
+            }
+        };
+        registry.register(x);
         llm.onExhaustedThrow(new RuntimeException("stop"));
         // P1-5 后同参数连发会触发循环检测，故每次参数不同以绕开第四重防线
         for (int i = 0; i < 200; i++) {
-            llm.thenToolCalls(new ToolCall("c" + i, "x", "{\"i\":" + i + "}"));
+            llm.thenToolCalls(new ToolCall("c" + i, "cancel_gate", "{\"i\":" + i + "}"));
         }
 
         Run run = newRun(newTask().id());
@@ -108,14 +119,14 @@ class RunControlServiceTest {
         });
         worker.start();
 
-        // 等 RUNNING 后取消
-        long deadline = System.currentTimeMillis() + 10_000;
-        while (System.currentTimeMillis() < deadline
-                && !"RUNNING".equals(runRepo.findById(run.id()).orElseThrow().status())) {
-            Thread.sleep(20);
+        try {
+            assertThat(entered.await(10, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+            control.cancel(run.id());
+        } finally {
+            release.countDown();
+            worker.join(10_000);
         }
-        control.cancel(run.id());
-        worker.join(10_000);
+        assertThat(worker.isAlive()).isFalse();
 
         Run cancelled = runRepo.findById(run.id()).orElseThrow();
         assertThat(cancelled.status()).isEqualTo("CANCELLED");
@@ -123,7 +134,7 @@ class RunControlServiceTest {
         // 取消时已执行的 steps 存在且 < maxSteps
         Integer steps = jdbc.queryForObject(
                 "SELECT COUNT(*) FROM step WHERE run_id=?", Integer.class, run.id());
-        assertThat(steps).isGreaterThan(0);
+        assertThat(steps).isBetween(1, 49);
     }
 
     /** 线程内安全执行 loop（异常吞掉不影响断言）——已内联到用例中 */

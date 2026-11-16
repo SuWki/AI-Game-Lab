@@ -1,5 +1,7 @@
 # AI Game Lab
 
+[GitHub Pages 静态预览](https://suwki.github.io/AI-Game-Lab/) · [发布配置与本地验证](docs/platform/PAGES_PREVIEW.md)。预览展示模块与真实截图，后端功能在本地运行。
+
 AI Game Lab 是本地运行的游戏 AI 工作平台：Designer 通过工具和数值模拟提出设计修改，Tester 执行测试，Research 整理外部资料，QA 团队编排角色任务并生成 Release Gate 裁决。所有模块共用一个后端、一个前端和一个 SQLite 数据库。
 
 产品方向（2026-11-12 更新）：支持**已有游戏的分析改进**与**同类型新游戏的设计制造**。平台支持本地命令测试、源码/产物版本证据、TestPlan/Finding 导入、受限 Agent 工具，以及人工批准后的独立工作区修改与回归。game-demo 是验证样例。见 [三批开发交付与审查](docs/reports/THREE_BATCH_DELIVERY_2026-11-12.md) 和 [后续开发路线](docs/design/DEVELOPMENT_ROADMAP.md)。
