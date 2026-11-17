@@ -1,0 +1,13 @@
+{
+  "method": "Real application in Edge, deterministic mocked HTTP responses; no backend or user data mutated",
+  "cancellation": {
+    "productionCancelled": true,
+    "reviewReadsBefore": 1,
+    "reviewReadsAfter": 3,
+    "staleDeliverableVisible": false
+  },
+  "failedRefresh": {
+    "errorVisible": true,
+    "staleDeliverableVisible": false
+  }
+}

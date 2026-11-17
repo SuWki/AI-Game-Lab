@@ -30,7 +30,7 @@ export function ProductionCandidatePanel({job}:{job:ProductionJob}){
         <details><summary>清单与归档指纹</summary><p style={{overflowWrap:"anywhere"}}>Manifest SHA256：{candidate.manifestHash}</p><p style={{overflowWrap:"anywhere"}}>ZIP SHA256：{candidate.archiveSha256} · {candidate.archiveBytes} bytes</p></details>
         <button disabled={busy} onClick={()=>void action(()=>download(candidate.id))}>下载候选 ZIP</button>{" "}<button disabled={busy} onClick={()=>void action(()=>preview(candidate.id))}>启动限时预览</button>
         {previews[candidate.id]?.url&&<p><a href={previews[candidate.id].url} target="_blank" rel="noopener noreferrer">打开候选预览</a> · 到期：{new Date(previews[candidate.id].expiresAt!).toLocaleTimeString()} <button disabled={busy} onClick={()=>void action(()=>stop(candidate.id))}>停止预览</button></p>}
-        <CandidateReviewPanel candidate={candidate}/>
+        <CandidateReviewPanel candidate={candidate} production={job.iteration}/>
       </>}
     </article>)}
   </section>;
