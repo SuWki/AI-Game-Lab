@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RequestMapping("/api/runs")
 public class RunController {
     @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.runtime.RuntimeConversation conversation;
+    @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.production.BuilderSessionService builderSessions;
 
     private final RunControlService control;
     private final com.aigamelab.repository.RunRepository runRepo;
@@ -122,6 +123,7 @@ public class RunController {
         data.put("run", run);
         data.put("steps", stepViews);
         data.put("executionContext",conversation.context(id));
+        var budget=builderSessions.snapshot(run.taskId());if(budget!=null)data.put("builderBudget",budget);
         return ApiResp.ok(data);
     }
 

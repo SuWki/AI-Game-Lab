@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "method": "Deterministic local OpenAI HTTP fixture through actual DeepSeekClient, shared Runtime, real Node production and browser retry; no paid supplier",
+  "productionId": "ae3b258c-7a03-482c-8a6b-de24a823cc30",
+  "baseline": "27f49590-e67a-46ae-9b88-100d6abdf237",
+  "firstRun": 4,
+  "nextRun": 5,
+  "firstTokens": 100,
+  "nextRunTokens": 80,
+  "finalBudget": {
+    "schemaVersion": 1,
+    "taskId": 4,
+    "model": "session-fixture",
+    "stepLimit": 20,
+    "tokenLimit": 100000,
+    "deadlineEpochMs": 1794884101000,
+    "productionSpecId": "adbc96a3-6f59-4793-b181-8afe135bbe84",
+    "productionSpecRevision": 1,
+    "productionSourceTaskId": 1,
+    "activeRunId": 5,
+    "productionId": "ae3b258c-7a03-482c-8a6b-de24a823cc30",
+    "tokensUsed": 180,
+    "stepsUsed": 9,
+    "promptTokens": 108,
+    "completionTokens": 72,
+    "unsettledUsageTurns": 0,
+    "estimatedCostUsd": null,
+    "pricingStatus": "UNCONFIGURED"
+  },
+  "productionCount": 1,
+  "retainedBaseline": true,
+  "ownerHistory": [
+    {
+      "runId": 4,
+      "transferredAt": "2026-11-17T02:40:18.097888Z"
+    }
+  ],
+  "browserErrors": []
+}

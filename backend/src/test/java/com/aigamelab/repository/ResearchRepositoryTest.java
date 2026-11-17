@@ -178,12 +178,12 @@ class ResearchRepositoryTest extends AbstractRepositoryTest {
     // ==================== schema 表数量验证 ====================
 
     @Test
-    @DisplayName("共 23 张表（Runtime 协议、版本绑定与隔离修改记录）")
+    @DisplayName("共 24 张表（Runtime 协议、版本绑定与隔离修改记录）")
     void schemaHasTwentyOneTables() {
         List<String> names = jdbc.queryForList(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
                 String.class);
-        assertThat(names).hasSize(23);
+        assertThat(names).hasSize(24);
         assertThat(names).contains("research_source", "research_claim", "local_test_run");
     }
 }

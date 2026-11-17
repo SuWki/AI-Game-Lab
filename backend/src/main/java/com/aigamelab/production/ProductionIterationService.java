@@ -19,6 +19,8 @@ public class ProductionIterationService {
     private final LocalTestService tests;
     @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<com.aigamelab.localtest.LocalChangeService> changes;
     @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.localtest.LocalEvidenceService evidence;
+    @org.springframework.beans.factory.annotation.Autowired private BuilderSessionService sessions;
+    @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.repository.RunRepository runs;
     public ProductionIterationService(JdbcTemplate db,ObjectMapper mapper,LocalTestService tests){this.db=db;this.mapper=mapper;this.tests=tests;}
     private JsonNode read(String json){try{return mapper.readTree(json);}catch(Exception e){throw new IllegalStateException(e);}}
     private List<JsonNode> attempts(String id){return db.query("""
@@ -82,6 +84,10 @@ public class ProductionIterationService {
     }
     public synchronized void checkApproval(Proposal proposal){
         var job=production(proposal.baseRunId());if(job!=null&&(job.path("iterationCancelled").asBoolean()||!stoppedOwner(job).isBlank()))throw BusinessException.conflict("Production cancelled or owning Agent stopped; proposal cannot be approved");
+        if(job!=null&&job.hasNonNull("ownerRunId")){
+            var owner=runs.findById(job.path("ownerRunId").asLong()).orElseThrow();
+            if("WAITING_APPROVAL".equals(owner.status())){var budget=sessions.check(owner,false);if(budget.hit())throw BusinessException.conflict(budget.reason());}
+        }
     }
     /** Holds the same lock as cancellation until the child execution is durably linked. */
     public synchronized Proposal registerValidation(Proposal proposal,java.util.function.Supplier<Proposal> register){checkApproval(proposal);return register.get();}

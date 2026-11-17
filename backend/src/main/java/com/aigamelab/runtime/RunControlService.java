@@ -34,6 +34,7 @@ public class RunControlService {
     private final RunStateMachine stateMachine;
     private final AgentLoop agentLoop;
     @org.springframework.beans.factory.annotation.Autowired private ToolExecutor toolExecutor;
+    @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.production.BuilderSessionService builderSessions;
     /** 循环执行器：resume/recovery 提交用（守护线程，不阻塞 JVM 退出） */
     private final java.util.concurrent.ThreadPoolExecutor executor = new java.util.concurrent.ThreadPoolExecutor(4,4,0,java.util.concurrent.TimeUnit.SECONDS,new java.util.concurrent.ArrayBlockingQueue<>(64),r -> {
         Thread t = new Thread(r, "agent-loop-worker");
@@ -96,9 +97,11 @@ public class RunControlService {
         Run old = runRepo.findById(runId).orElseThrow(
                 () -> BusinessException.notFound("Run 不存在: " + runId));
         if(!RunStateMachine.isTerminal(RunStatus.valueOf(old.status())))throw BusinessException.conflict("仅终态 Run 可以重试");
-        Run retried=runRepo.insert(new Run(null, old.taskId(), "PENDING", old.promptVersionId(),
+        var task=taskRepo.findById(old.taskId()).orElseThrow();
+        java.util.function.Supplier<Run> create=()->runRepo.insert(new Run(null, old.taskId(), "PENDING", old.promptVersionId(),
                 old.model(), 0, old.maxSteps(), old.tokenBudget(), 0,
                 null, null, null, null, null));
+        Run retried=builderSessions.isBuilder(task)?builderSessions.admit(task,create):create.get();
         submit(retried.id(),()->agentLoop.run(retried.id()));
         return retried;
     }
@@ -116,9 +119,10 @@ public class RunControlService {
     public Run start(long taskId) {
         var task=taskRepo.findById(taskId).orElseThrow(
                 () -> BusinessException.notFound("Task 不存在: " + taskId));
-        Run run = runRepo.insert(new Run(null, taskId, "PENDING", null,
+        java.util.function.Supplier<Run> create=()->runRepo.insert(new Run(null, taskId, "PENDING", null,
                 model, 0, task.maxSteps(), 100000, 0,
                 null, null, null, null, null));
+        Run run=builderSessions.isBuilder(task)?builderSessions.admit(task,create):create.get();
         log.info("Task {} → 新建 Run {}（待 AgentLoop 执行）", taskId, run.id());
         submit(run.id(),() -> {
             try {

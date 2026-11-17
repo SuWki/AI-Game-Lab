@@ -202,6 +202,13 @@ export interface StepRow {
 export interface RunTrace {
   run: RunRow;
   steps: Array<{ step: StepRow; toolCalls: ToolCallRow[] }>;
+  builderBudget?: BuilderBudget;
+}
+
+export interface BuilderBudget {
+  taskId:number;activeRunId?:number;productionId?:string;
+  tokensUsed:number;tokenLimit:number;stepsUsed:number;stepLimit:number;deadlineEpochMs:number;
+  pricingStatus:string;estimatedCostUsd:string|null;maxCostUsd?:string;unsettledUsageTurns:number;
 }
 
 // ==================== P7-5 Config & Diff 类型 ====================

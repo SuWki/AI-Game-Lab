@@ -1,5 +1,7 @@
 # 生产修复链与预算 v1
 
+后续实现：[Builder 跨 Run 会话与预算](BUILDER_SESSIONS.md) 补齐了同任务生产接管和累计步骤/token/可选估算费用，新增会话表共 24 表。本页“五次提案”策略继续适用，以下首批边界为该批交付时的状态。
+
 2026-11-17，B-05 首个增量。复用 production_job、local_change_proposal、local_test_context 与 local_test_run，不增加表或另一个 AgentLoop。
 
 每个生产的 verify-<productionId> 目标绑定原始验收及其隔离回归；从持久提案按创建顺序恢复修复链。最多五个成功创建的提案，拒绝及失败仍计数，非法请求不计数。相同生产只允许一个未决提案；后续提案必须引用当前候选的执行，禁止退回旧基线重新计数。完整 FAIL 回归可作为下一次修复基线，PASS 候选可进入 REVIEW；证据不足不自动成为新基线。

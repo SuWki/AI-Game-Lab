@@ -22,6 +22,8 @@ public class ProductionJobService {
     @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.repository.TaskRepository tasks;
     @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<com.aigamelab.localtest.LocalEvidenceService> evidence;
     @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<ProductionIterationService> iterations;
+    @org.springframework.beans.factory.annotation.Autowired private BuilderSessionService sessions;
+    @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.repository.RunRepository runs;
     private static final List<String> PROTECTED=List.of("config.json","production-manifest.json","specification.json","build-project.mjs","serve-project.mjs");
     public record Request(long taskId,String specId,int specRevision,String requestKey){}
     public ProductionJobService(JdbcTemplate db,ObjectMapper mapper,ProductionArtifactService artifacts,LocalTestService executor,
@@ -33,7 +35,27 @@ public class ProductionJobService {
     private String templateHash()throws Exception{List<String> lines=new ArrayList<>();for(String name:FILES){Path p=repo.resolve("templates/survival-web").resolve(name);if(Files.isSymbolicLink(p)||!Files.isRegularFile(p))throw new IllegalArgumentException("Invalid template file");lines.add(name+":"+hash(Files.readAllBytes(p)));}return hash(String.join("\n",lines).getBytes(StandardCharsets.UTF_8));}
     private String hash(byte[] bytes)throws Exception{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));}
     public synchronized JsonNode start(Request request){return startOwned(request,null);}
-    public synchronized JsonNode startForAgent(Request request,long ownerRunId){return startOwned(request,ownerRunId);}
+    public synchronized JsonNode startForAgent(Request request,long ownerRunId){
+        var run=runs.findById(ownerRunId).orElseThrow();
+        if(!"RUNNING".equals(run.status()))throw BusinessException.conflict("Builder Run is not active");
+        var task=tasks.findById(run.taskId()).orElseThrow();sessions.claim(task,run);
+        var session=sessions.snapshot(run.taskId());
+        if(!session.path("productionSpecId").asText().equals(request.specId())||session.path("productionSpecRevision").asInt()!=request.specRevision()||session.path("productionSourceTaskId").asLong()!=request.taskId())throw BusinessException.conflict("Builder specification mismatch");
+        if(session.hasNonNull("productionId"))return claimForBuilder(session.path("productionId").asText(),ownerRunId);
+        var verdict=sessions.check(run,false);if(verdict.hit())throw BusinessException.conflict(verdict.reason());
+        var job=startOwned(new Request(request.taskId(),request.specId(),request.specRevision(),"builder-task-"+run.taskId()),ownerRunId);
+        sessions.bind(ownerRunId,job.path("id").asText());return get(job.path("id").asText());
+    }
+    public synchronized JsonNode claimForBuilder(String id,long runId){
+        var job=require(id);sessions.assertOwner(runId,id);
+        if(job.path("iterationCancelled").asBoolean())throw BusinessException.conflict("Production cancelled; retry cannot reset it");
+        if(job.path("ownerRunId").asLong(-1)!=runId){
+            var old=runs.findById(job.path("ownerRunId").asLong()).orElseThrow();var next=runs.findById(runId).orElseThrow();
+            if(old.taskId()!=next.taskId()||!com.aigamelab.runtime.RunStateMachine.isTerminal(com.aigamelab.domain.RunStatus.valueOf(old.status())))throw BusinessException.conflict("Production belongs to another Agent Run");
+            job.withArray("ownerHistory").addObject().put("runId",old.id()).put("transferredAt",Instant.now().toString());job.put("ownerRunId",runId);save(job);
+        }
+        return get(id);
+    }
     private JsonNode startOwned(Request request,Long ownerRunId){
         if(request.specId()==null||request.specRevision()<1||request.requestKey()==null||!request.requestKey().matches("[A-Za-z0-9_-]{1,80}"))throw new IllegalArgumentException("Exact specification revision and request key required");
         var spec=artifacts.get(request.specId(),request.specRevision());
@@ -67,6 +89,7 @@ public class ProductionJobService {
         }
         if(job.hasNonNull("validationRunId")){var validation=executor.get(job.path("validationRunId").asText());job.put("validationStatus",validation.status());if(!Set.of("QUEUED","RUNNING").contains(validation.status())){job.put("validationDecision",evidence.getObject().assessment(validation).path("decision").asText());if(validation.evidence()!=null){job.set("validationChecks",validation.evidence().path("checks"));job.put("validationScope",validation.evidence().path("scope").asText());}}save(job);}
         if(iterations!=null)job.set("iteration",iterations.getObject().snapshot(job));
+        if(sessions!=null&&job.hasNonNull("ownerRunId"))runs.findById(job.path("ownerRunId").asLong()).ifPresent(r->{var budget=sessions.snapshot(r.taskId());if(budget!=null)job.set("budget",budget);});
         return job;
     }
     public synchronized JsonNode cancel(String id){var job=require(id);iterations.getObject().cancel(id);if(!job.path("localRunId").isNull()&&!job.path("localRunId").isMissingNode())executor.cancel(job.path("localRunId").asText());if(job.hasNonNull("validationRunId"))executor.cancel(job.path("validationRunId").asText());return get(id);}

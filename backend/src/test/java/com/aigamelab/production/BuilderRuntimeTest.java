@@ -21,6 +21,7 @@ class BuilderRuntimeTest {
  @org.springframework.boot.test.context.TestConfiguration static class Config{@org.springframework.context.annotation.Bean CheckingGateway gateway(){return new CheckingGateway();}}
  @Autowired ProductionArtifactService artifacts;@Autowired ProductionJobService jobs;@Autowired ProductionTools tools;@Autowired TaskRepository tasks;@Autowired RunRepository runs;@Autowired RuntimeConversation conversation;@Autowired AgentLoop loop;@Autowired CheckingGateway gateway;@Autowired ObjectMapper mapper;@Autowired AgentTypeResolver resolver;
  @Autowired com.aigamelab.localtest.LocalChangeService changes;@Autowired org.springframework.jdbc.core.JdbcTemplate db;
+ @Autowired BuilderSessionService sessions;@Autowired RunControlService control;
  JsonNode spec;long sourceTask;
  @BeforeEach void setup()throws Exception{
   gateway.script.clear();sourceTask=tasks.insert(new Task(null,"source","make game","{}",20,true,"ACTIVE",null)).id();
@@ -44,6 +45,46 @@ class BuilderRuntimeTest {
  @Test void cancelledBuilderCannotCreateAProduction(){var run=builder();conversation.freeze(run,tasks.findById(run.taskId()).orElseThrow());runs.finishIfActive(run.id(),RunStatus.CANCELLED,null,"cancelled");var before=jobs.list().size();assertThat(tools.productionStart().execute(mapper.createObjectNode(),ToolContext.of(run.id(),1L)).status()).isEqualTo("FAILED");assertThat(jobs.list()).hasSize(before);}
  @Test void unboundBuilderFailsBeforeModelInvocation(){var task=tasks.insert(new Task(null,"bad","bad","{\"agent_type\":\"BUILDER\"}",20,true,"ACTIVE",null));var run=runs.insert(new Run(null,task.id(),"PENDING",null,"checking",0,20,100000,0,null,null,null,null,null));loop.run(run.id());assertThat(runs.findById(run.id()).orElseThrow().status()).isEqualTo("FAILED");}
  @Test void otherAgentRolesHaveNoProductionTools(){for(var type:AgentType.values())if(type!=AgentType.BUILDER)assertThat(resolver.toolWhitelist(type)).doesNotContain("production_start","production_context","production_result");}
+ @Test void retryReusesProductionAndValidatedCandidateWithCumulativeUsage()throws Exception{
+  final String[] id={null};gateway.script.add(r->call("start","production_start","{}"));
+  gateway.script.add(r->{id[0]=observation(r,"start").path("id").asText();return call("result","production_result","{\"productionId\":\""+id[0]+"\"}");});
+  gateway.script.add(r->call("verify","production_validate","{\"productionId\":\""+id[0]+"\"}"));gateway.script.add(r->stop());
+  var first=builder();loop.run(first.id());assertThat(runs.findById(first.id()).orElseThrow().status()).isEqualTo("COMPLETED");
+  var j=jobs.get(id[0]);String baseline=j.path("validationRunId").asText();var evidence=org.springframework.test.util.ReflectionTestUtils.getField(tools,"evidence");
+  var source=((com.aigamelab.localtest.LocalEvidenceService)evidence).source(baseline,"engine.mjs");
+  var approved=changes.approve(changes.create(baseline,"Keep candidate across retry",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText().replace("*210*dt","*220*dt")))).id());
+  long end=System.nanoTime()+20_000_000_000L;while(System.nanoTime()<end&&"VALIDATING".equals(changes.get(approved.id()).status()))Thread.sleep(20);assertThat(changes.get(approved.id()).status()).isEqualTo("VALIDATED");
+  long tokens=sessions.snapshot(first.taskId()).path("tokensUsed").asLong();var deadline=sessions.snapshot(first.taskId()).path("deadlineEpochMs");
+  gateway.script.add(r->call("context","production_context","{}"));gateway.script.add(r->{assertThat(observation(r,"context").path("budget").path("productionId").asText()).isEqualTo(id[0]);return call("restart","production_start","{}");});
+  gateway.script.add(r->{var reused=observation(r,"restart");assertThat(reused.path("id").asText()).isEqualTo(id[0]);assertThat(reused.path("iteration").path("repairCount").asInt()).isEqualTo(1);assertThat(reused.path("validationRunId").asText()).isEqualTo(approved.validationRunId());return stop();});
+  var next=control.retry(first.id());end=System.nanoTime()+20_000_000_000L;while(System.nanoTime()<end&&!RunStateMachine.isTerminal(RunStatus.valueOf(runs.findById(next.id()).orElseThrow().status())))Thread.sleep(20);
+  assertThat(runs.findById(next.id()).orElseThrow().status()).isEqualTo("COMPLETED");assertThat(jobs.get(id[0]).path("ownerRunId").asLong()).isEqualTo(next.id());assertThat(jobs.get(id[0]).path("ownerHistory").size()).isEqualTo(1);
+  assertThat(sessions.snapshot(first.taskId()).path("tokensUsed").asLong()).isGreaterThan(tokens);assertThat(sessions.snapshot(first.taskId()).path("deadlineEpochMs")).isEqualTo(deadline);
+  assertThat(db.queryForObject("SELECT COUNT(*) FROM production_job WHERE task_id=?",Integer.class,sourceTask)).isEqualTo(1);
+  assertThat(tools.productionSourceRead().execute(mapper.createObjectNode().put("productionId",id[0]).put("path","engine.mjs"),ToolContext.of(first.id(),1L)).status()).isEqualTo("FAILED");
+ }
+ @Test void overBudgetResponseCannotDispatchItsProductionToolOrResetViaRetry(){
+  var first=builder();int before=jobs.list().size();gateway.script.add(r->new LlmResponse("overflow","tool_calls",null,List.of(new com.aigamelab.llm.dto.ToolCall("start","production_start","{}")),new TokenUsage(100000,1,100001,null,null),0L,"checking"));loop.run(first.id());
+  assertThat(runs.findById(first.id()).orElseThrow().status()).isEqualTo("FAILED");assertThat(jobs.list()).hasSize(before);assertThatThrownBy(()->control.retry(first.id())).hasMessageContaining("token budget");assertThat(runs.findByTask(first.taskId())).hasSize(1);
+ }
+ @Test void finalAllowedStepCanCompleteButCannotBeReset(){
+  var t=jobs.createBuilderTask(sourceTask,spec.path("artifactId").asText(),1,"one step");var run=runs.insert(new Run(null,t.id(),"PENDING",null,"checking",0,1,100000,0,null,null,null,null,null));gateway.script.add(r->stop());loop.run(run.id());assertThat(runs.findById(run.id()).orElseThrow().status()).isEqualTo("COMPLETED");assertThatThrownBy(()->control.retry(run.id())).hasMessageContaining("step budget");
+ }
+ @Test void pendingProposalMustBeResolvedBeforeRetryHandoff()throws Exception{
+  final String[] id={null};gateway.script.add(r->call("start","production_start","{}"));gateway.script.add(r->{id[0]=observation(r,"start").path("id").asText();return call("result","production_result","{\"productionId\":\""+id[0]+"\"}");});gateway.script.add(r->call("verify","production_validate","{\"productionId\":\""+id[0]+"\"}"));gateway.script.add(r->stop());
+  var first=builder();loop.run(first.id());String base=jobs.get(id[0]).path("validationRunId").asText();var source=((com.aigamelab.localtest.LocalEvidenceService)org.springframework.test.util.ReflectionTestUtils.getField(tools,"evidence")).source(base,"engine.mjs");
+  var pending=changes.create(base,"Unresolved previous proposal",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText()+"\n// pending")));
+  var next=control.retry(first.id());long end=System.nanoTime()+15_000_000_000L;while(System.nanoTime()<end&&!"FAILED".equals(runs.findById(next.id()).orElseThrow().status()))Thread.sleep(20);
+  assertThat(runs.findById(next.id()).orElseThrow().errorMessage()).contains("Resolve previous");assertThat(changes.get(pending.id()).status()).isEqualTo("PENDING");assertThat(jobs.get(id[0]).path("ownerRunId").asLong()).isEqualTo(first.id());changes.reject(pending.id());
+ }
+ @Test void lateUsageAfterCancellationIsSettledBeforeRetryCanCallTheModel()throws Exception{
+  var entered=new java.util.concurrent.CountDownLatch(1);var release=new java.util.concurrent.CountDownLatch(1);var first=builder();
+  gateway.script.add(r->{entered.countDown();try{if(!release.await(10,java.util.concurrent.TimeUnit.SECONDS))throw new AssertionError("Gate timeout");}catch(InterruptedException e){throw new RuntimeException(e);}return new LlmResponse("late","stop","late",null,new TokenUsage(100000,1,100001,null,null),0L,"checking");});
+  var worker=new Thread(()->loop.run(first.id()));worker.start();Run next;
+  try{assertThat(entered.await(10,java.util.concurrent.TimeUnit.SECONDS)).isTrue();control.cancel(first.id());next=control.retry(first.id());}finally{release.countDown();worker.join(15000);}
+  long end=System.nanoTime()+15_000_000_000L;while(System.nanoTime()<end&&!RunStateMachine.isTerminal(RunStatus.valueOf(runs.findById(next.id()).orElseThrow().status())))Thread.sleep(20);
+  assertThat(runs.findById(first.id()).orElseThrow().status()).isEqualTo("CANCELLED");assertThat(runs.findById(next.id()).orElseThrow().status()).isEqualTo("FAILED");assertThat(db.queryForObject("SELECT COUNT(*) FROM step WHERE run_id=?",Integer.class,next.id())).isZero();assertThat(sessions.snapshot(first.taskId()).path("tokensUsed").asLong()).isEqualTo(100001);
+ }
  JsonNode observation(LlmRequest r,String id){try{return mapper.readTree(r.messages().stream().filter(m->id.equals(m.toolCallId())).findFirst().orElseThrow().content());}catch(Exception e){throw new RuntimeException(e);}}
  @Test void sourceProposalWaitsForHumanThenResumesWithIndependentRegression()throws Exception{
   final String[] production={null};final StringBuilder source=new StringBuilder();final String[] sourceHash={null};

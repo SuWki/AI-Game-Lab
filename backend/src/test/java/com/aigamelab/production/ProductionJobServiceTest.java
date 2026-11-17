@@ -120,6 +120,14 @@ class ProductionJobServiceTest {
   assertThatThrownBy(()->changes.approve(p.id())).hasMessageContaining("owning Agent stopped");assertThat(changes.get(p.id()).workspace()).isNull();
   assertThat(jobs.get(j.path("id").asText()).path("iteration").path("phase").asText()).isEqualTo("CANCELLED");
  }
+ @Test void approvalRechecksTheWaitingBuilderSessionDeadline()throws Exception{
+  var j=verified("expired-approval");String base=j.path("validationRunId").asText();var source=evidence.source(base,"engine.mjs");
+  var task=jobs.createBuilderTask(this.task,spec.path("artifactId").asText(),1,"Approve within budget");var runs=application.getBean(com.aigamelab.repository.RunRepository.class);var sessions=application.getBean(BuilderSessionService.class);
+  var run=runs.insert(new com.aigamelab.domain.Run(null,task.id(),"RUNNING",null,"checking",0,20,100000,0,null,null,null,null,null));sessions.claim(task,run);sessions.bind(run.id(),j.path("id").asText());db.update("UPDATE production_job SET record_json=json_set(record_json,'$.ownerRunId',?) WHERE id=?",run.id(),j.path("id").asText());
+  var p=changes.create(base,"Awaiting approval",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText()+"\n// pending")));
+  runs.transitionIf(run.id(),"RUNNING",com.aigamelab.domain.RunStatus.WAITING_APPROVAL);db.update("UPDATE builder_session SET record_json=json_set(record_json,'$.deadlineEpochMs',0) WHERE task_id=?",task.id());
+  assertThatThrownBy(()->changes.approve(p.id())).hasMessageContaining("deadline");assertThat(changes.get(p.id()).workspace()).isNull();
+ }
  @Test void rejectsCrossTaskSpecificationBeforeStarting(){assertThatThrownBy(()->jobs.start(new ProductionJobService.Request(task+1000,spec.path("artifactId").asText(),1,"cross"))).hasMessageContaining("does not belong");}
  @Test void invalidTemplateParametersFailWithSpecificEvidence()throws Exception{
   var content=spec.path("content").deepCopy();((com.fasterxml.jackson.databind.node.ObjectNode)content.path("systems").path("survivalWeb")).put("duration",-1);

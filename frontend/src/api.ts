@@ -1,9 +1,10 @@
+import type {BuilderBudget} from "./types";
 import type { ApiResp, Finding, TestPlan, Experiment, ExperimentPair, RunRow, RunTrace, ConfigVersion, ChangeProposal, FindingRegression, ResearchSource, ResearchClaim, ResearchReport, ClaimSources, TaskRow } from "@/types";
 
 const BASE = "/api";
 export interface ProductionArtifact {artifactId:string;revision:number;kind:string;taskId:number;contentHash:string;content:{title?:string}}
 export interface ProductionIteration {phase:string;reason:string;repairCount:number;repairLimit:number;currentRunId:string;currentDecision?:string;currentStatus?:string;currentWorkspace?:string;attempts:{proposalId:string;status:string;baseRunId:string;validationRunId?:string}[]}
-export interface ProductionJob {id:string;taskId:number;specId:string;specRevision:number;specHash:string;status:string;localRunId?:string;validationRunId?:string;validationStatus?:string;validationDecision?:string;iteration?:ProductionIteration;error?:string;result?:{workspace:string;build:{buildId:string;files:Record<string,string>}}}
+export interface ProductionJob {id:string;taskId:number;specId:string;specRevision:number;specHash:string;status:string;localRunId?:string;validationRunId?:string;validationStatus?:string;validationDecision?:string;iteration?:ProductionIteration;budget?:BuilderBudget;error?:string;result?:{workspace:string;build:{buildId:string;files:Record<string,string>}}}
 
 export interface LocalTestTarget {
   id: string; name: string; workingDirectory: string; command: string[];
