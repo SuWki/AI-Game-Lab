@@ -20,6 +20,7 @@ class ProductionJobServiceTest {
  @Autowired ProductionJobService jobs;@Autowired ProductionArtifactService artifacts;@Autowired TaskRepository tasks;@Autowired ObjectMapper mapper;@Autowired org.springframework.jdbc.core.JdbcTemplate db;
  @Autowired com.aigamelab.localtest.LocalEvidenceService evidence;@Autowired com.aigamelab.localtest.LocalChangeService changes;
  @Autowired ControlledExecutor executor;
+ @Autowired org.springframework.context.ApplicationContext application;
  static class ControlledExecutor extends LocalTestService {
   String mode="real";TestRun controlled;boolean cancelled;
   ControlledExecutor(ObjectMapper mapper,org.springframework.jdbc.core.JdbcTemplate db){super(mapper,db,ROOT.resolve("unused-catalog.json").toString());}
@@ -65,6 +66,59 @@ class ProductionJobServiceTest {
   var p=changes.create(baseline,"Restore movement",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",evidence.binding(baseline).path("source").path("engine.mjs").asText(),good)));
   var approved=changes.approve(p.id());var result=awaitExecution(approved.validationRunId());assertThat(result.status()).isEqualTo("PASSED");assertThat(changes.get(p.id()).status()).isEqualTo("VALIDATED");
   assertThat(Files.readString(original)).isEqualTo(bad);assertThat(result.evidence().path("contractHash")).isEqualTo(failed.evidence().path("contractHash"));assertThat(result.target().protectedFiles()).contains("build-project.mjs");
+ }
+ @Test void failedCandidatesFormOneDurableFiveProposalChain()throws Exception{
+  var j=verified("iterations");String id=j.path("id").asText(),first=j.path("validationRunId").asText();
+  String original=evidence.source(first,"engine.mjs").path("text").asText();String current=first;
+  for(int attempt=1;attempt<=5;attempt++){
+   var source=evidence.source(current,"engine.mjs");String broken=original.replace("*210*dt","*0*dt")+"\n// attempt "+attempt;
+   var p=changes.create(current,"Repair attempt "+attempt,List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),broken)));
+   final String before=current;assertThatThrownBy(()->changes.create(before,"Parallel proposal",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),broken)))).hasMessageContaining(attempt==5?"budget":"unresolved");
+   var approved=changes.approve(p.id());awaitExecution(approved.validationRunId());assertThat(changes.get(p.id()).status()).isEqualTo("REGRESSION_FAILED");current=approved.validationRunId();
+   var state=jobs.get(id).path("iteration");assertThat(state.path("repairCount").asInt()).isEqualTo(attempt);assertThat(state.path("currentRunId").asText()).isEqualTo(current);
+   assertThat(state.path("phase").asText()).isEqualTo(attempt==5?"FAILED":"IMPLEMENTING");
+   if(attempt<5)assertThatThrownBy(()->changes.create(first,"Stale original baseline",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",evidence.source(first,"engine.mjs").path("sha256").asText(),original)))).hasMessageContaining("current production");
+  }
+  var state=jobs.get(id).path("iteration");assertThat(state.path("attempts").size()).isEqualTo(5);
+  var recovered=new ProductionIterationService(db,mapper,executor);application.getAutowireCapableBeanFactory().autowireBean(recovered);
+  assertThat(recovered.snapshot(jobs.get(id))).isEqualTo(state);
+  var source=evidence.source(current,"engine.mjs");String last=current;assertThatThrownBy(()->changes.create(last,"Sixth attempt",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),original)))).hasMessageContaining("budget");
+  assertThat(Files.readString(Path.of(j.path("result").path("workspace").asText()).resolve("engine.mjs"))).isEqualTo(original);
+ }
+ @Test void cancellationBlocksPendingApprovalAndNewVerification()throws Exception{
+  var j=verified("cancel-iteration");String id=j.path("id").asText(),base=j.path("validationRunId").asText();var source=evidence.source(base,"engine.mjs");
+  var p=changes.create(base,"Pending repair",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText()+"\n// candidate")));
+  assertThat(jobs.cancel(id).path("iteration").path("phase").asText()).isEqualTo("CANCELLED");
+  assertThatThrownBy(()->changes.approve(p.id())).hasMessageContaining("cancelled");assertThat(changes.get(p.id()).workspace()).isNull();
+  assertThatThrownBy(()->jobs.validate(id,null)).hasMessageContaining("cancelled");
+ }
+ @Test void concurrentProposalsHaveOneDurableWinner()throws Exception{
+  var j=verified("concurrent-proposals");String base=j.path("validationRunId").asText();var source=evidence.source(base,"engine.mjs");
+  var workers=java.util.concurrent.Executors.newFixedThreadPool(2);var start=new java.util.concurrent.CountDownLatch(1);
+  try{
+   java.util.concurrent.Callable<Boolean> submit=()->{start.await();try{changes.create(base,"Concurrent candidate",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText()+"\n// concurrent")));return true;}catch(com.aigamelab.common.BusinessException expected){return false;}};
+   var a=workers.submit(submit);var b=workers.submit(submit);start.countDown();int winners=(a.get(15,java.util.concurrent.TimeUnit.SECONDS)?1:0)+(b.get(15,java.util.concurrent.TimeUnit.SECONDS)?1:0);
+   assertThat(winners).isEqualTo(1);assertThat(jobs.get(j.path("id").asText()).path("iteration").path("repairCount").asInt()).isEqualTo(1);
+  }finally{workers.shutdownNow();}
+ }
+ @Test void rejectedAttemptsCountAndSuccessfulCandidateEntersReview()throws Exception{
+  var j=verified("reject-and-pass");String id=j.path("id").asText(),base=j.path("validationRunId").asText();var source=evidence.source(base,"engine.mjs");
+  var edits=List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText().replace("*210*dt","*220*dt")));
+  var rejected=changes.create(base,"Rejected change",edits);changes.reject(rejected.id());var accepted=changes.approve(changes.create(base,"Approved change",edits).id());awaitExecution(accepted.validationRunId());
+  var state=jobs.get(id).path("iteration");assertThat(state.path("phase").asText()).isEqualTo("REVIEW");assertThat(state.path("repairCount").asInt()).isEqualTo(2);assertThat(state.path("currentRunId").asText()).isEqualTo(accepted.validationRunId());
+ }
+ @Test void incompleteCandidateIsNotHiddenByThePassingOriginalBaseline()throws Exception{
+  var j=verified("incomplete-candidate");String base=j.path("validationRunId").asText();var source=evidence.source(base,"engine.mjs");
+  var p=changes.approve(changes.create(base,"Break module loading",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),"throw new Error('candidate runtime failure');"))).id());awaitExecution(p.validationRunId());
+  assertThat(jobs.get(j.path("id").asText()).path("iteration").path("phase").asText()).isEqualTo("WAITING_INPUT");
+ }
+ @Test void cancelledAgentCannotApproveAnAlreadyPendingProposal()throws Exception{
+  var j=verified("cancelled-owner");String base=j.path("validationRunId").asText();var source=evidence.source(base,"engine.mjs");
+  var p=changes.create(base,"Pending owned candidate",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText()+"\n// candidate")));
+  var owner=application.getBean(com.aigamelab.repository.RunRepository.class).insert(new com.aigamelab.domain.Run(null,task,"CANCELLED",null,"checking",0,20,100000,0,null,null,null,null,null));
+  db.update("UPDATE production_job SET record_json=json_set(record_json,'$.ownerRunId',?) WHERE id=?",owner.id(),j.path("id").asText());
+  assertThatThrownBy(()->changes.approve(p.id())).hasMessageContaining("owning Agent stopped");assertThat(changes.get(p.id()).workspace()).isNull();
+  assertThat(jobs.get(j.path("id").asText()).path("iteration").path("phase").asText()).isEqualTo("CANCELLED");
  }
  @Test void rejectsCrossTaskSpecificationBeforeStarting(){assertThatThrownBy(()->jobs.start(new ProductionJobService.Request(task+1000,spec.path("artifactId").asText(),1,"cross"))).hasMessageContaining("does not belong");}
  @Test void invalidTemplateParametersFailWithSpecificEvidence()throws Exception{
