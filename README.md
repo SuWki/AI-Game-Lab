@@ -6,7 +6,9 @@ AI Game Lab 是本地运行的游戏 AI 工作平台：Designer 通过工具和�
 
 产品方向（2026-11-12 更新）：支持**已有游戏的分析改进**与**同类型新游戏的设计制造**。平台支持本地命令测试、源码/产物版本证据、TestPlan/Finding 导入、受限 Agent 工具，以及人工批准后的独立工作区修改与回归。game-demo 是验证样例。见 [三批开发交付与审查](docs/reports/THREE_BATCH_DELIVERY_2026-11-12.md) 和 [后续开发路线](docs/design/DEVELOPMENT_ROADMAP.md)。
 
-> 文档更新：2026-11-16。进度与验收记录见 [task-state.md](docs/state/task-state.md)，完整导航见 [文档索引](docs/index.md)。
+> 文档更新：2026-11-17。进度与验收记录见 [task-state.md](docs/state/task-state.md)，完整导航见 [文档索引](docs/index.md)。
+
+最新增量：[候选人工评审与规格覆盖](docs/platform/CANDIDATE_HUMAN_REVIEW.md)。固定候选支持逐项观察、接受/拒绝、版本历史与独立回执；仅当前候选、完整人工 PASS 和最新显式接受同时成立时，交付门禁才开放。此状态不会自动公开发布。
 
 ## 当前能力与边界
 

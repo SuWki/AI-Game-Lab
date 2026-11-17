@@ -1,3 +1,4 @@
+import {CandidateReviewPanel} from "./CandidateReviewPanel";
 import {useState,useEffect} from "react";
 import {useQuery,useQueryClient} from "react-query";
 import {api,type ProductionJob,type CandidatePreview} from "@/api";
@@ -25,10 +26,11 @@ export function ProductionCandidatePanel({job}:{job:ProductionJob}){
     {list.data?.map(candidate=><article key={candidate.id} style={{padding:12,marginTop:12,background:"#f8faf9"}}>
       <h4>候选 {candidate.id} · {candidate.status}</h4><p>验收执行：{candidate.validationRunId}</p>
       {candidate.error&&<p role="alert">{candidate.error}</p>}
-      {candidate.status==="READY"&&<><p>范围：{candidate.manifest?.scope} · 仅完成引擎验收，人类接受尚未记录。</p><p>固定构建：{candidate.manifest?.buildId}</p>
+      {candidate.status==="READY"&&<><p>范围：{candidate.manifest?.scope} · 引擎验收通过；人工意见见下方评审记录。包内清单保留打包时状态。</p><p>固定构建：{candidate.manifest?.buildId}</p>
         <details><summary>清单与归档指纹</summary><p style={{overflowWrap:"anywhere"}}>Manifest SHA256：{candidate.manifestHash}</p><p style={{overflowWrap:"anywhere"}}>ZIP SHA256：{candidate.archiveSha256} · {candidate.archiveBytes} bytes</p></details>
         <button disabled={busy} onClick={()=>void action(()=>download(candidate.id))}>下载候选 ZIP</button>{" "}<button disabled={busy} onClick={()=>void action(()=>preview(candidate.id))}>启动限时预览</button>
         {previews[candidate.id]?.url&&<p><a href={previews[candidate.id].url} target="_blank" rel="noopener noreferrer">打开候选预览</a> · 到期：{new Date(previews[candidate.id].expiresAt!).toLocaleTimeString()} <button disabled={busy} onClick={()=>void action(()=>stop(candidate.id))}>停止预览</button></p>}
+        <CandidateReviewPanel candidate={candidate}/>
       </>}
     </article>)}
   </section>;

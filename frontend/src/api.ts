@@ -5,6 +5,11 @@ const BASE = "/api";
 export interface ProductionArtifact {artifactId:string;revision:number;kind:string;taskId:number;contentHash:string;content:{title?:string}}
 export interface ProductionCandidate {id:string;productionId:string;validationRunId:string;status:string;manifestHash?:string;archiveSha256?:string;archiveBytes?:number;error?:string;manifest?:{buildId:string;scope:string;humanAccepted:boolean}}
 export interface CandidatePreview {candidateId:string;status:string;url?:string;expiresAt?:string}
+export type ManualOutcome="PASS"|"FAIL"|"NOT_TESTED";
+export interface ManualCriterion {criterionId:string;requirementId:string;expected:string;method:string;evidenceKind:string;outcome:ManualOutcome;evidenceNote:string}
+export interface CandidateReviewRecord {candidateId:string;revision:number;reviewer:string;summary:string;decision:string;recordedAt:string;reviewHash:string;manifestHash:string;archiveSha256:string;checks:{criterionId:string;outcome:ManualOutcome;evidenceNote:string}[]}
+export interface CandidateReview {candidateId:string;manifestHash:string;archiveSha256:string;revision:number;decision:string;checks:ManualCriterion[];coverage:{total:number;passed:number;failed:number;untested:number;allPassed:boolean;requirements:{id:string;description:string;status:string}[]};engineScope:string;gate:{candidateCurrent:boolean;filesVerified:boolean;humanAccepted:boolean;eligibleForDelivery:boolean;reason:string};latestReview?:CandidateReviewRecord}
+export interface CandidateReviewInput {expectedRevision:number;manifestHash:string;reviewer:string;summary:string;decision:"DRAFT"|"ACCEPTED"|"REJECTED";checks:{criterionId:string;outcome:ManualOutcome;evidenceNote:string}[]}
 export interface ProductionIteration {phase:string;reason:string;repairCount:number;repairLimit:number;currentRunId:string;currentDecision?:string;currentStatus?:string;currentWorkspace?:string;attempts:{proposalId:string;status:string;baseRunId:string;validationRunId?:string}[]}
 export interface ProductionJob {id:string;taskId:number;specId:string;specRevision:number;specHash:string;status:string;localRunId?:string;validationRunId?:string;validationStatus?:string;validationDecision?:string;iteration?:ProductionIteration;budget?:BuilderBudget;error?:string;result?:{workspace:string;build:{buildId:string;files:Record<string,string>}}}
 
@@ -59,6 +64,11 @@ export interface QaFindingFilter {
 }
 
 export const api = {
+  candidateReview:(id:string)=>unwrap<CandidateReview>(fetch(`${BASE}/production-candidates/${encodeURIComponent(id)}/review`)),
+  saveCandidateReview:(id:string,body:CandidateReviewInput)=>unwrap<CandidateReview>(fetch(`${BASE}/production-candidates/${encodeURIComponent(id)}/review`,{method:"POST",headers:{"Content-Type":"application/json","X-AGL-Local-Test":"1"},body:JSON.stringify(body)})),
+  candidateReviewHistory:(id:string,beforeRevision?:number)=>unwrap<CandidateReviewRecord[]>(fetch(`${BASE}/production-candidates/${encodeURIComponent(id)}/review/history${beforeRevision?`?beforeRevision=${beforeRevision}`:""}`)),
+  downloadReviewReceipt:async(id:string)=>{const response=await fetch(`${BASE}/production-candidates/${encodeURIComponent(id)}/review/receipt`,{headers:{"X-AGL-Local-Test":"1"}});if(!response.ok)throw new Error(`评审回执下载失败：HTTP ${response.status}`);return response.blob();},
+
   productionCandidates:(id:string)=>unwrap<ProductionCandidate[]>(fetch(`${BASE}/productions/${encodeURIComponent(id)}/candidates`)),
   packageCandidate:(id:string,validationRunId:string)=>unwrap<ProductionCandidate>(fetch(`${BASE}/productions/${encodeURIComponent(id)}/candidates`,{method:"POST",headers:{"Content-Type":"application/json","X-AGL-Local-Test":"1"},body:JSON.stringify({validationRunId})})),
   startCandidatePreview:(id:string)=>unwrap<CandidatePreview>(fetch(`${BASE}/production-candidates/${encodeURIComponent(id)}/preview`,{method:"POST",headers:{"X-AGL-Local-Test":"1"}})),
