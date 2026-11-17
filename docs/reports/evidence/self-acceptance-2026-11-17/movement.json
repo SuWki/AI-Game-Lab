@@ -1,0 +1,9 @@
+{
+  "result": "PASS",
+  "candidateId": "ad7d0d22-f638-3e0b-a97a-aae74106afa3",
+  "input": "D held 250 ms",
+  "measurement": "Canvas player pixels RGB(125,211,252) centroid",
+  "beforeX": 399.4793187347932,
+  "afterX": 455.5325301204819,
+  "deltaX": 56.05321138568871
+}

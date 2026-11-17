@@ -1,0 +1,68 @@
+{
+  "result": "PASS",
+  "scope": "Twelve routes load with actual isolated-backend reads; no assertion about model-backed business outcomes",
+  "pages": [
+    {
+      "path": "/",
+      "heading": "AI Game Lab · Dashboard",
+      "alerts": []
+    },
+    {
+      "path": "/findings",
+      "heading": "Findings",
+      "alerts": []
+    },
+    {
+      "path": "/test-plans",
+      "heading": "请从左侧导航选择一个 Test Plan，或通过 Finding 详情中的链接跳转。",
+      "alerts": []
+    },
+    {
+      "path": "/experiments",
+      "heading": "Experiment Center",
+      "alerts": []
+    },
+    {
+      "path": "/runs",
+      "heading": "AI Game Lab · Run Trace",
+      "alerts": []
+    },
+    {
+      "path": "/config-diff",
+      "heading": "AI Game Lab · Config & Diff",
+      "alerts": []
+    },
+    {
+      "path": "/regression",
+      "heading": "版本间 Finding 回归对比",
+      "alerts": []
+    },
+    {
+      "path": "/research",
+      "heading": "Research",
+      "alerts": []
+    },
+    {
+      "path": "/workflow",
+      "heading": "Workflow",
+      "alerts": []
+    },
+    {
+      "path": "/local-tests",
+      "heading": "本地游戏测试",
+      "alerts": []
+    },
+    {
+      "path": "/local-tests/changes",
+      "heading": "修改提案与回归",
+      "alerts": []
+    },
+    {
+      "path": "/productions",
+      "heading": "游戏生产",
+      "alerts": []
+    }
+  ],
+  "errors": [],
+  "serverFailures": []
+}

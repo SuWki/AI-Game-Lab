@@ -1,0 +1,240 @@
+{
+  "commit": "18d2d36a5a4529503e2e9bb75056ac718bc13038",
+  "taskId": 1,
+  "productionId": "f34ccc21-d16d-471a-a737-d8a27d05c457",
+  "candidateId": "ad7d0d22-f638-3e0b-a97a-aae74106afa3",
+  "successorId": "063da5e5-da6c-3f21-bfb5-fabc3da362db",
+  "archiveSha256": "392c569e7218b8ddebab51037f19c55afbbb0360d6f01b1dfd9ae63df4efe647",
+  "finalOriginalGate": {
+    "candidateCurrent": false,
+    "filesVerified": true,
+    "eligibleForDelivery": false,
+    "humanAccepted": true,
+    "reason": "Candidate is historical or production has unresolved work"
+  },
+  "finalSuccessorReview": {
+    "candidateId": "063da5e5-da6c-3f21-bfb5-fabc3da362db",
+    "manifestHash": "a3e540f6f62ca220c54e28da79ea5f21e55bb19f59e1b4188d2192d6f7cd047b",
+    "archiveSha256": "fd98dec9338c85a8c0410119ddcc79933a154d8e7a640aad1ed8a2e52188a2b2",
+    "revision": 1,
+    "decision": "DRAFT",
+    "checks": [
+      {
+        "criterionId": "A1",
+        "requirementId": "R1",
+        "expected": "Restart enters active play and the first HUD shows health 100",
+        "method": "browser",
+        "evidenceKind": "HUMAN_OBSERVATION",
+        "outcome": "NOT_TESTED",
+        "evidenceNote": ""
+      },
+      {
+        "criterionId": "A2",
+        "requirementId": "R1",
+        "expected": "First restart HUD shows score 0 and time 0.0",
+        "method": "browser",
+        "evidenceKind": "HUMAN_OBSERVATION",
+        "outcome": "NOT_TESTED",
+        "evidenceNote": ""
+      },
+      {
+        "criterionId": "A3",
+        "requirementId": "R2",
+        "expected": "Start, accept movement input and reach a natural victory or defeat within the six-second configured round",
+        "method": "browser",
+        "evidenceKind": "HUMAN_OBSERVATION",
+        "outcome": "NOT_TESTED",
+        "evidenceNote": ""
+      }
+    ],
+    "coverage": {
+      "total": 3,
+      "passed": 0,
+      "failed": 0,
+      "untested": 3,
+      "fullyTested": false,
+      "allPassed": false,
+      "requirements": [
+        {
+          "id": "R1",
+          "description": "Restart visible state",
+          "status": "NOT_TESTED",
+          "acceptanceIds": [
+            "A1",
+            "A2"
+          ]
+        },
+        {
+          "id": "R2",
+          "description": "Bounded playable round",
+          "status": "NOT_TESTED",
+          "acceptanceIds": [
+            "A3"
+          ]
+        }
+      ]
+    },
+    "engineChecks": [
+      {
+        "id": "initial-and-restart",
+        "status": "PASS",
+        "expected": "Fresh rounds reset health, score, clock and resources",
+        "actual": "Assertions passed"
+      },
+      {
+        "id": "movement",
+        "status": "PASS",
+        "expected": "Directional movement stays in the arena",
+        "actual": "Assertions passed"
+      },
+      {
+        "id": "deterministic-replay",
+        "status": "PASS",
+        "expected": "Identical seeds and actions reproduce state",
+        "actual": "Assertions passed"
+      },
+      {
+        "id": "settlement",
+        "status": "PASS",
+        "expected": "Round terminates consistently and terminal state stops advancing",
+        "actual": "Assertions passed"
+      },
+      {
+        "id": "damage-and-protection",
+        "status": "PASS",
+        "expected": "Contact damage can defeat player; shield blocks it",
+        "actual": "Assertions passed"
+      },
+      {
+        "id": "resource-mechanic",
+        "status": "PASS",
+        "expected": "Configured resource mechanic has its declared effect",
+        "actual": "Assertions passed"
+      }
+    ],
+    "engineScope": "survival-web-engine-v1",
+    "latestReview": {
+      "reviewer": "AI race fixture",
+      "summary": "Concurrent writer one",
+      "decision": "DRAFT",
+      "checks": [
+        {
+          "criterionId": "A1",
+          "outcome": "NOT_TESTED",
+          "evidenceNote": ""
+        },
+        {
+          "criterionId": "A2",
+          "outcome": "NOT_TESTED",
+          "evidenceNote": ""
+        },
+        {
+          "criterionId": "A3",
+          "outcome": "NOT_TESTED",
+          "evidenceNote": ""
+        }
+      ],
+      "candidateId": "063da5e5-da6c-3f21-bfb5-fabc3da362db",
+      "manifestHash": "a3e540f6f62ca220c54e28da79ea5f21e55bb19f59e1b4188d2192d6f7cd047b",
+      "archiveSha256": "fd98dec9338c85a8c0410119ddcc79933a154d8e7a640aad1ed8a2e52188a2b2",
+      "revision": 1,
+      "baseRevision": 0,
+      "inputHash": "3d37f80d1adc63afa9c91b584ca8844e08e3418f7a82e5f2048ca3f8d91c8934",
+      "recordedAt": "2026-11-17T07:05:05.555727400Z",
+      "evidenceKind": "HUMAN_OBSERVATION",
+      "reviewHash": "7cc3894a0e6d360689ac08dc08c223076729d581803dcc2f6e94567242577960"
+    },
+    "gate": {
+      "candidateCurrent": true,
+      "filesVerified": true,
+      "eligibleForDelivery": false,
+      "humanAccepted": false,
+      "reason": "Explicit human acceptance is missing or has been revised"
+    }
+  },
+  "browserObservations": {
+    "settlement": "胜利！存活目标达成",
+    "restart": {
+      "hud": "生命 100 · 热量 6 · 得分 0 · 时间 0.0 / 6 秒",
+      "status": "进行中"
+    }
+  },
+  "results": [
+    {
+      "name": "Fresh task, pinned specification, build and independent engine verification",
+      "result": "PASS",
+      "detail": {
+        "taskId": 1,
+        "productionId": "f34ccc21-d16d-471a-a737-d8a27d05c457",
+        "engineChecks": 6
+      }
+    },
+    {
+      "name": "UI packaging and initial complete untested coverage",
+      "result": "PASS",
+      "detail": {
+        "candidateId": "ad7d0d22-f638-3e0b-a97a-aae74106afa3",
+        "criteria": 3
+      }
+    },
+    {
+      "name": "Actual fixed preview input, natural settlement and first restart HUD",
+      "result": "PASS",
+      "detail": {
+        "settlement": "胜利！存活目标达成",
+        "restart": {
+          "hud": "生命 100 · 热量 6 · 得分 0 · 时间 0.0 / 6 秒",
+          "status": "进行中"
+        }
+      }
+    },
+    {
+      "name": "Partial requirement coverage and incomplete acceptance disabled",
+      "result": "PASS"
+    },
+    {
+      "name": "Observed complete coverage and explicit acceptance open the gate",
+      "result": "PASS",
+      "detail": {
+        "revision": 2
+      }
+    },
+    {
+      "name": "Actual receipt download, fixed hash binding and exact retry idempotency",
+      "result": "PASS"
+    },
+    {
+      "name": "Two real pages: conflicting revision rejected, edits preserved, explicit reload and revocation",
+      "result": "PASS"
+    },
+    {
+      "name": "Pending work closes gate, server refuses acceptance, rejection restores prior valid decision",
+      "result": "PASS"
+    },
+    {
+      "name": "Successor candidate invalidates historical acceptance and does not inherit review",
+      "result": "PASS",
+      "detail": {
+        "successorId": "063da5e5-da6c-3f21-bfb5-fabc3da362db"
+      }
+    },
+    {
+      "name": "Local marker, invalid cursor, manifest drift, missing criteria and historical pagination",
+      "result": "PASS"
+    },
+    {
+      "name": "Changed archive blocks review/receipt/download and restored archive retains original bytes",
+      "result": "PASS"
+    },
+    {
+      "name": "Concurrent HTTP submissions produce exactly one durable revision",
+      "result": "PASS"
+    },
+    {
+      "name": "No browser JavaScript errors",
+      "result": "PASS",
+      "detail": []
+    }
+  ],
+  "scope": "Platform bounded acceptance; no real LLM or complete game-quality claim"
+}

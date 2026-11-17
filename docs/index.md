@@ -1,5 +1,7 @@
 # AI Game Lab 文档索引
 
+最新入口：[规格编辑与版本保存](reports/SPECIFICATION_EDITOR_2026-11-17.md)。
+
 最新交付：[人工评审与规格覆盖](platform/CANDIDATE_HUMAN_REVIEW.md) · [第四批交付报告](reports/CANDIDATE_HUMAN_REVIEW_2026-11-17.md)。
 
 上一批：[固定候选与预览](platform/PRODUCTION_CANDIDATES.md) · [2026-11-17 第三批报告](reports/PRODUCTION_CANDIDATES_2026-11-17.md)。

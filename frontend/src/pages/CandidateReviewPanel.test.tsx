@@ -21,3 +21,7 @@ it("records rejection without inventing passing observations",async()=>{
 it("blocks acceptance of historical candidates even when draft checks pass",async()=>{
  vi.mocked(api.candidateReview).mockResolvedValue({...reviewFixture(),gate:{...reviewFixture().gate,candidateCurrent:false}});show();await fill();fireEvent.change(screen.getByLabelText("验收 A1 结论"),{target:{value:"PASS"}});fireEvent.change(screen.getByLabelText("验收 A1 观察说明"),{target:{value:"Old build observed"}});expect(screen.getByRole("button",{name:"接受此固定候选"})).toBeDisabled();expect(screen.getByRole("button",{name:"拒绝此固定候选"})).toBeEnabled();
 });
+it.each(["Fixed candidate archive changed","Network unavailable"])("withdraws cached eligibility when revalidation fails: %s",async(message)=>{
+ vi.mocked(api.candidateReview).mockResolvedValue({...reviewFixture(),decision:"ACCEPTED",gate:{...reviewFixture().gate,eligibleForDelivery:true}});show();await screen.findByText("门禁查询：此版本可交付");vi.mocked(api.candidateReview).mockRejectedValue(new Error(message));fireEvent.click(screen.getByRole("button",{name:"重新载入最新评审"}));expect(await screen.findByRole("alert")).toHaveTextContent(message);expect(screen.queryByText("门禁查询：此版本可交付")).not.toBeInTheDocument();expect(screen.getByText("门禁查询：当前状态未确认，请重新校验")).toBeInTheDocument();
+ vi.mocked(api.candidateReview).mockResolvedValue({...reviewFixture(),gate:{...reviewFixture().gate,eligibleForDelivery:false}});fireEvent.click(screen.getByRole("button",{name:"重新载入最新评审"}));expect(await screen.findByText("门禁查询：此版本尚不可交付")).toBeInTheDocument();
+});

@@ -1,0 +1,15 @@
+{
+  "result": "PASS",
+  "taskId": 2,
+  "specId": "e9e26543-9909-44e1-97f4-ac6b413da170",
+  "briefHash": "a0aa94de8af6059fb14ff97456ae442ae0eacf232170dcc521577fe523d801e6",
+  "pinnedInput": true,
+  "criteria": 2,
+  "originalSpecUnchanged": true,
+  "productionId": "e827b986-4be2-4607-b153-34155a171958",
+  "productionSpecRevision": 1,
+  "latestEditorRevision": 2,
+  "originalProductionUnchanged": true,
+  "errors": [],
+  "scope": "Real frontend and isolated backend; task prepared by API, specs created/revised and production started through UI. No LLM or gameplay-quality claim."
+}

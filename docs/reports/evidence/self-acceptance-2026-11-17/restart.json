@@ -1,0 +1,22 @@
+{
+  "result": "PASS",
+  "candidateIds": [
+    "ad7d0d22-f638-3e0b-a97a-aae74106afa3",
+    "063da5e5-da6c-3f21-bfb5-fabc3da362db"
+  ],
+  "historyRevisions": [
+    [
+      4,
+      3,
+      2,
+      1
+    ],
+    [
+      1
+    ]
+  ],
+  "sameView": true,
+  "sameHistory": true,
+  "sameReceipts": true,
+  "sameZip": true
+}
