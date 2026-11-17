@@ -13,3 +13,5 @@ ZIP 仅导出固定清单，排除 .env、依赖缓存、日志、任意未声�
 验收范围仍为 survival-web-engine-v1 六项检查，不把自然语言 GameSpec、浏览器质量、素材许可或人类接受自动判定为完成。已知问题说明必须随包交付。包内提供零依赖 Node 预览脚本，便于在干净目录解压后运行固定 build；源码可用自带构建脚本重新构建，构建 ID 可变化、文件内容哈希应一致。
 
 Builder 新 Run 可用 candidate_package，绑定自身生产与明确的验收执行；只保存本地候选，不增加审批/发布工具。Prompt 采用 builder_p003，保留旧冻结 Run。全平台 41 工具、16 Prompt。
+
+2026-11-17 后续：[人工评审与规格覆盖](CANDIDATE_HUMAN_REVIEW.md) 新增独立评审表，共 26 表。ZIP 内 humanAccepted=false 是打包时快照，当前意见与门禁须查询 review 接口，不能从 ZIP 推断最新接受状态。评审不修改既有 ZIP、manifest 或引擎证据。

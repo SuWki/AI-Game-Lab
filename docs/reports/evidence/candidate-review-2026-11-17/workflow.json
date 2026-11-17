@@ -1,0 +1,22 @@
+{
+  "candidateId": "697cc7d6-236b-36c8-b432-1477156cce1d",
+  "archiveSha256": "f7840259a3704ae68afeaa40f449a51ffbad1ee7c8652d71ee80010eeadb7ae8",
+  "manualCriteria": [
+    "A1"
+  ],
+  "browserRestartObserved": true,
+  "restartHud": "生命 100 · 热量 6 · 得分 0 · 时间 0.0 / 20 秒",
+  "observedMismatch": "A1 expects initial heat reset; first rendered restart frame has heat 6",
+  "reviewFlow": [
+    "UNREVIEWED",
+    "DRAFT r1 FAIL",
+    "REJECTED r2 FAIL"
+  ],
+  "receiptBound": true,
+  "zipUnchanged": true,
+  "finalGate": false,
+  "errors": [],
+  "fixtureOnly": true,
+  "restartVerified": true,
+  "receiptByteIdenticalAfterRestart": true
+}

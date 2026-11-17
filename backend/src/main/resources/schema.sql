@@ -335,6 +335,13 @@ CREATE TABLE IF NOT EXISTS production_candidate (
     UNIQUE(production_id, validation_run_id)
 );
 
+CREATE TABLE IF NOT EXISTS candidate_review (
+    candidate_id TEXT NOT NULL REFERENCES production_candidate(id),
+    revision INTEGER NOT NULL,
+    record_json TEXT NOT NULL,
+    PRIMARY KEY(candidate_id, revision)
+);
+
 CREATE TABLE IF NOT EXISTS local_change_proposal (
     id TEXT PRIMARY KEY,
     status TEXT NOT NULL,

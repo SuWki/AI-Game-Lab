@@ -21,6 +21,7 @@ class ProductionJobServiceTest {
  @Autowired com.aigamelab.localtest.LocalEvidenceService evidence;@Autowired com.aigamelab.localtest.LocalChangeService changes;
  @Autowired ControlledExecutor executor;
  @Autowired ProductionCandidateService candidates;
+ @Autowired CandidateReviewService reviews;
  @Autowired org.springframework.context.ApplicationContext application;
  static class ControlledExecutor extends LocalTestService {
   String mode="real";TestRun controlled;boolean cancelled;
@@ -177,6 +178,38 @@ class ProductionJobServiceTest {
  @Test void refusesUnverifiedBuildAndFrozenAcceptanceDrift()throws Exception{
   var built=await(jobs.start(request("package-no-verification")).path("id").asText());assertThatThrownBy(()->candidates.create(built.path("id").asText(),"missing")).hasMessageContaining("current verified");
   var j=verified("package-contract-drift");Files.writeString(Path.of(j.path("jobDirectory").asText()).resolve("acceptance-contract.json"),"{}");assertThatThrownBy(()->candidates.create(j.path("id").asText(),j.path("validationRunId").asText())).hasMessageContaining("Frozen acceptance inputs");
+ }
+ String reviewCandidate(String key)throws Exception{var j=verified(key);return candidates.create(j.path("id").asText(),j.path("validationRunId").asText()).path("id").asText();}
+ CandidateReviewService.Request reviewRequest(String id,int revision,String decision,String outcome,String note){return new CandidateReviewService.Request(revision,candidates.get(id).path("manifestHash").asText(),"Fixture operator","Bound fixed-build observation",decision,List.of(new CandidateReviewService.Check("A1",outcome,note)));}
+ @Test void enginePassDoesNotInventManualSpecificationCoverage()throws Exception{
+  String id=reviewCandidate("manual-unreviewed");var view=reviews.view(id);assertThat(view.path("revision").asInt()).isZero();assertThat(view.path("decision").asText()).isEqualTo("UNREVIEWED");assertThat(view.path("engineChecks").size()).isEqualTo(6);assertThat(view.path("checks").get(0).path("expected").asText()).isEqualTo("reset");assertThat(view.path("coverage").path("untested").asInt()).isEqualTo(1);assertThat(view.path("coverage").path("requirements").get(0).path("status").asText()).isEqualTo("NOT_TESTED");assertThat(view.path("gate").path("eligibleForDelivery").asBoolean()).isFalse();assertThatThrownBy(()->reviews.receipt(id)).hasMessageContaining("No manual review");
+ }
+ @Test void manualAcceptanceRequiresCompleteBoundObservedChecks()throws Exception{
+  String id=reviewCandidate("manual-invalid");assertThatThrownBy(()->reviews.save(id,reviewRequest(id,0,"ACCEPTED","NOT_TESTED",""))).hasMessageContaining("every specification");assertThatThrownBy(()->reviews.save(id,reviewRequest(id,0,"ACCEPTED","PASS"," "))).hasMessageContaining("observation");
+  var valid=reviewRequest(id,0,"ACCEPTED","PASS","Reset observed");assertThatThrownBy(()->reviews.save(id,new CandidateReviewService.Request(0,"wrong",valid.reviewer(),valid.summary(),valid.decision(),valid.checks()))).hasMessageContaining("precondition");
+  assertThatThrownBy(()->reviews.save(id,new CandidateReviewService.Request(0,valid.manifestHash(),valid.reviewer(),valid.summary(),"DRAFT",List.of(new CandidateReviewService.Check("other","PASS","Observed"))))).hasMessageContaining("missing");
+  assertThatThrownBy(()->reviews.save(id,new CandidateReviewService.Request(0,valid.manifestHash(),valid.reviewer(),valid.summary(),"DRAFT",List.of()))).hasMessageContaining("All fixed");assertThat(reviews.history(id)).isEmpty();
+ }
+ @Test void acceptanceIsIdempotentAndDoesNotRewriteArchiveOrManifest()throws Exception{
+  String id=reviewCandidate("manual-accepted");byte[] archive=candidates.download(id);var candidate=candidates.get(id).deepCopy();var request=reviewRequest(id,0,"ACCEPTED","PASS","Started fixed build, restarted, observed reset");var saved=reviews.save(id,request);
+  assertThat(saved.path("gate").path("eligibleForDelivery").asBoolean()).isTrue();assertThat(saved.path("coverage").path("requirements").get(0).path("status").asText()).isEqualTo("PASS");assertThat(reviews.save(id,request).path("revision").asInt()).isEqualTo(1);assertThat(reviews.save(id,reviewRequest(id,1,"ACCEPTED","PASS",request.checks().get(0).evidenceNote())).path("revision").asInt()).isEqualTo(1);
+  var receipt=(com.fasterxml.jackson.databind.node.ObjectNode)mapper.readTree(reviews.receipt(id));assertThat(receipt.path("candidateId").asText()).isEqualTo(id);assertThat(receipt.path("archiveSha256")).isEqualTo(candidate.path("archiveSha256"));String hash=receipt.remove("reviewHash").asText();assertThat(ProductionCandidateService.hash(receipt.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8))).isEqualTo(hash);assertThat(candidates.download(id)).isEqualTo(archive);assertThat(candidates.get(id)).isEqualTo(candidate);assertThat(candidate.path("manifest").path("humanAccepted").asBoolean()).isFalse();assertThat(reviews.history(id)).hasSize(1);
+ }
+ @Test void revisionsPreserveHistoryCloseGateAndSurviveRestart()throws Exception{
+  String id=reviewCandidate("manual-history");reviews.save(id,reviewRequest(id,0,"ACCEPTED","PASS","Reset observed"));var first=reviews.history(id).get(0).deepCopy();reviews.save(id,reviewRequest(id,1,"REJECTED","FAIL","Reset failed on another observation"));assertThat(reviews.view(id).path("gate").path("eligibleForDelivery").asBoolean()).isFalse();
+  assertThat(reviews.history(id)).hasSize(2);assertThat(reviews.history(id,2)).containsExactly(first);assertThatThrownBy(()->reviews.save(id,reviewRequest(id,1,"DRAFT","NOT_TESTED",""))).hasMessageContaining("changed");reviews.save(id,reviewRequest(id,2,"DRAFT","NOT_TESTED",""));assertThat(reviews.view(id).path("gate").path("humanAccepted").asBoolean()).isFalse();
+  var restored=new CandidateReviewService(candidates,jobs,mapper,db,application.getBean(org.springframework.transaction.PlatformTransactionManager.class));assertThat(restored.view(id)).isEqualTo(reviews.view(id));assertThat(restored.receipt(id)).isEqualTo(reviews.receipt(id));assertThat(restored.history(id)).hasSize(3);assertThatThrownBy(()->reviews.history(id,0)).hasMessageContaining("cursor");
+ }
+ @Test void pendingWorkAndNewCandidateInvalidateEarlierAcceptance()throws Exception{
+  String id=reviewCandidate("manual-current");var c=candidates.get(id);reviews.save(id,reviewRequest(id,0,"ACCEPTED","PASS","Reset observed"));String base=c.path("validationRunId").asText();var source=evidence.source(base,"engine.mjs");var p=changes.create(base,"Next version",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText()+"\n// reviewed successor")));
+  assertThat(reviews.view(id).path("gate").path("eligibleForDelivery").asBoolean()).isFalse();assertThatThrownBy(()->reviews.save(id,reviewRequest(id,1,"ACCEPTED","PASS","Repeated observation"))).hasMessageContaining("current REVIEW");var approved=changes.approve(p.id());awaitExecution(approved.validationRunId());candidates.create(c.path("productionId").asText(),approved.validationRunId());assertThat(reviews.view(id).path("gate").path("candidateCurrent").asBoolean()).isFalse();assertThat(reviews.history(id)).hasSize(1);
+ }
+ @Test void corruptPackageCannotBeReviewedOrExportAReceipt()throws Exception{
+  String id=reviewCandidate("manual-corrupt");var request=reviewRequest(id,0,"DRAFT","NOT_TESTED","");reviews.save(id,request);Files.writeString(ROOT.resolve("candidates").resolve(id+".zip"),"changed");assertThatThrownBy(()->reviews.view(id)).hasMessageContaining("archive changed");assertThatThrownBy(()->reviews.save(id,request)).hasMessageContaining("archive changed");assertThatThrownBy(()->reviews.receipt(id)).hasMessageContaining("archive changed");assertThat(reviews.history(id)).hasSize(1);
+ }
+ @Test void competingReviewRevisionsHaveOneWinnerWithoutDeadlock()throws Exception{
+  String id=reviewCandidate("manual-concurrent");var workers=java.util.concurrent.Executors.newFixedThreadPool(2);var start=new java.util.concurrent.CountDownLatch(1);
+  try{java.util.concurrent.Callable<Boolean> submit=()->{start.await();try{reviews.save(id,reviewRequest(id,0,"DRAFT","NOT_TESTED",Thread.currentThread().getName()));return true;}catch(com.aigamelab.common.BusinessException expected){return false;}};var a=workers.submit(submit);var b=workers.submit(submit);start.countDown();assertThat(List.of(a.get(15,java.util.concurrent.TimeUnit.SECONDS),b.get(15,java.util.concurrent.TimeUnit.SECONDS))).containsExactlyInAnyOrder(true,false);assertThat(reviews.history(id)).hasSize(1);}finally{workers.shutdownNow();}
  }
  @Test void rejectsCrossTaskSpecificationBeforeStarting(){assertThatThrownBy(()->jobs.start(new ProductionJobService.Request(task+1000,spec.path("artifactId").asText(),1,"cross"))).hasMessageContaining("does not belong");}
  @Test void invalidTemplateParametersFailWithSpecificEvidence()throws Exception{

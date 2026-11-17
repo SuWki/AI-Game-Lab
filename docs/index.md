@@ -1,6 +1,8 @@
 # AI Game Lab 文档索引
 
-最新交付：[固定候选与预览](platform/PRODUCTION_CANDIDATES.md) · [2026-11-17 第三批报告](reports/PRODUCTION_CANDIDATES_2026-11-17.md)。
+最新交付：[人工评审与规格覆盖](platform/CANDIDATE_HUMAN_REVIEW.md) · [第四批交付报告](reports/CANDIDATE_HUMAN_REVIEW_2026-11-17.md)。
+
+上一批：[固定候选与预览](platform/PRODUCTION_CANDIDATES.md) · [2026-11-17 第三批报告](reports/PRODUCTION_CANDIDATES_2026-11-17.md)。
 
 最新 Builder 增量：[跨 Run 会话与累计预算](platform/BUILDER_SESSIONS.md) · [2026-11-17 第二批交付](reports/BUILDER_SESSIONS_2026-11-17.md)。
 
