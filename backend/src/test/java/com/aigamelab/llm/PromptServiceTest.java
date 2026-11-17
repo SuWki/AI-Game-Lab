@@ -64,7 +64,7 @@ class PromptServiceTest {
         assertThat(active.systemPrompt()).contains("AI Game Designer");
         assertThat(active.systemPrompt()).contains("simulate_game");
         assertThat(activeCount()).isEqualTo(1); // 恰一条 active
-        assertThat(count()).isEqualTo(15); // 5 原有 + QA Phase 2 8 个角色 prompt（R5 §8.2）
+        assertThat(count()).isEqualTo(16); // 5 原有 + QA Phase 2 8 个角色 prompt（R5 §8.2）
 
         // ---- 第二次"启动"：独立 context 复用同一 DB → 不重复导入 ----
         SpringApplication app = new SpringApplication(com.aigamelab.Application.class);
@@ -76,7 +76,7 @@ class PromptServiceTest {
             var active2 = svc2.getActive();
             assertThat(active2.version()).isEqualTo("p001");
             assertThat(activeCount()).isEqualTo(1); // 不重复导入、active 不变量保持
-            assertThat(count()).isEqualTo(15);        // 5 原有 + QA Phase 2 8 角色 prompt（R5 §8.2）
+            assertThat(count()).isEqualTo(16);        // 5 原有 + QA Phase 2 8 角色 prompt（R5 §8.2）
         }
     }
 

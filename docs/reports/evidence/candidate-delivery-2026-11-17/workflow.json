@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "productionId": "5f6192eb-7c30-4f7d-ab2c-d85d4cd7bd88",
+  "candidateId": "697cc7d6-236b-36c8-b432-1477156cce1d",
+  "validationRunId": "8cdd8486-baef-40b9-a103-e357f7cd7a7d",
+  "originalValidationRunId": "33a630f2-aa26-4ecc-a503-b039af9dbb57",
+  "manifestHash": "7eadad542efc7afbfa3f25b9abcdc4ac1ce0cf353fe4bc35644afd812414b29f",
+  "archiveSha256": "f7840259a3704ae68afeaa40f449a51ffbad1ee7c8652d71ee80010eeadb7ae8",
+  "archiveBytes": 22690,
+  "entries": 25,
+  "allPayloadHashesMatched": true,
+  "approvedSourceAndBuildMatched": true,
+  "cleanSourceRebuildMatched": true,
+  "postFreezeOriginalMutationIgnored": true,
+  "managedPreview": {
+    "load": true,
+    "input": true,
+    "naturalSettlement": true,
+    "restart": true,
+    "opaqueOrigin": true,
+    "externalApiBlocked": true,
+    "errors": []
+  },
+  "previewStopped": true,
+  "unguessedPathRejected": true,
+  "portablePreview": {
+    "load": true,
+    "input": true,
+    "naturalSettlement": true,
+    "restart": true,
+    "opaqueOrigin": true,
+    "externalApiBlocked": true,
+    "errors": []
+  },
+  "humanAccepted": false
+}

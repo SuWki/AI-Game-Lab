@@ -10,7 +10,7 @@ const modules=[
   {id:"tester",name:"Tester",label:"测试与证据",summary:"让每个问题都能追溯到被测版本。",features:["本地命令执行、源码与产物指纹","Test Plan、Finding 与隔离回归"],boundary:"通用目标仍需配置对应的可信测试程序。",document:"docs/projects/02_AI_Game_Tester/README.md"},
   {id:"research",name:"Research",label:"资料研究",summary:"将外部资料整理成有来源的设计输入。",features:["搜索、页面抓取与来源记录","Claim、研究报告与设计交接"],boundary:"在线搜索与模型调用需要在本地配置服务。",document:"docs/projects/03_AI_Research_Agent/README.md"},
   {id:"qa",name:"QA Team",label:"质量评估",summary:"汇总不同角色的观察，保留裁决依据。",features:["QA_LEAD 与角色任务编排","Finding 过滤与 Release Gate"],boundary:"自动建议和人类最终接受是两个不同状态。",document:"docs/projects/04_AI_Game_Agent_Team/README.md"},
-  {id:"builder",name:"Builder",label:"游戏生产",summary:"从固定规格生产，再通过受控提案迭代。",features:["survival-web 模板与两种资源机制","独立引擎验收、审批和隔离源码回归"],boundary:"完整修复预算、规格验收和候选打包仍在开发。",document:"docs/projects/05_AI_Auto_Game_Developer/README.md"},
+  {id:"builder",name:"Builder",label:"游戏生产",summary:"从固定规格生产，再通过受控提案迭代。",features:["survival-web 模板与两种资源机制","独立引擎验收、审批和隔离源码回归","会话预算、固定候选 ZIP 与限时预览"],boundary:"完整规格验收、人类质量接受和正式发布流程仍在开发。",document:"docs/projects/05_AI_Auto_Game_Developer/README.md"},
 ];
 function selectedFromHash(){return modules.some(m=>"#"+m.id===window.location.hash)?window.location.hash.slice(1):"builder";}
 

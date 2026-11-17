@@ -13,6 +13,7 @@ public class ProductionTools {
     @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.localtest.LocalEvidenceService evidence;
     @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.localtest.LocalChangeService changes;
     @org.springframework.beans.factory.annotation.Autowired private BuilderSessionService sessions;
+    @org.springframework.beans.factory.annotation.Autowired private ProductionCandidateService candidates;
     public ProductionTools(ProductionJobService jobs,ProductionArtifactService artifacts,RuntimeConversation conversation,RunRepository runs,ObjectMapper mapper){this.jobs=jobs;this.artifacts=artifacts;this.conversation=conversation;this.runs=runs;this.mapper=mapper;}
     private JsonNode scope(ToolContext ctx){
         if(ctx.runId()==null)throw new ToolException("Builder Run required");var s=conversation.context(ctx.runId());
@@ -76,4 +77,8 @@ public class ProductionTools {
             var edits=mapper.convertValue(a.path("edits"),new com.fasterxml.jackson.core.type.TypeReference<List<com.aigamelab.localtest.LocalChangeService.Edit>>(){});var p=changes.create(baseline,a.path("title").asText(),edits);return mapper.createObjectNode().put("localProposalId",p.id()).put("status",p.status());
         });
     }
+    @Bean GameTool candidatePackage(){return tool("candidate_package",productionSchema(Map.of("validationRunId",Map.of("type","string")),List.of("validationRunId")),(a,c)->{
+        String id=a.path("productionId").asText();owned(id,c);if(!active(c,scope(c)))throw new ToolException("Builder cancelled or timed out");var candidate=candidates.create(id,a.path("validationRunId").asText());
+        return mapper.createObjectNode().put("candidateId",candidate.path("id").asText()).put("status",candidate.path("status").asText()).put("manifestHash",candidate.path("manifestHash").asText()).put("archiveSha256",candidate.path("archiveSha256").asText()).put("qualityAccepted",false).put("published",false);
+    });}
 }

@@ -1,5 +1,7 @@
 # Builder 的共享 Runtime 接入
 
+2026-11-17 第三批：[固定候选](PRODUCTION_CANDIDATES.md) 增加 candidate_package，BUILDER 新 Run 为七工具/p003，全平台 41 工具/16 Prompt。旧冻结 Run/Prompt 保留；此工具不公开发布或写人类接受。
+
 2026-11-17 更新：[会话与累计预算](BUILDER_SESSIONS.md) 将同一 Builder Task 的各 Run 串联，重试沿用生产、当前候选、五次提案及累计消耗；Run Trace/生产页显示预算。拥有者仅在受检接管时转移，任意其他任务不可读取。仍为六工具和唯一 AgentLoop。
 
 2026-11-13。BUILDER 是第 9 个 AgentType，使用 builder_p001 版本化 Prompt 和唯一 AgentLoop，不新增执行服务。当前只支持受控模板生产与证据查询，没有任意代码写入、审批、合并或发布工具。
