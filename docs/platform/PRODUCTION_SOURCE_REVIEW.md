@@ -2,6 +2,8 @@
 
 2026-11-16。本轮为 VAL-01 与 Builder 受控修改的可用切片，复用现有生产任务、本地执行器、源码版本、审批及隔离回归，不增加业务表（仍 23 表）。
 
+2026-11-17：[生产修复链](PRODUCTION_ITERATIONS.md) 补充当前候选和五次提案限制。后续源码读取/提案跟随 iteration.currentRunId，原 validationRunId 仍是初始验收，不将它静默替换。Builder 的验证观察返回当前候选的执行与检查。
+
 ## 用户流程
 
 生产完成后在 `/productions` 点击“执行独立验收”，或 POST `/api/productions/{id}/validate`。修改请求沿用本机来源与 `X-AGL-Local-Test: 1`。首次提交固定验收契约并启动受管执行；重复提交返回同一验收执行，不重复或重置基线。可通过现有取消生产接口取消进行中的验证。

@@ -21,6 +21,7 @@ public class ProductionJobService {
     private final Path repo,root;private final String node;
     @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.repository.TaskRepository tasks;
     @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<com.aigamelab.localtest.LocalEvidenceService> evidence;
+    @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<ProductionIterationService> iterations;
     private static final List<String> PROTECTED=List.of("config.json","production-manifest.json","specification.json","build-project.mjs","serve-project.mjs");
     public record Request(long taskId,String specId,int specRevision,String requestKey){}
     public ProductionJobService(JdbcTemplate db,ObjectMapper mapper,ProductionArtifactService artifacts,LocalTestService executor,
@@ -65,11 +66,13 @@ public class ProductionJobService {
             job.put("status",state);if(run.error()!=null)job.put("error",run.error());save(job);
         }
         if(job.hasNonNull("validationRunId")){var validation=executor.get(job.path("validationRunId").asText());job.put("validationStatus",validation.status());if(!Set.of("QUEUED","RUNNING").contains(validation.status())){job.put("validationDecision",evidence.getObject().assessment(validation).path("decision").asText());if(validation.evidence()!=null){job.set("validationChecks",validation.evidence().path("checks"));job.put("validationScope",validation.evidence().path("scope").asText());}}save(job);}
+        if(iterations!=null)job.set("iteration",iterations.getObject().snapshot(job));
         return job;
     }
-    public synchronized JsonNode cancel(String id){var job=require(id);if(!job.path("localRunId").isNull()&&!job.path("localRunId").isMissingNode())executor.cancel(job.path("localRunId").asText());if(job.hasNonNull("validationRunId"))executor.cancel(job.path("validationRunId").asText());return get(id);}
+    public synchronized JsonNode cancel(String id){var job=require(id);iterations.getObject().cancel(id);if(!job.path("localRunId").isNull()&&!job.path("localRunId").isMissingNode())executor.cancel(job.path("localRunId").asText());if(job.hasNonNull("validationRunId"))executor.cancel(job.path("validationRunId").asText());return get(id);}
     public synchronized JsonNode validate(String id,Long ownerRunId){
         var job=(ObjectNode)get(id);
+        if(job.path("iterationCancelled").asBoolean())throw BusinessException.conflict("Production cancelled");
         if(ownerRunId!=null&&job.path("ownerRunId").asLong(-1)!=ownerRunId)throw BusinessException.conflict("Production belongs to another Agent Run");
         if(!"BUILT".equals(job.path("status").asText()))throw BusinessException.conflict("A completed production build is required");
         if(job.hasNonNull("validationRunId"))return job;

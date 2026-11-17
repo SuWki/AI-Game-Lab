@@ -1,0 +1,70 @@
+{
+  "status": "PASS",
+  "method": "Actual browser approval and second proposal against failed candidate; controlled movement fault",
+  "productionId": "24f85eb3-7fd9-409c-bf6e-2695495f7748",
+  "baseline": "5e31c569-c8d2-4516-aade-b43d16a79f7a",
+  "iteration": {
+    "repairLimit": 5,
+    "currentRunId": "95afb61b-00ff-4473-80f3-213b6d26d400",
+    "repairCount": 2,
+    "attempts": [
+      {
+        "proposalId": "a6096b5f-4fbd-430d-bd84-ab0a0659ef5c",
+        "status": "REGRESSION_FAILED",
+        "baseRunId": "5e31c569-c8d2-4516-aade-b43d16a79f7a",
+        "validationRunId": "ceeb5c2e-2ded-4066-b3c0-2bb045b6fb7d"
+      },
+      {
+        "proposalId": "1f61c2d6-f833-417b-812c-0e4110b282a1",
+        "status": "VALIDATED",
+        "baseRunId": "ceeb5c2e-2ded-4066-b3c0-2bb045b6fb7d",
+        "validationRunId": "95afb61b-00ff-4473-80f3-213b6d26d400"
+      }
+    ],
+    "currentStatus": "PASSED",
+    "currentDecision": "PASS",
+    "currentWorkspace": "D:\\AI-Game-Designer\\backend\\data\\local-workspaces\\1f61c2d6-f833-417b-812c-0e4110b282a1",
+    "currentChecks": [
+      {
+        "id": "initial-and-restart",
+        "status": "PASS",
+        "expected": "Fresh rounds reset health, score, clock and resources",
+        "actual": "Assertions passed"
+      },
+      {
+        "id": "movement",
+        "status": "PASS",
+        "expected": "Directional movement stays in the arena",
+        "actual": "Assertions passed"
+      },
+      {
+        "id": "deterministic-replay",
+        "status": "PASS",
+        "expected": "Identical seeds and actions reproduce state",
+        "actual": "Assertions passed"
+      },
+      {
+        "id": "settlement",
+        "status": "PASS",
+        "expected": "Round terminates consistently and terminal state stops advancing",
+        "actual": "Assertions passed"
+      },
+      {
+        "id": "damage-and-protection",
+        "status": "PASS",
+        "expected": "Contact damage can defeat player; shield blocks it",
+        "actual": "Assertions passed"
+      },
+      {
+        "id": "resource-mechanic",
+        "status": "PASS",
+        "expected": "Configured resource mechanic has its declared effect",
+        "actual": "Assertions passed"
+      }
+    ],
+    "phase": "REVIEW",
+    "reason": "Engine checks passed; human quality acceptance and delivery remain separate"
+  },
+  "originalPreserved": true,
+  "browserErrors": []
+}

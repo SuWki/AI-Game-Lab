@@ -18,13 +18,15 @@ public class LocalChangeService {
     public record Proposal(String id,String status,String baseRunId,String title,List<Edit> edits,String workspace,String validationRunId,String error) {}
     private final JdbcTemplate db;private final ObjectMapper mapper;private final LocalTestService tests;private final LocalEvidenceService evidence;private final Path workspaceRoot;
     @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<com.aigamelab.runtime.RunControlService> runControl;
+    @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<com.aigamelab.production.ProductionIterationService> iterations;
     public LocalChangeService(JdbcTemplate db,ObjectMapper mapper,LocalTestService tests,LocalEvidenceService evidence,@Value("${local-tests.workspace-root:./data/local-workspaces}")String workspaceRoot) {
         this.db=db;this.mapper=mapper;this.tests=tests;this.evidence=evidence;this.workspaceRoot=Path.of(workspaceRoot);
         for(Proposal p:db.query("SELECT proposal_json FROM local_change_proposal WHERE status='APPLYING'",(rs,n)->read(rs.getString(1))))
             save(new Proposal(p.id(),"INTERRUPTED",p.baseRunId(),p.title(),p.edits(),p.workspace(),p.validationRunId(),"Interrupted while preparing workspace; inspect before creating a new proposal"));
     }
     public List<Proposal> list(){return db.query("SELECT proposal_json FROM local_change_proposal ORDER BY rowid DESC LIMIT 100",(rs,n)->read(rs.getString(1))).stream().map(p->get(p.id())).toList();}
-    public Proposal create(String baseRunId,String title,List<Edit> edits) {
+    @org.springframework.transaction.annotation.Transactional
+    public synchronized Proposal create(String baseRunId,String title,List<Edit> edits) {
         var base=tests.get(baseRunId);var assessment=evidence.assessment(base);
         if("INCONCLUSIVE".equals(assessment.path("decision").asText()))throw BusinessException.conflict("Versioned structured baseline evidence required");
         if(title==null||title.isBlank()||edits==null||edits.isEmpty()||edits.size()>20)throw new IllegalArgumentException("A title and 1..20 file edits are required");
@@ -53,10 +55,12 @@ public class LocalChangeService {
             }
         }catch(java.io.IOException e){throw new IllegalArgumentException("Cannot validate proposal paths",e);}
         var p=new Proposal(UUID.randomUUID().toString(),"PENDING",baseRunId,title,List.copyOf(checked),null,null,null);
+        iterations.getObject().checkProposal(baseRunId);
         save(p);return p;
     }
     public Proposal approve(String id) {
         Proposal p=require(id);
+        iterations.getObject().checkApproval(p);
         if(db.update("UPDATE local_change_proposal SET status='APPLYING' WHERE id=? AND status='PENDING'",id)!=1)throw BusinessException.conflict("Proposal already decided");
         Path workspace=null;String validationId=null;
         try {
@@ -80,8 +84,12 @@ public class LocalChangeService {
             }
             var owners=db.queryForList("SELECT run_id FROM tool_call WHERE approval_status='PENDING' AND CASE WHEN json_valid(result_json) THEN json_extract(result_json,'$.localProposalId') END=?",Long.class,p.id());
             Long owner=owners.isEmpty()?null:owners.get(0);
-            var target=base.target();var run=tests.startWorkspace(new LocalTestService.Target(target.id(),target.name(),workspace.toString(),command,target.timeoutSeconds(),target.resultPath(),target.versionFiles(),target.artifactFiles(),target.protectedFiles()),owner);
-            validationId=run.id();p=new Proposal(p.id(),"VALIDATING",p.baseRunId(),p.title(),p.edits(),workspace.toString(),validationId,null);
+            var target=base.target();var candidate=workspace;var before=p;
+            p=iterations.getObject().registerValidation(before,()->{
+                var run=tests.startWorkspace(new LocalTestService.Target(target.id(),target.name(),candidate.toString(),command,target.timeoutSeconds(),target.resultPath(),target.versionFiles(),target.artifactFiles(),target.protectedFiles()),owner);
+                var linked=new Proposal(before.id(),"VALIDATING",before.baseRunId(),before.title(),before.edits(),candidate.toString(),run.id(),null);
+                save(linked);return linked;
+            });validationId=p.validationRunId();
         }catch(Exception e){p=new Proposal(p.id(),"FAILED",p.baseRunId(),p.title(),p.edits(),workspace==null?null:workspace.toString(),validationId,e.getClass().getSimpleName()+": "+e.getMessage());}
         save(p);return get(p.id());
     }
