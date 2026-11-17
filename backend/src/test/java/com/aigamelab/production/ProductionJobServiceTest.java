@@ -16,10 +16,11 @@ import static org.assertj.core.api.Assertions.*;
 class ProductionJobServiceTest {
  static final Path ROOT;static final Path REPO;
  static{try{ROOT=Files.createTempDirectory("agl-production-jobs-");Path cwd=Path.of("").toAbsolutePath();REPO=Files.exists(cwd.resolve("scripts/production"))?cwd:cwd.getParent();}catch(Exception e){throw new RuntimeException(e);}}
- @DynamicPropertySource static void props(DynamicPropertyRegistry r){r.add("spring.datasource.url",()->"jdbc:sqlite:"+ROOT.resolve("test.db"));r.add("production.repository-root",()->REPO.toString());r.add("production.workspace-root",()->ROOT.resolve("jobs").toString());r.add("production.node",()->Files.exists(Path.of("D:/nodejs/node.exe"))?"D:/nodejs/node.exe":"node");}
+ @DynamicPropertySource static void props(DynamicPropertyRegistry r){r.add("spring.datasource.url",()->"jdbc:sqlite:"+ROOT.resolve("test.db"));r.add("production.repository-root",()->REPO.toString());r.add("production.workspace-root",()->ROOT.resolve("jobs").toString());r.add("production.candidate-root",()->ROOT.resolve("candidates").toString());r.add("production.node",()->Files.exists(Path.of("D:/nodejs/node.exe"))?"D:/nodejs/node.exe":"node");}
  @Autowired ProductionJobService jobs;@Autowired ProductionArtifactService artifacts;@Autowired TaskRepository tasks;@Autowired ObjectMapper mapper;@Autowired org.springframework.jdbc.core.JdbcTemplate db;
  @Autowired com.aigamelab.localtest.LocalEvidenceService evidence;@Autowired com.aigamelab.localtest.LocalChangeService changes;
  @Autowired ControlledExecutor executor;
+ @Autowired ProductionCandidateService candidates;
  @Autowired org.springframework.context.ApplicationContext application;
  static class ControlledExecutor extends LocalTestService {
   String mode="real";TestRun controlled;boolean cancelled;
@@ -127,6 +128,55 @@ class ProductionJobServiceTest {
   var p=changes.create(base,"Awaiting approval",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText()+"\n// pending")));
   runs.transitionIf(run.id(),"RUNNING",com.aigamelab.domain.RunStatus.WAITING_APPROVAL);db.update("UPDATE builder_session SET record_json=json_set(record_json,'$.deadlineEpochMs',0) WHERE task_id=?",task.id());
   assertThatThrownBy(()->changes.approve(p.id())).hasMessageContaining("deadline");assertThat(changes.get(p.id()).workspace()).isNull();
+ }
+ Map<String,byte[]> archive(String id)throws Exception{
+  var result=new TreeMap<String,byte[]>();try(var zip=new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(candidates.download(id)))){java.util.zip.ZipEntry entry;while((entry=zip.getNextEntry())!=null)result.put(entry.getName(),zip.readAllBytes());}return result;
+ }
+ @Test void freezesExactVerifiedBuildAndExcludesUnregisteredSecrets()throws Exception{
+  var j=verified("package");Path workspace=Path.of(j.path("result").path("workspace").asText());Files.writeString(workspace.resolve(".env"),"PRIVATE_CANARY_DO_NOT_EXPORT");
+  var c=candidates.create(j.path("id").asText(),j.path("validationRunId").asText());String id=c.path("id").asText();var files=archive(id);
+  assertThat(files).hasSize(25);assertThat(files.keySet()).doesNotContain(".env","source/.env");assertThat(files.values()).allSatisfy(bytes->assertThat(new String(bytes,java.nio.charset.StandardCharsets.UTF_8)).doesNotContain("PRIVATE_CANARY_DO_NOT_EXPORT"));
+  assertThat(c.path("manifest").path("humanAccepted").asBoolean()).isFalse();assertThat(ProductionCandidateService.hash(candidates.download(id))).isEqualTo(c.path("archiveSha256").asText());
+  assertThat(candidates.create(j.path("id").asText(),j.path("validationRunId").asText()).path("id").asText()).isEqualTo(id);
+  byte[] frozen=candidates.download(id);Files.writeString(workspace.resolve("engine.mjs"),"changed after freeze");assertThat(candidates.download(id)).isEqualTo(frozen);
+ }
+ @Test void rejectsSourceAndBuildDriftBeforeFreezing()throws Exception{
+  var a=verified("package-source-drift");Files.writeString(Path.of(a.path("result").path("workspace").asText()).resolve("engine.mjs"),"changed");assertThatThrownBy(()->candidates.create(a.path("id").asText(),a.path("validationRunId").asText())).hasMessageContaining("Source tree changed");
+  var b=verified("package-build-drift");var r=executor.get(b.path("validationRunId").asText());Files.writeString(Path.of(r.target().workingDirectory()).resolve(r.evidence().path("validationBuild").path("buildId").asText()).resolve("engine.mjs"),"changed output");
+  assertThatThrownBy(()->candidates.create(b.path("id").asText(),r.id())).hasMessageContaining("Build does not match");assertThat(candidates.list(b.path("id").asText()).get(0).path("status").asText()).isEqualTo("FAILED");
+ }
+ @Test void rejectsOldBaselineAndPackagesApprovedCandidateInstead()throws Exception{
+  var j=verified("package-current");String id=j.path("id").asText(),base=j.path("validationRunId").asText();var source=evidence.source(base,"engine.mjs");
+  var p=changes.approve(changes.create(base,"Accepted candidate",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText().replace("*210*dt","*220*dt")))).id());awaitExecution(p.validationRunId());
+  assertThatThrownBy(()->candidates.create(id,base)).hasMessageContaining("current verified");var c=candidates.create(id,p.validationRunId());assertThat(new String(archive(c.path("id").asText()).get("build/engine.mjs"),java.nio.charset.StandardCharsets.UTF_8)).contains("*220*dt");
+ }
+ @Test void fixedFileOrArchiveTamperingBlocksDownloadAndPreview()throws Exception{
+  var j=verified("package-tamper");var c=candidates.create(j.path("id").asText(),j.path("validationRunId").asText());String id=c.path("id").asText();Path engine=ROOT.resolve("candidates").resolve(id).resolve("build/engine.mjs");byte[] original=Files.readAllBytes(engine);Files.writeString(engine,"tampered");
+  assertThatThrownBy(()->candidates.download(id)).hasMessageContaining("Fixed candidate changed");try(var preview=new CandidatePreviewService(candidates,mapper,3)){assertThatThrownBy(()->preview.start(id)).hasMessageContaining("Fixed candidate changed");}
+  Files.write(engine,original);Files.writeString(ROOT.resolve("candidates").resolve(id+".zip"),"zip changed");assertThatThrownBy(()->candidates.download(id)).hasMessageContaining("archive changed");
+ }
+ @Test void previewServesOnlyFixedBuildAndStopsOrExpires()throws Exception{
+  var j=verified("package-preview");var c=candidates.create(j.path("id").asText(),j.path("validationRunId").asText());String id=c.path("id").asText();var client=java.net.http.HttpClient.newHttpClient();
+  try(var preview=new CandidatePreviewService(candidates,mapper,2)){
+   var info=preview.start(id);String url=info.path("url").asText();assertThat(preview.start(id).path("url").asText()).isEqualTo(url);
+   var response=client.send(java.net.http.HttpRequest.newBuilder(java.net.URI.create(url)).GET().build(),java.net.http.HttpResponse.BodyHandlers.ofString());assertThat(response.statusCode()).isEqualTo(200);assertThat(response.headers().firstValue("Content-Security-Policy").orElseThrow()).contains("sandbox allow-scripts","connect-src http://127.0.0.1");
+   assertThat(client.send(java.net.http.HttpRequest.newBuilder(java.net.URI.create(url+"source/engine.mjs")).GET().build(),java.net.http.HttpResponse.BodyHandlers.ofString()).statusCode()).isEqualTo(404);
+   Thread.sleep(2200);assertThatThrownBy(()->client.send(java.net.http.HttpRequest.newBuilder(java.net.URI.create(url)).GET().build(),java.net.http.HttpResponse.BodyHandlers.ofString())).isInstanceOf(java.io.IOException.class);
+   preview.stop(id);preview.stop(id);
+  }
+ }
+ @Test void candidateRecordsAndHashesSurviveServiceRestart()throws Exception{
+  var j=verified("package-restart");var c=candidates.create(j.path("id").asText(),j.path("validationRunId").asText());
+  var interrupted=mapper.createObjectNode().put("id","interrupted-candidate").put("productionId",j.path("id").asText()).put("validationRunId",j.path("localRunId").asText()).put("status","PREPARING");db.update("INSERT INTO production_candidate VALUES (?,?,?,?)","interrupted-candidate",j.path("id").asText(),j.path("localRunId").asText(),interrupted.toString());
+  var restored=new ProductionCandidateService(db,mapper,jobs,executor,evidence,ROOT.resolve("candidates").toString(),REPO.toString());assertThat(restored.get(c.path("id").asText())).isEqualTo(c);assertThat(restored.download(c.path("id").asText())).isEqualTo(candidates.download(c.path("id").asText()));assertThat(restored.get("interrupted-candidate").path("status").asText()).isEqualTo("INTERRUPTED");assertThatThrownBy(()->restored.download("interrupted-candidate")).hasMessageContaining("not ready");
+ }
+ @Test void previewCapacityIsBoundedAndReleasedOnStop()throws Exception{
+  var ids=new ArrayList<String>();for(int i=0;i<3;i++){var j=verified("capacity-"+i);ids.add(candidates.create(j.path("id").asText(),j.path("validationRunId").asText()).path("id").asText());}
+  try(var preview=new CandidatePreviewService(candidates,mapper,300)){preview.start(ids.get(0));preview.start(ids.get(1));assertThatThrownBy(()->preview.start(ids.get(2))).hasMessageContaining("At most two");preview.stop(ids.get(0));assertThat(preview.start(ids.get(2)).path("status").asText()).isEqualTo("RUNNING");}
+ }
+ @Test void refusesUnverifiedBuildAndFrozenAcceptanceDrift()throws Exception{
+  var built=await(jobs.start(request("package-no-verification")).path("id").asText());assertThatThrownBy(()->candidates.create(built.path("id").asText(),"missing")).hasMessageContaining("current verified");
+  var j=verified("package-contract-drift");Files.writeString(Path.of(j.path("jobDirectory").asText()).resolve("acceptance-contract.json"),"{}");assertThatThrownBy(()->candidates.create(j.path("id").asText(),j.path("validationRunId").asText())).hasMessageContaining("Frozen acceptance inputs");
  }
  @Test void rejectsCrossTaskSpecificationBeforeStarting(){assertThatThrownBy(()->jobs.start(new ProductionJobService.Request(task+1000,spec.path("artifactId").asText(),1,"cross"))).hasMessageContaining("does not belong");}
  @Test void invalidTemplateParametersFailWithSpecificEvidence()throws Exception{

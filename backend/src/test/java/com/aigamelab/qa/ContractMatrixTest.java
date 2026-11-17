@@ -182,7 +182,7 @@ class ContractMatrixTest {
     @Test
     @DisplayName("C3: ToolRegistry 注册总数 = 29（24 P1 + 5 QA_LEAD 编排工具）")
     void toolRegistryCount29() {
-        assertThat(registry.size()).isEqualTo(40);
+        assertThat(registry.size()).isEqualTo(41);
         assertThat(registry.contains("local_change_propose")).isTrue();
     }
 
@@ -219,7 +219,7 @@ class ContractMatrixTest {
     void promptVersionCount() {
         int total = jdbc.queryForObject(
                 "SELECT COUNT(*) FROM prompt_version", Integer.class);
-        assertThat(total).isEqualTo(15);
+        assertThat(total).isEqualTo(16);
 
         int activeCount = jdbc.queryForObject(
                 "SELECT COUNT(*) FROM prompt_version WHERE is_active=1", Integer.class);

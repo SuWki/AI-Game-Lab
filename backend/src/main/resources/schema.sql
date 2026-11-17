@@ -327,6 +327,14 @@ CREATE TABLE IF NOT EXISTS builder_session (
     record_json TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS production_candidate (
+    id TEXT PRIMARY KEY,
+    production_id TEXT NOT NULL REFERENCES production_job(id),
+    validation_run_id TEXT NOT NULL REFERENCES local_test_run(id),
+    record_json TEXT NOT NULL,
+    UNIQUE(production_id, validation_run_id)
+);
+
 CREATE TABLE IF NOT EXISTS local_change_proposal (
     id TEXT PRIMARY KEY,
     status TEXT NOT NULL,

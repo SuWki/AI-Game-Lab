@@ -3,6 +3,8 @@ import type { ApiResp, Finding, TestPlan, Experiment, ExperimentPair, RunRow, Ru
 
 const BASE = "/api";
 export interface ProductionArtifact {artifactId:string;revision:number;kind:string;taskId:number;contentHash:string;content:{title?:string}}
+export interface ProductionCandidate {id:string;productionId:string;validationRunId:string;status:string;manifestHash?:string;archiveSha256?:string;archiveBytes?:number;error?:string;manifest?:{buildId:string;scope:string;humanAccepted:boolean}}
+export interface CandidatePreview {candidateId:string;status:string;url?:string;expiresAt?:string}
 export interface ProductionIteration {phase:string;reason:string;repairCount:number;repairLimit:number;currentRunId:string;currentDecision?:string;currentStatus?:string;currentWorkspace?:string;attempts:{proposalId:string;status:string;baseRunId:string;validationRunId?:string}[]}
 export interface ProductionJob {id:string;taskId:number;specId:string;specRevision:number;specHash:string;status:string;localRunId?:string;validationRunId?:string;validationStatus?:string;validationDecision?:string;iteration?:ProductionIteration;budget?:BuilderBudget;error?:string;result?:{workspace:string;build:{buildId:string;files:Record<string,string>}}}
 
@@ -57,6 +59,12 @@ export interface QaFindingFilter {
 }
 
 export const api = {
+  productionCandidates:(id:string)=>unwrap<ProductionCandidate[]>(fetch(`${BASE}/productions/${encodeURIComponent(id)}/candidates`)),
+  packageCandidate:(id:string,validationRunId:string)=>unwrap<ProductionCandidate>(fetch(`${BASE}/productions/${encodeURIComponent(id)}/candidates`,{method:"POST",headers:{"Content-Type":"application/json","X-AGL-Local-Test":"1"},body:JSON.stringify({validationRunId})})),
+  startCandidatePreview:(id:string)=>unwrap<CandidatePreview>(fetch(`${BASE}/production-candidates/${encodeURIComponent(id)}/preview`,{method:"POST",headers:{"X-AGL-Local-Test":"1"}})),
+  stopCandidatePreview:(id:string)=>unwrap<CandidatePreview>(fetch(`${BASE}/production-candidates/${encodeURIComponent(id)}/preview/stop`,{method:"POST",headers:{"X-AGL-Local-Test":"1"}})),
+  downloadCandidate:async(id:string)=>{const response=await fetch(`${BASE}/production-candidates/${encodeURIComponent(id)}/download`,{headers:{"X-AGL-Local-Test":"1"}});if(!response.ok)throw new Error(`下载失败：HTTP ${response.status}`);return response.blob();},
+
   productionArtifacts:(taskId:number)=>unwrap<ProductionArtifact[]>(fetch(`${BASE}/production-artifacts?taskId=${taskId}`)),
   productionJobs:()=>unwrap<ProductionJob[]>(fetch(`${BASE}/productions`)),
   validateProduction:(id:string)=>unwrap<ProductionJob>(fetch(`${BASE}/productions/${encodeURIComponent(id)}/validate`,{method:"POST",headers:{"X-AGL-Local-Test":"1"}})),

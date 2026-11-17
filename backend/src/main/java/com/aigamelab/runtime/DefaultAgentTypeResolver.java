@@ -180,7 +180,7 @@ public class DefaultAgentTypeResolver implements AgentTypeResolver {
     @Override
     public String systemPrompt(AgentType type) {
         return switch (type) {
-            case BUILDER -> promptFor("builder_p002","Builder prompt unavailable");
+            case BUILDER -> promptFor("builder_p003","Builder prompt unavailable");
             case DESIGNER -> DESIGNER_SYSTEM_PROMPT;
             case TESTER -> promptFor(TESTER_PROMPT_VERSION,
                     "Tester Run 但缺少 " + TESTER_PROMPT_VERSION + " Prompt 版本");
@@ -200,7 +200,7 @@ public class DefaultAgentTypeResolver implements AgentTypeResolver {
     @Override
     public Set<String> toolWhitelist(AgentType type) {
         return switch (type) {
-            case BUILDER -> Set.of("production_context","production_start","production_result","production_validate","production_source_read","production_change_propose");
+            case BUILDER -> Set.of("production_context","production_start","production_result","production_validate","production_source_read","production_change_propose","candidate_package");
             case DESIGNER -> DESIGNER_TOOL_NAMES;
             case TESTER -> TESTER_TOOL_NAMES;
             case RESEARCH -> RESEARCH_TOOL_NAMES;
