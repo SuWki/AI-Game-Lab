@@ -1,3 +1,4 @@
+import {BuilderBudgetPanel} from "@/BuilderBudgetPanel";
 import { Fragment, useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { api } from "@/api";
@@ -133,6 +134,7 @@ function RunTimeline({ trace }: { trace: RunTrace }) {
     <div>
       <div style={{ marginBottom: 12 }}>
         <RunMeta run={trace.run} />
+        {trace.builderBudget&&<BuilderBudgetPanel budget={trace.builderBudget}/>}
       </div>
       <div style={{ border: "1px solid #e5e7eb", borderRadius: 8 }}>
         <div style={{ padding: "10px 12px", borderBottom: "1px solid #e5e7eb", fontWeight: 600, fontSize: 14 }}>

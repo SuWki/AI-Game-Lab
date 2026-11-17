@@ -1,5 +1,7 @@
 # AI Game Lab 文档索引
 
+最新 Builder 增量：[跨 Run 会话与累计预算](platform/BUILDER_SESSIONS.md) · [2026-11-17 第二批交付](reports/BUILDER_SESSIONS_2026-11-17.md)。
+
 站点预览与发布：[GitHub Pages](platform/PAGES_PREVIEW.md)。
 
 最新平台增量：[生产修复链与预算](platform/PRODUCTION_ITERATIONS.md) · [2026-11-17 交付](reports/PRODUCTION_ITERATIONS_2026-11-17.md)。

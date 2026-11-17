@@ -322,6 +322,11 @@ CREATE TABLE IF NOT EXISTS production_job (
     UNIQUE(task_id, request_key)
 );
 
+CREATE TABLE IF NOT EXISTS builder_session (
+    task_id INTEGER PRIMARY KEY REFERENCES task(id),
+    record_json TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS local_change_proposal (
     id TEXT PRIMARY KEY,
     status TEXT NOT NULL,

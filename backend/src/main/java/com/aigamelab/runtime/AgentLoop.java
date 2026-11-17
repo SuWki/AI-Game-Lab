@@ -48,6 +48,7 @@ public class AgentLoop {
     @org.springframework.beans.factory.annotation.Value("${agent.runtime.timeout-ms:900000}")
     private long timeoutMs = 900000;
     @org.springframework.beans.factory.annotation.Autowired private RuntimeConversation conversation;
+    @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.production.BuilderSessionService builderSessions;
     private final java.util.concurrent.ConcurrentHashMap<Long,java.util.concurrent.locks.ReentrantLock> locks=new java.util.concurrent.ConcurrentHashMap<>();
 
     /** 懒加载：避免与 Designer WIP（sim 包）构造期循环依赖风险，且 Tester 工具注册表已就绪即可用 */
@@ -86,7 +87,10 @@ public class AgentLoop {
     public void run(long runId) {
         var lock=locks.computeIfAbsent(runId,id->new java.util.concurrent.locks.ReentrantLock());
         lock.lock();
+        java.util.concurrent.locks.ReentrantLock taskLock=null;
         try {
+            var initial=runRepo.findById(runId).orElseThrow();
+            if(builderSessions.isBuilder(taskOf(initial))){taskLock=builderSessions.executionLock(initial.taskId());taskLock.lock();}
             runInner(runId);
         } catch (com.aigamelab.tool.ToolException e) {
             if (e.isCritical()) {
@@ -100,6 +104,7 @@ public class AgentLoop {
             finalizeRun(runId, RunStatus.FAILED, null, String.valueOf(e.getMessage()));
             return;
         } finally {
+            if(taskLock!=null)taskLock.unlock();
             lock.unlock();
             runRepo.findById(runId).filter(r->RunStateMachine.isTerminal(RunStatus.valueOf(r.status()))).ifPresent(r->locks.remove(runId,lock));
         }
@@ -114,6 +119,7 @@ public class AgentLoop {
         }
         if(!Set.of("PENDING","RUNNING").contains(run.status()))return;
         run=runRepo.findById(runId).orElseThrow();
+        if(builderSessions.isBuilder(taskOf(run)))builderSessions.claim(taskOf(run),run);
         conversation.freeze(run,taskOf(run));
         long budgetMs=conversation.context(runId).path("timeoutMs").asLong(timeoutMs);
         conversation.assertRecoverable(runId);
@@ -122,6 +128,7 @@ public class AgentLoop {
         while (true) {
             run = runRepo.findById(runId).orElseThrow();
             if(!"RUNNING".equals(run.status())||cancelled(runId))return;
+            var shared=builderSessions.check(run,false);if(shared.hit()){finalizeRun(runId,shared.target(),null,shared.reason());return;}
             // Resume unexecuted batch members before starting another model turn.
             for(var pending:conversation.pending(runId)) {
                 if(!"RUNNING".equals(runRepo.findById(runId).orElseThrow().status()))return;
@@ -135,6 +142,7 @@ public class AgentLoop {
             }
 
             // ---- Evaluate：三重预算防线（P1-3） ----
+            shared=builderSessions.check(run,true);if(shared.hit()){finalizeRun(runId,shared.target(),null,shared.reason());return;}
             var verdict = budgetGuard.check(run, elapsedMs(run), budgetMs);
             if (verdict.hit()) {
                 finalizeRun(runId, verdict.target(), null, verdict.reason());
@@ -159,10 +167,12 @@ public class AgentLoop {
                         "LlmGateway 未配置：P1 阶段请在测试中注入 FakeLlmGateway；P2-2 落地 DeepSeekClient 后生产可用");
             }
             resp = llmGateway.complete(request(run, messages, task));
+            if(usage(resp).promptTokens()<0||usage(resp).completionTokens()<0||usage(resp).totalTokens()<0)throw new IllegalStateException("Model returned invalid negative token usage");
             stepRepo.updateLlmResult(step.id(), resp.finishReason(), resp.content(),
                     usage(resp).promptTokens(), usage(resp).completionTokens(),
                     System.currentTimeMillis() - t0);
             runRepo.addTokensUsed(runId, usage(resp).totalTokens());
+            shared=builderSessions.check(run,false);if(shared.hit()){finalizeRun(runId,shared.target(),null,shared.reason());return;}
             if(!"RUNNING".equals(runRepo.findById(runId).orElseThrow().status())||cancelled(runId))return;
             if(budgetMs>0&&elapsedMs(runRepo.findById(runId).orElseThrow())>=budgetMs){finalizeRun(runId,RunStatus.TIMEOUT,null,"已到总超时预算");return;}
 
