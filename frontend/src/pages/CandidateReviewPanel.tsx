@@ -46,11 +46,19 @@ export function CandidateReviewPanel({candidate,production}:{candidate:Productio
         <h6>浏览器验收证据</h6>
         <ul>{browserChecks.map(check=><li key={check.criterionId}>
           {check.criterionId} · {check.outcome==="PASS"?"通过":check.outcome==="FAIL"?"失败":"未测"}
-          {check.field&&<> · {browserFields[check.field]??check.field} 期望 {check.expected}，观察 {check.actual??"—"}</>}
+          {check.field&&<> · {browserFields[check.field]??check.field} {check.profile==="survival-web-space-resource-v1"?"变化至少":"期望"} {check.expected}，观察 {check.actual??"—"}</>}
+          {check.reason==="SKILL_READY_TIMEOUT"&&" · 等待技能就绪超时"}
+          {check.reason==="RESOURCE_CHANGE_TIMEOUT"&&" · 等待资源变化超时"}
         </li>)}</ul>
         {browser&&<details><summary>查看浏览器观察与来源</summary>
           <p>{browser.observation.observedAt} · {browser.observation.browser} · 规格 r{browser.specRevision}</p>
           <p>{browser.observation.hud}</p>
+          {browser.observation.interaction&&<div>
+            <p>{browser.observation.interaction.pressed?"已按下空格":"技能等待超时"} · {browser.observation.interaction.elapsedMs} 毫秒</p>
+            <p>输入前 · {browser.observation.interaction.beforeHud}</p>
+            <p>阶段内观察值 · {browser.observation.interaction.afterHud}</p>
+            <img alt="观察结束时的 HUD 截图" style={{maxWidth:"100%"}} src={`data:image/png;base64,${browser.observation.interaction.screenshotPng}`}/>
+          </div>}
           <p style={{overflowWrap:"anywhere"}}>执行 {browser.executionId} · 清单 {browser.manifestHash} · ZIP {browser.archiveSha256}</p>
         </details>}
         {browserChecks.some(check=>check.field)&&<details><summary>如何运行本地浏览器验收</summary>
