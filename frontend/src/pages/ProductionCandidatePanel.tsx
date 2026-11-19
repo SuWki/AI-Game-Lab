@@ -1,9 +1,12 @@
 import {CandidateReviewPanel} from "./CandidateReviewPanel";
 import {useState,useEffect} from "react";
 import {useQuery,useQueryClient} from "react-query";
+import {Link,type To} from "react-router-dom";
 import {api,type ProductionJob,type CandidatePreview} from "@/api";
 
-export function ProductionCandidatePanel({job}:{job:ProductionJob}){
+export function ProductionCandidatePanel({job,selectedCandidateId,candidateLink,onPack}:{
+  job:ProductionJob;selectedCandidateId?:string|null;candidateLink?:(id:string)=>To;onPack?:(id:string)=>void;
+}){
   const qc=useQueryClient(),list=useQuery(["production-candidates",job.id],()=>api.productionCandidates(job.id));
   const [busy,setBusy]=useState(false),[error,setError]=useState(""),[message,setMessage]=useState("");
   const [previews,setPreviews]=useState<Record<string,CandidatePreview>>({});
@@ -15,16 +18,19 @@ export function ProductionCandidatePanel({job}:{job:ProductionJob}){
     }),1000);return()=>clearInterval(timer);
   },[previews]);
   async function action(run:()=>Promise<void>){setBusy(true);setError("");try{await run();}catch(e){setError(String(e));}finally{setBusy(false);}}
-  async function pack(){const id=job.iteration?.currentRunId;if(!id)return;await api.packageCandidate(job.id,id);await qc.invalidateQueries(["production-candidates",job.id]);setMessage("固定候选已打包，未公开发布，也未记录人类质量接受。");}
+  async function pack(){const id=job.iteration?.currentRunId;if(!id)return;const candidate=await api.packageCandidate(job.id,id);await qc.invalidateQueries(["production-candidates",job.id]);setMessage("固定候选已打包，未公开发布，也未记录人类质量接受。");onPack?.(candidate.id);}
   async function download(id:string){const blob=await api.downloadCandidate(id),url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`agl-candidate-${id}.zip`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
   async function preview(id:string){const result=await api.startCandidatePreview(id);setPreviews(previous=>({...previous,[id]:result}));}
   async function stop(id:string){await api.stopCandidatePreview(id);setPreviews(previous=>{const next={...previous};delete next[id];return next;});}
+  const visible=list.data?.filter(candidate=>!selectedCandidateId||candidate.id===selectedCandidateId);
   return <section aria-label="固定候选与交付" style={{borderTop:"1px solid #ddd",marginTop:16,paddingTop:12}}>
     <h3>固定候选与交付</h3><p>打包当前通过引擎验收的源码、实际构建与证据。下载和预览读取固定副本，原项目保持不变。</p>
     {job.iteration?.phase==="REVIEW"&&job.iteration.currentRunId&&<button disabled={busy} onClick={()=>void action(pack)}>固定当前候选并打包</button>}
     {Boolean(error||list.error)&&<p role="alert">{error||String(list.error)}</p>}{message&&<p role="status">{message}</p>}
-    {list.data?.map(candidate=><article key={candidate.id} style={{padding:12,marginTop:12,background:"#f8faf9"}}>
+    {selectedCandidateId&&visible?.length===0&&<p role="alert">该生产下找不到指定候选。</p>}
+    {visible?.map(candidate=><article key={candidate.id} style={{padding:12,marginTop:12,background:"#f8faf9"}}>
       <h4>候选 {candidate.id} · {candidate.status}</h4><p>验收执行：{candidate.validationRunId}</p>
+      {candidateLink&&!selectedCandidateId&&<p><Link to={candidateLink(candidate.id)}>打开此候选与评审</Link></p>}
       {candidate.error&&<p role="alert">{candidate.error}</p>}
       {candidate.status==="READY"&&<><p>范围：{candidate.manifest?.scope} · 引擎验收通过；人工意见见下方评审记录。包内清单保留打包时状态。</p><p>固定构建：{candidate.manifest?.buildId}</p>
         <details><summary>清单与归档指纹</summary><p style={{overflowWrap:"anywhere"}}>Manifest SHA256：{candidate.manifestHash}</p><p style={{overflowWrap:"anywhere"}}>ZIP SHA256：{candidate.archiveSha256} · {candidate.archiveBytes} bytes</p></details>

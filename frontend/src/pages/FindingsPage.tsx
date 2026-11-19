@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "react-query";
-import { useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { api, type QaFindingFilter } from "@/api";
 import type { Finding, FindingStatus } from "@/types";
@@ -17,7 +17,8 @@ export function FindingsPage() {
   const qc = useQueryClient();
   const { id } = useParams();
   const [filter, setFilter] = useState<QaFindingFilter>({});
-  const [selected, setSelected] = useState<number | null>(id ? Number(id) : null);
+  const navigate = useNavigate();
+  const selected = id && /^[1-9]\d*$/.test(id) ? Number(id) : null;
 
   // 首屏数据：QA REST list 接口拉取（SSE 语义：首屏 REST + 实时增量）
   const { data: findings = [], isLoading, error } = useQuery({
@@ -30,7 +31,11 @@ export function FindingsPage() {
     qc.invalidateQueries({ queryKey: ["findings"] });
   });
 
-  const selectedFinding = findings.find((f) => f.id === selected) ?? null;
+  const listed = findings.find((f) => f.id === selected);
+  const detail = useQuery(["finding", selected], () => api.getFinding(selected!), {
+    enabled: selected !== null && !isLoading && !listed,
+  });
+  const selectedFinding = listed ?? detail.data;
 
   async function changeStatus(f: Finding, status: FindingStatus) {
     await api.updateFindingStatus(f.id, status);
@@ -108,9 +113,9 @@ export function FindingsPage() {
         </thead>
         <tbody>
           {findings.map((f) => (
-            <tr key={f.id} onClick={() => setSelected(f.id)} style={{ cursor: "pointer", borderBottom: "1px solid #f3f4f6" }}>
+            <tr key={f.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
               <Td>{f.id}</Td>
-              <Td>{f.title}</Td>
+              <Td><Link to={`/findings/${f.id}`}>{f.title}</Link></Td>
               <Td><Badge tone={severityTone(f.severity)}>{f.severity}</Badge></Td>
               <Td>{f.category}</Td>
               <Td>{f.configVersion}</Td>
@@ -126,7 +131,8 @@ export function FindingsPage() {
       </table>
 
       {/* 详情抽屉 */}
-      <Drawer open={!!selectedFinding} title={`Finding #${selectedFinding?.id ?? ""}`} onClose={() => setSelected(null)}>
+      <Drawer open={selected !== null} title={`Finding #${selected ?? ""}`} onClose={() => navigate("/findings")}>
+        {!selectedFinding && <p>{detail.isError ? "无法读取该 Finding。" : "读取 Finding…"}</p>}
         {selectedFinding && <FindingDetail f={selectedFinding} onStatus={(s) => changeStatus(selectedFinding, s)} />}
       </Drawer>
     </div>
@@ -135,6 +141,7 @@ export function FindingsPage() {
 
 function FindingDetail({ f, onStatus }: { f: Finding; onStatus: (s: FindingStatus) => void }) {
   const evidence = api.parseEvidence(f);
+  const localRunId = evidence?.observationSnapshot?.localTestRunId;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <DefinitionList items={[
@@ -151,6 +158,7 @@ function FindingDetail({ f, onStatus }: { f: Finding; onStatus: (s: FindingStatu
 
       <Section title="Expected">{f.expected ?? "—"}</Section>
       <Section title="Actual">{f.actual ?? "—"}</Section>
+      {typeof localRunId==="string"&&localRunId&&<p><Link to={`/local-tests?runId=${encodeURIComponent(localRunId)}`}>打开来源测试与修改入口</Link></p>}
       <Section title="Repro Steps">
         <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, background: "#f9fafb", padding: 12, borderRadius: 6 }}>{f.reproSteps}</pre>
       </Section>

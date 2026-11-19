@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "react-query";
 import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { api } from "@/api";
 import type { RunRow, TaskRow } from "@/types";
 import { useGlobalSse } from "@/useGlobalSse";
@@ -30,6 +30,7 @@ export function WorkflowPage() {
   const qc = useQueryClient();
   const [params] = useSearchParams();
   const urlResearchId = params.get("researchSourceTaskId");
+  const focusTaskId = params.get("taskId");
 
   const [title, setTitle] = useState("");
   const [goal, setGoal] = useState("");
@@ -47,6 +48,7 @@ export function WorkflowPage() {
     queryKey: ["runs"],
     queryFn: () => api.listRuns(),
   });
+  const visibleTasks=focusTaskId?tasks.filter(task=>String(task.id)===focusTaskId):tasks;
 
   // R2-2/R2-3：SSE 实时刷新任务与 Run 状态（任务创建 / Run 启动 / 终态）
   useGlobalSse((e) => {
@@ -185,7 +187,7 @@ export function WorkflowPage() {
 
       {/* ===== 任务列表 ===== */}
       <h3 style={{ fontSize: 14, margin: "20px 0 10px", color: "#111827" }}>
-        任务（{tasks.length}）
+        任务（{visibleTasks.length}）
       </h3>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
         <thead>
@@ -200,7 +202,7 @@ export function WorkflowPage() {
           </tr>
         </thead>
         <tbody>
-          {tasks.map((t: TaskRow) => {
+          {visibleTasks.map((t: TaskRow) => {
             const run = latestRunOf(t.id);
             const researchRef = api.parseResearchSourceTaskId(t);
             return (
@@ -246,15 +248,16 @@ export function WorkflowPage() {
               </tr>
             );
           })}
-          {tasks.length === 0 && !tasksLoading && (
+          {visibleTasks.length === 0 && !tasksLoading && (
             <tr>
               <Td colSpan={7} style={{ padding: 24, textAlign: "center", color: "#9ca3af" }}>
-                暂无任务 —— 先创建一个 Research 任务收集证据，再以研究发起 Designer
+                {focusTaskId?"找不到指定任务。":"暂无任务 —— 先创建一个 Research 任务收集证据，再以研究发起 Designer"}
               </Td>
             </tr>
           )}
         </tbody>
       </table>
+      {focusTaskId&&<p><Link to="/workflow">查看所有任务</Link></p>}
     </div>
   );
 }

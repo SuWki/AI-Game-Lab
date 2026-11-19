@@ -2,15 +2,19 @@ import "@testing-library/jest-dom";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { FindingsPage } from "@/pages/FindingsPage";
+import { api } from "@/api";
 import type { Finding } from "@/types";
 
-function makeWrapper() {
+function makeWrapper(entry="/findings") {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={qc}>
-      <MemoryRouter>{children}</MemoryRouter>
+      <MemoryRouter initialEntries={[entry]}><Routes>
+        <Route path="/findings" element={children}/>
+        <Route path="/findings/:id" element={children}/>
+      </Routes></MemoryRouter>
     </QueryClientProvider>
   );
 }
@@ -153,6 +157,17 @@ describe("FindingsPage QA 集成（P1-4）", () => {
     await waitFor(() =>
       expect(screen.getByText(/无 Finding/)).toBeInTheDocument()
     );
+  });
+
+  it("restores a Finding outside the recent list and links its source execution", async () => {
+    stubFetch([]);
+    const finding = vi.spyOn(api,"getFinding").mockResolvedValue({
+      ...FINDING,evidenceJson:JSON.stringify({observationSnapshot:{localTestRunId:"baseline-42"}}),
+    });
+    render(<FindingsPage/>, {wrapper:makeWrapper("/findings/1")});
+    expect(await screen.findByRole("link",{name:"打开来源测试与修改入口"}))
+      .toHaveAttribute("href","/local-tests?runId=baseline-42");
+    expect(finding).toHaveBeenCalledWith(1);
   });
 
   it("error state：后端错误码包络显示加载失败，不静默", async () => {

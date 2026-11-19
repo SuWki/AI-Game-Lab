@@ -5,8 +5,17 @@ import {QueryClient,QueryClientProvider} from "react-query";import {MemoryRouter
 import {api,type ProductionJob} from "@/api";import {ProductionsPage} from "./ProductionsPage";
 const job:ProductionJob={id:"production-a",taskId:1,specId:"spec-a",specRevision:2,specHash:"hash",status:"RUNNING",localRunId:"execution-a"};
 beforeEach(()=>{vi.restoreAllMocks();vi.spyOn(api,"productionCandidates").mockResolvedValue([]);vi.spyOn(api,"listTasks").mockResolvedValue([{id:1,title:"Game",goal:"build",constraintsJson:"{}",maxSteps:20,approvalRequired:true,status:"ACTIVE",createdAt:null}]);vi.spyOn(api,"productionArtifacts").mockResolvedValue([{artifactId:"spec-a",revision:2,kind:"GameSpec",taskId:1,contentHash:"hash",content:{title:"Heat game"}}]);vi.spyOn(api,"productionJobs").mockResolvedValue([]);});
-function show(){render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false,cacheTime:0}}})}><MemoryRouter><ProductionsPage/></MemoryRouter></QueryClientProvider>);}
+function show(entry="/productions"){render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false,cacheTime:0}}})}><MemoryRouter initialEntries={[entry]}><ProductionsPage/></MemoryRouter></QueryClientProvider>);}
 beforeEach(()=>{vi.spyOn(api,"manufacturingScope").mockResolvedValue(null);});
+it("restores the exact production and specification outside the recent list",async()=>{
+ const detail=vi.spyOn(api,"productionJob").mockResolvedValue(job);
+ show("/productions?taskId=1&spec=spec-a%3A2&productionId=production-a");
+ expect(await screen.findByRole("heading",{name:"生产任务 · RUNNING"})).toBeInTheDocument();
+ await screen.findByRole("option",{name:"Heat game · r2"});
+ expect(screen.getByLabelText("规格版本")).toHaveValue("spec-a:2");
+ expect(detail).toHaveBeenCalledWith(job.id);
+ expect(api.productionJobs).not.toHaveBeenCalled();
+});
 it("requires a confirmation for the exact selected revision before creating Builder", async () => {
   const confirm = vi.spyOn(api,"confirmManufacturingScope").mockResolvedValue({contentHash:"hash",confirmedAt:"2026-11-19"});
   show();

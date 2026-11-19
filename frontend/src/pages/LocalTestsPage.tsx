@@ -1,4 +1,4 @@
-import { useState,useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import { api } from "@/api";
 import { LocalEvidencePanel } from "./LocalEvidencePanel";
@@ -6,9 +6,9 @@ import { Link,useSearchParams } from "react-router-dom";
 
 export function LocalTestsPage() {
   const qc=useQueryClient();
-  const [params]=useSearchParams();const requestedId=params.get("runId");
-  const [selected,setSelected]=useState<string>();
-  useEffect(()=>{if(requestedId)setSelected(requestedId);},[requestedId]);
+  const [params,setParams]=useSearchParams();
+  const selected=params.get("runId");
+  function selectRun(id:string){setParams({runId:id});}
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState("");
   const targets=useQuery(["local-test-targets"],api.localTestTargets);
@@ -18,7 +18,7 @@ export function LocalTestsPage() {
     setBusy(true);setError("");
     try {
       const result=await (cancel?api.cancelLocalTest(id):api.startLocalTest(id));
-      setSelected(result.id);
+      selectRun(result.id);
       await qc.invalidateQueries(["local-test-runs"]);
       await qc.invalidateQueries(["local-test-run",result.id]);
     }catch(e){setError(String(e));}finally{setBusy(false);}
@@ -27,7 +27,7 @@ export function LocalTestsPage() {
   return <main style={{maxWidth:1100,margin:"24px auto"}}>
     <h1>本地游戏测试</h1>
     <p><Link to="/local-tests/changes">修改提案与回归</Link></p>
-    <button onClick={()=>{void targets.refetch();void runs.refetch();}}>刷新目标和任务</button>
+    <button onClick={()=>{void targets.refetch();void runs.refetch();if(selected)void detail.refetch();}}>刷新目标和任务</button>
     <p>选择已注册的游戏测试目标，执行后查看状态、日志和结果证据。COMPLETED 表示命令结束；PASSED 才表示结果文件报告通过。</p>
     {Boolean(error||targets.error||runs.error||detail.error)&&<p role="alert" style={{color:"#b91c1c"}}>{error||String(targets.error||runs.error||detail.error)}</p>}
     <h2>测试目标</h2>
@@ -40,7 +40,7 @@ export function LocalTestsPage() {
     </section>)}
     <h2>最近任务</h2>
     <table style={{width:"100%",textAlign:"left"}}><thead><tr><th>目标</th><th>状态</th><th>提交时间</th><th>操作</th></tr></thead>
-      <tbody>{runs.data?.map(r=><tr key={r.id}><td><button onClick={()=>setSelected(r.id)}>{r.target.name}</button></td><td>{r.status}</td><td>{r.startedAt}</td>
+      <tbody>{runs.data?.map(r=><tr key={r.id}><td><button onClick={()=>selectRun(r.id)}>{r.target.name}</button></td><td>{r.status}</td><td>{r.startedAt}</td>
         <td>{["QUEUED","RUNNING"].includes(r.status)&&<button disabled={busy} onClick={()=>void action(r.id,true)}>取消</button>}</td></tr>)}</tbody></table>
     {run&&<section><h2>任务详情 · {run.status}</h2><p>{run.id} · 退出码：{run.exitCode??"无"}</p>
       {run.error&&<p role="alert">{run.error}</p>}

@@ -25,6 +25,13 @@ public class LocalChangeService {
             save(new Proposal(p.id(),"INTERRUPTED",p.baseRunId(),p.title(),p.edits(),p.workspace(),p.validationRunId(),"Interrupted while preparing workspace; inspect before creating a new proposal"));
     }
     public List<Proposal> list(){return db.query("SELECT proposal_json FROM local_change_proposal ORDER BY rowid DESC LIMIT 100",(rs,n)->read(rs.getString(1))).stream().map(p->get(p.id())).toList();}
+    public List<Proposal> listForRun(String runId) {
+        return db.queryForList("""
+                SELECT id FROM local_change_proposal
+                WHERE json_extract(proposal_json,'$.baseRunId')=? OR json_extract(proposal_json,'$.validationRunId')=?
+                ORDER BY rowid DESC LIMIT 100
+                """, String.class, runId, runId).stream().map(this::get).toList();
+    }
     @org.springframework.transaction.annotation.Transactional
     public synchronized Proposal create(String baseRunId,String title,List<Edit> edits) {
         var base=tests.get(baseRunId);var assessment=evidence.assessment(base);
