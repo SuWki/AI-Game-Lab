@@ -27,6 +27,9 @@ const save = (name, value) => fs.writeFile(path.join(output, name), JSON.stringi
 function blockers(runtime) {
   const reasons = [];
   if (!runtime.gatewayConfigured) reasons.push('供应商凭据未配置');
+  if (runtime.gatewayMode === 'cc-switch-claude' && runtime.proxyHealthy !== true) {
+    reasons.push(`CC Switch 本地代理未就绪，请检查 127.0.0.1:${runtime.proxyPort} 的 /health`);
+  }
   if (runtime.retryEnabled) reasons.push('本次验收需停用 Gateway 自动重试');
   if (runtime.tokenBudget < 1 || runtime.tokenBudget > 20000) reasons.push('Run token 预算需设为 1–20000');
   if (runtime.maxResponseTokens < 1 || runtime.maxResponseTokens > 4096) reasons.push('单轮输出上限需设为 1–4096');
@@ -132,7 +135,10 @@ if (action === 'status') {
   } else {
     const original = await read('runtime.json');
     assert.equal(origin, original.origin);
-    assert.deepEqual(runtime, original.profile, 'Acceptance runtime configuration changed');
+    // Older direct-mode checkpoints predate proxy diagnostics.
+    const originalProfile = { gatewayMode: 'direct', proxyPort: null, proxyHealthy: null, ...original.profile };
+    assert.deepEqual({ gatewayMode: 'direct', proxyPort: null, proxyHealthy: null, ...runtime },
+      originalProfile, 'Acceptance runtime configuration changed');
     const designer = await read('designer-run.json');
     const detail = await api('/runs/' + designer.id);
     assert.equal(detail.run.status, 'COMPLETED');

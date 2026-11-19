@@ -11,11 +11,15 @@ public record LlmToolSpec(String name, String description, Map<String, Object> j
         boolean requiresApproval) {
     @com.fasterxml.jackson.annotation.JsonValue
     public Map<String,Object> wireValue() {
+        return Map.of("type","function","function",Map.of("name",name,"description",description==null?name:description,"parameters",parameters()));
+    }
+
+    public Map<String,Object> parameters() {
         Map<String,Object> parameters=jsonSchema==null?Map.of("type","object","properties",Map.of()):jsonSchema;
         if(parameters.get("function") instanceof Map<?,?> fn && fn.get("parameters") instanceof Map<?,?> nested) {
             @SuppressWarnings("unchecked") Map<String,Object> normalized=(Map<String,Object>)nested;
             parameters=normalized;
         }
-        return Map.of("type","function","function",Map.of("name",name,"description",description==null?name:description,"parameters",parameters));
+        return parameters;
     }
 }

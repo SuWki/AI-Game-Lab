@@ -162,8 +162,10 @@ public class QaOrchestratorService {
             throw BusinessException.conflict("编排 wall-clock deadline 已超时，不再启动新的 role");
         }
 
+        Run parent = runRepo.findById(a.parentRunId()).orElseThrow(
+                () -> BusinessException.notFound("缺少 QA 主 Run " + a.parentRunId()));
         Run subRun = runRepo.insert(new Run(null, subTaskId, "PENDING", null,
-                "deepseek-chat", 0, 50, 100000, 0, null, null, null, null, null));
+                parent.model(), 0, 50, parent.tokenBudget(), 0, null, null, null, null, null));
         // 固化 deadline（首次 start_subrun 起算）
         deadlines.putIfAbsent(leadTask.id(), System.currentTimeMillis() + WALL_CLOCK_BUDGET_MS);
         assignmentRepo.bindSubRun(a.id(), subTaskId, subRun.id(), "RUNNING", 0, 0);

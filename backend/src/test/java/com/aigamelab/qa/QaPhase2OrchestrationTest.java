@@ -201,6 +201,8 @@ class QaPhase2OrchestrationTest {
 
         assertThat(subRun.id()).isNotNull();
         assertThat(subRun.taskId()).isEqualTo(a.subTaskId());
+        assertThat(subRun.model()).isEqualTo(leadRun.model());
+        assertThat(subRun.tokenBudget()).isEqualTo(leadRun.tokenBudget());
         // runRepo.insert 设 PENDING
         assertThat(subRun.status()).isEqualTo("PENDING");
 

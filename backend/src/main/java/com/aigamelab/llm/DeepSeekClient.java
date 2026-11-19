@@ -29,6 +29,7 @@ import com.aigamelab.llm.dto.ToolCall;
  * 避免与 FakeLlmGateway 形成 NoUniqueBeanDefinitionException。
  */
 @Component
+@org.springframework.context.annotation.Profile("!cc-switch")
 @ConditionalOnProperty(prefix = "llm.gateway", name = "api-key")
 @org.springframework.context.annotation.Conditional(DeepSeekClient.ApiKeyPresent.class)
 public class DeepSeekClient implements LlmGateway {
