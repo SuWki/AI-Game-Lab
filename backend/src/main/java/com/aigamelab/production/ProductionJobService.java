@@ -23,6 +23,7 @@ public class ProductionJobService {
     @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<com.aigamelab.localtest.LocalEvidenceService> evidence;
     @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<ProductionIterationService> iterations;
     @org.springframework.beans.factory.annotation.Autowired private BuilderSessionService sessions;
+    @org.springframework.beans.factory.annotation.Autowired private ManufacturingScopeService manufacturingScopes;
     @org.springframework.beans.factory.annotation.Autowired private com.aigamelab.repository.RunRepository runs;
     private static final List<String> PROTECTED=List.of("config.json","production-manifest.json","specification.json","build-project.mjs","serve-project.mjs");
     public record Request(long taskId,String specId,int specRevision,String requestKey){}
@@ -65,7 +66,11 @@ public class ProductionJobService {
         var parameters=spec.path("content").path("systems").path("survivalWeb");
         if(!"web".equals(spec.path("content").path("targetPlatform").asText())||!Set.of("heat-burst","shield-dash").contains(parameters.path("mechanic").asText()))throw new IllegalArgumentException("Specification is unsupported by survival-web");
         String id=UUID.randomUUID().toString();ObjectNode job=mapper.createObjectNode().put("id",id).put("taskId",request.taskId()).put("specId",request.specId()).put("specRevision",request.specRevision()).put("specHash",spec.path("contentHash").asText()).put("requestKey",request.requestKey()).put("status","PREPARING").put("createdAt",Instant.now().toString());job.putNull("localRunId");
-        if(ownerRunId!=null)job.put("ownerRunId",ownerRunId);
+        if(ownerRunId!=null){
+            job.put("ownerRunId",ownerRunId);
+            manufacturingScopes.find(request.specId(),request.specRevision(),job.path("specHash").asText())
+                    .ifPresent(confirmation -> job.set("manufacturingScope", mapper.valueToTree(confirmation)));
+        }
         try{
             String fingerprint=templateHash();job.put("templateHash",fingerprint);save(job);
             Files.createDirectories(root);Path directory=Files.createDirectory(root.toRealPath().resolve(id));job.put("jobDirectory",directory.toString());save(job);
@@ -186,6 +191,9 @@ public class ProductionJobService {
     public com.aigamelab.domain.Task createBuilderTask(long taskId,String specId,int revision,String goal){
         var spec=artifacts.get(specId,revision);if(!"GameSpec".equals(spec.path("kind").asText())||spec.path("taskId").asLong()!=taskId)throw BusinessException.conflict("Specification scope mismatch");
         if(goal==null||goal.isBlank()||goal.length()>10000)throw new IllegalArgumentException("Builder goal required, up to 10000 characters");
+        if (manufacturingScopes.find(specId, revision, spec.path("contentHash").asText()).isEmpty()) {
+            throw BusinessException.conflict("Confirm manufacturing scope for this exact specification revision first");
+        }
         var scope=mapper.createObjectNode().put("agent_type","BUILDER").put("productionSpecId",specId).put("productionSpecRevision",revision).put("productionSourceTaskId",taskId);
         return tasks.insert(new com.aigamelab.domain.Task(null,"Builder: "+spec.path("content").path("title").asText(),goal,scope.toString(),20,true,"ACTIVE",null));
     }

@@ -4,6 +4,8 @@ import type { ApiResp, Finding, TestPlan, Experiment, ExperimentPair, RunRow, Ru
 const BASE = "/api";
 export interface ProductionArtifact {artifactId:string;revision:number;kind:string;taskId:number;contentHash:string;content:{title?:string;[key:string]:unknown};inputRefs?:{id:string;revision:number;hash:string}[]}
 export interface ArtifactInput {taskId:number;artifactId?:string;expectedRevision?:number;kind:string;content:Record<string,unknown>;inputRefs:{id:string;revision:number;hash:string}[]}
+export interface ManufacturingScope {contentHash:string;confirmedAt:string}
+export interface DesignerDraft {runId:number;result:string}
 export interface ProductionCandidate {id:string;productionId:string;validationRunId:string;status:string;manifestHash?:string;archiveSha256?:string;archiveBytes?:number;error?:string;manifest?:{buildId:string;scope:string;humanAccepted:boolean}}
 export interface CandidatePreview {candidateId:string;status:string;url?:string;expiresAt?:string}
 export type ManualOutcome="PASS"|"FAIL"|"NOT_TESTED";
@@ -77,6 +79,17 @@ export const api = {
   downloadCandidate:async(id:string)=>{const response=await fetch(`${BASE}/production-candidates/${encodeURIComponent(id)}/download`,{headers:{"X-AGL-Local-Test":"1"}});if(!response.ok)throw new Error(`下载失败：HTTP ${response.status}`);return response.blob();},
 
   productionArtifacts:(taskId:number)=>unwrap<ProductionArtifact[]>(fetch(`${BASE}/production-artifacts?taskId=${taskId}`)),
+  designerDrafts: (taskId: number) => unwrap<DesignerDraft[]>(fetch(`${BASE}/production-artifacts/designer-drafts?taskId=${taskId}`)),
+  importDesignerDraft: (runId: number, body: {taskId:number;brief:unknown;spec:unknown}) =>
+    unwrap<ProductionArtifact>(fetch(`${BASE}/production-artifacts/designer-drafts/${runId}`, {
+      method:"POST", headers:{"Content-Type":"application/json","X-AGL-Local-Test":"1"}, body:JSON.stringify(body),
+    })),
+  manufacturingScope: (id: string, revision: number) => unwrap<ManufacturingScope | null>(
+    fetch(`${BASE}/production-artifacts/${id}/revisions/${revision}/manufacturing-scope`)),
+  confirmManufacturingScope: (body: {taskId:number;specId:string;revision:number;contentHash:string}) =>
+    unwrap<ManufacturingScope>(fetch(`${BASE}/production-artifacts/manufacturing-scope`, {
+      method:"POST", headers:{"Content-Type":"application/json","X-AGL-Local-Test":"1"}, body:JSON.stringify(body),
+    })),
   saveProductionArtifact:(body:ArtifactInput)=>unwrap<ProductionArtifact>(fetch(`${BASE}/production-artifacts`,{method:"POST",headers:{"Content-Type":"application/json","X-AGL-Local-Test":"1"},body:JSON.stringify(body)})),
   productionJobs:()=>unwrap<ProductionJob[]>(fetch(`${BASE}/productions`)),
   validateProduction:(id:string)=>unwrap<ProductionJob>(fetch(`${BASE}/productions/${encodeURIComponent(id)}/validate`,{method:"POST",headers:{"X-AGL-Local-Test":"1"}})),
@@ -207,6 +220,7 @@ export const api = {
     goal: string;
     agentType: string; // DESIGNER | TESTER | RESEARCH
     researchSourceTaskId?: number | null;
+    productionDraft?: boolean;
     maxSteps?: number;
   }): Promise<TaskRow> {
     return unwrap<TaskRow>(fetch(`${BASE}/tasks`, {

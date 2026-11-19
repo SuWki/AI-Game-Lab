@@ -111,7 +111,11 @@ public class TaskController {
         }
 
         int maxSteps = defaultMaxSteps(body);
-        String constraintsJson = buildConstraints(agentType, researchSourceTaskId);
+        boolean productionDraft = Boolean.TRUE.equals(body.get("productionDraft"));
+        if (productionDraft && (type != AgentType.DESIGNER || researchSourceTaskId != null)) {
+            throw new IllegalArgumentException("A production draft requires a standalone Designer task");
+        }
+        String constraintsJson = buildConstraints(agentType, researchSourceTaskId, productionDraft);
 
         Task created = taskRepo.insert(new Task(
                 null, title, goal, constraintsJson, maxSteps, false, "ACTIVE", null));
@@ -152,9 +156,10 @@ public class TaskController {
      * 组装 constraintsJson：{"agent_type":"X", "researchSourceTaskId":N?}。
      * researchSourceTaskId 为研究→设计链引用（非复制，仅存任务 id 引用）。
      */
-    private static String buildConstraints(String agentType, Long researchSourceTaskId) {
+    private static String buildConstraints(String agentType, Long researchSourceTaskId, boolean productionDraft) {
         ObjectNode n = MAPPER.createObjectNode();
         n.put("agent_type", agentType);
+        if (productionDraft) n.put("productionDraft", true);
         if (researchSourceTaskId != null) {
             n.put("researchSourceTaskId", researchSourceTaskId);
         }
