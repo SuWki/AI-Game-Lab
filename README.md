@@ -2,13 +2,13 @@
 
 [GitHub Pages 静态预览](https://suwki.github.io/AI-Game-Lab/) · [发布配置与本地验证](docs/platform/PAGES_PREVIEW.md)。预览展示模块与真实截图，后端功能在本地运行。
 
-AI Game Lab 是本地运行的游戏 AI 工作平台：Designer 通过工具和数值模拟提出设计修改，Tester 执行测试，Research 整理外部资料，QA 团队编排角色任务并生成 Release Gate 裁决。所有模块共用一个后端、一个前端和一个 SQLite 数据库。
+AI Game Lab 是本地运行的游戏 AI 工作平台。Research 查证资料，Designer 提出改进或编写规格，Builder 构建和修订可玩作品，Tester 运行测试，QA 团队汇总证据。五个模块共用一个后端、一个前端和一个 SQLite 数据库。
 
 产品方向（2026-11-12 更新）：支持**已有游戏的分析改进**与**同类型新游戏的设计制造**。平台支持本地命令测试、源码/产物版本证据、TestPlan/Finding 导入、受限 Agent 工具，以及人工批准后的独立工作区修改与回归。game-demo 是验证样例。见 [三批开发交付与审查](docs/reports/THREE_BATCH_DELIVERY_2026-11-12.md) 和 [后续开发路线](docs/design/DEVELOPMENT_ROADMAP.md)。
 
-> 文档更新：2026-11-17。进度与验收记录见 [task-state.md](docs/state/task-state.md)，完整导航见 [文档索引](docs/index.md)。
+> 2026-11-19 更新。五模块的可用能力、代码风险与下一轮验收分别见[整体审查](docs/reports/PLATFORM_REVIEW_2026-11-19.md)和[开发路线](docs/design/DEVELOPMENT_ROADMAP.md)。实现进度见 [task-state.md](docs/state/task-state.md)，完整导航见[文档索引](docs/index.md)。
 
-最新增量：[候选人工评审与规格覆盖](docs/platform/CANDIDATE_HUMAN_REVIEW.md)。固定候选支持逐项观察、接受/拒绝、版本历史与独立回执；仅当前候选、完整人工 PASS 和最新显式接受同时成立时，交付门禁才开放。此状态不会自动公开发布。
+生产页支持[人工编写和修订规格](docs/reports/SPECIFICATION_EDITOR_2026-11-17.md)。固定候选支持逐项观察、接受/拒绝、版本历史与独立回执。仅当前候选、完整人工 PASS 和最新显式接受同时成立时，交付门禁才开放。[候选人工评审与规格覆盖](docs/platform/CANDIDATE_HUMAN_REVIEW.md)
 
 ## 当前能力与边界
 
@@ -31,6 +31,8 @@ QA Phase 3 已有实现和 closure audit（16/16 PASS）；审计通过与人工
 配置采用 append-only 全量快照，最新版本即当前版本；现有代码未提供历史版本激活或一键回滚接口。
 
 接入自己的本地游戏测试程序，见 [本地测试执行协议](docs/platform/LOCAL_GAME_TEST_EXECUTION.md) 和 [目标配置示例](backend/local-test-targets.example.json)。共享执行恢复见 [Runtime 契约](docs/platform/AGENT_RUNTIME_RECOVERY.md)。单机可信目录运行，独立工作区不是操作系统沙箱，验证通过后仍需人工决定合并。
+
+当前仓库默认配置仅指定后端端口。在只供自己使用的 Windows 工作台，可在启动后端的 PowerShell 中先设置 `$env:SERVER_ADDRESS='127.0.0.1'`，并让前端代理连接该回环地址。GitHub Pages 只展示静态预览。[默认访问边界审查](docs/reports/PLATFORM_REVIEW_2026-11-19.md)
 
 ## 技术栈与目录
 

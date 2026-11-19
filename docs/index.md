@@ -1,42 +1,18 @@
 # AI Game Lab 文档索引
 
-最新入口：[规格编辑与版本保存](reports/SPECIFICATION_EDITOR_2026-11-17.md)。
+首次使用先看 [README](../README.md) 和[构建环境](BUILD_ENVIRONMENT.md)。开发从[进度摘要](state/task-state.md)进入，后续排期以[开发路线](design/DEVELOPMENT_ROADMAP.md)顶部为准。最近一次[整体设计与代码审查](reports/PLATFORM_REVIEW_2026-11-19.md)记录五模块的实际交付边界、风险和关闭条件。
 
-最新交付：[人工评审与规格覆盖](platform/CANDIDATE_HUMAN_REVIEW.md) · [第四批交付报告](reports/CANDIDATE_HUMAN_REVIEW_2026-11-17.md)。
+## 按工作任务导航
 
-上一批：[固定候选与预览](platform/PRODUCTION_CANDIDATES.md) · [2026-11-17 第三批报告](reports/PRODUCTION_CANDIDATES_2026-11-17.md)。
-
-最新 Builder 增量：[跨 Run 会话与累计预算](platform/BUILDER_SESSIONS.md) · [2026-11-17 第二批交付](reports/BUILDER_SESSIONS_2026-11-17.md)。
-
-站点预览与发布：[GitHub Pages](platform/PAGES_PREVIEW.md)。
-
-最新平台增量：[生产修复链与预算](platform/PRODUCTION_ITERATIONS.md) · [2026-11-17 交付](reports/PRODUCTION_ITERATIONS_2026-11-17.md)。
-
-> 当前代码包含 Designer、Tester、Research、QA 团队与共享中台，采用单体后端 + SQLite。
-> 文档核对：2026-11-11，基线 `724f01a`。Designer P0–P8、Tester T1–T7、Research R0–R2 和 QA Phase 1–3 均已有实现；人工验收状态以 [task-state.md](state/task-state.md) 顶部摘要及对应记录为准。
-> 首次运行先看 [README](../README.md) 与 [构建环境](BUILD_ENVIRONMENT.md)；下列早期设计和历史报告需结合日期、冻结范围阅读。
-
-## 文档导航
-
-最新开发：[生产源码提案与独立引擎验收（2026-11-16）](platform/PRODUCTION_SOURCE_REVIEW.md)。生产页可建立验证基线，Builder 可在人工审批下修改运行源码并隔离重建/回归。
-
-最新 Builder 接线：[模型身份与任务范围](platform/BUILDER_RUNTIME.md)。生产页面可创建绑定规格的 Builder 任务，再使用共享 Workflow 启动；目前仅有模板生产工具。
-
-最新模块交付：[生产任务 API 与中台页面](platform/PRODUCTION_JOBS.md) → [B-02/03 首版实施验证](reports/PRODUCTION_JOBS_2026-11-13.md)。现在可从 `/productions` 页面选择规格并生成项目，仍非模型自主代码生产。
-
-最新可运行产出：[首个可玩模板与规格实例化](platform/PLAYABLE_TEMPLATE.md)，制造范围与证据见 [B-01 实施记录](reports/PLAYABLE_TEMPLATE_2026-11-13.md)。
-
-最新代码开发：[生产交付物 API（2026-11-13）](platform/PRODUCTION_ARTIFACTS.md)：简报、规格、验收定义的不可变版本与输入链；尚不包含游戏制造。
-
-最新总入口：[产品总设计](architecture/GAME_LAB_PRODUCT_DESIGN.md) → [五模块逐文档复核](reports/MODULE_DESIGN_REVIEW_2026-11-12.md) → [生产交付契约](platform/GAME_PRODUCTION_CONTRACT.md)。模块入口：[Designer](projects/01_AI_Game_Designer/README.md)、[Tester](projects/02_AI_Game_Tester/README.md)、[Research](projects/03_AI_Research_Agent/README.md)、[QA](projects/04_AI_Game_Agent_Team/README.md)、[Builder](projects/05_AI_Auto_Game_Developer/README.md)。新增 Builder 流程是待实施设计，不等于已上线。
-
-产品方向与设计入口：[已有游戏分析与改进](architecture/EXISTING_GAME_PRODUCT_DESIGN.md) → [可信改进验证设计（待实施）](platform/IMPROVEMENT_VALIDATION_DESIGN.md) → [当前开发排序](design/DEVELOPMENT_ROADMAP.md)。2026-11-12 补齐任务类型、接入边界、模块分工、独立验收和构建来源；设计要求与已交付实现须分别阅读。
-
-平台本轮开发：[三批交付与模型审查入口](reports/THREE_BATCH_DELIVERY_2026-11-12.md) → [共享 Runtime 契约](platform/AGENT_RUNTIME_RECOVERY.md) / [本地游戏测试协议](platform/LOCAL_GAME_TEST_EXECUTION.md) / [契约变更 ADR](decisions/ADR-20261112-RUNTIME-LOCAL-TEST.md)。本轮覆盖运行可靠性、版本化测试证据和隔离修改回归；早期 [首版记录](reports/PLATFORM_LOCAL_TEST_REVIEW_2026-11-12.md) 保留为历史。
-
-样例历史：[game-demo 首批实施与运行入口](reports/GAME_DEMO_IMPLEMENTATION_2026-11-12.md)。当前研发主线是共享平台，demo 只作适配验收。
-
-评估历史与后续计划：[2026-11-11 项目整体评估](reports/PROJECT_REVIEW_2026-11-11.md) → [game-demo 实测与复跑](reports/GAME_DEMO_BASELINE_2026-11-12.md) → [开发路线与任务验收](design/DEVELOPMENT_ROADMAP.md)。当前以共享平台为研发主线；Runtime、版本证据和审批回归的最新实现以上方三批交付为准。进度仍以 task-state 为准。
+| 我要做什么 | 从哪里开始 |
+| --- | --- |
+| 理解平台定位与分工 | [两条产品主线与五模块](architecture/GAME_LAB_PRODUCT_DESIGN.md) · [生产交接契约](platform/GAME_PRODUCTION_CONTRACT.md) |
+| 分析和改进已有游戏 | [接入范围](architecture/EXISTING_GAME_PRODUCT_DESIGN.md) · [本地测试执行](platform/LOCAL_GAME_TEST_EXECUTION.md) · [可信验证设计](platform/IMPROVEMENT_VALIDATION_DESIGN.md) · [game-demo 样例](reports/GAME_DEMO_IMPLEMENTATION_2026-11-12.md) |
+| 从规格制作新游戏 | [版本化产物](platform/PRODUCTION_ARTIFACTS.md) · [规格编辑](reports/SPECIFICATION_EDITOR_2026-11-17.md) · [可玩模板](platform/PLAYABLE_TEMPLATE.md) · [生产任务](platform/PRODUCTION_JOBS.md) |
+| 运行 Builder 与审批修改 | [身份与工具](platform/BUILDER_RUNTIME.md) · [跨 Run 会话与预算](platform/BUILDER_SESSIONS.md) · [生产修复链](platform/PRODUCTION_ITERATIONS.md) · [独立引擎验收](platform/PRODUCTION_SOURCE_REVIEW.md) |
+| 判断能否交付 | [固定候选与预览](platform/PRODUCTION_CANDIDATES.md) · [逐项人工评审](platform/CANDIDATE_HUMAN_REVIEW.md) · [本地验收记录](reports/SELF_ACCEPTANCE_2026-11-17.md) |
+| 运行平台或查看公开预览 | [共享运行时与恢复](platform/AGENT_RUNTIME_RECOVERY.md) · [GitHub Pages 静态预览](platform/PAGES_PREVIEW.md) |
+| 查模块设计与历史证据 | [Designer](projects/01_AI_Game_Designer/README.md) · [Tester](projects/02_AI_Game_Tester/README.md) · [Research](projects/03_AI_Research_Agent/README.md) · [QA](projects/04_AI_Game_Agent_Team/README.md) · [Builder](projects/05_AI_Auto_Game_Developer/README.md) · [历次报告目录](reports/) |
 
 ### 治理与流程
 
