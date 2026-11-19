@@ -32,7 +32,15 @@ public class ProductionJobService {
         this.db=db;this.mapper=mapper;this.artifacts=artifacts;this.executor=executor;this.repo=Path.of(repo).toAbsolutePath().normalize();this.root=Path.of(root).toAbsolutePath().normalize();this.node=node;
         for(var value:db.query("SELECT record_json FROM production_job",(rs,n)->decode(rs.getString(1))))if(value.path("localRunId").isNull()&&"PREPARING".equals(value.path("status").asText())){value.put("status","INTERRUPTED").put("error","Interrupted before execution was linked; inspect workspace, then submit a new request key");save(value);}
     }
-    public JsonNode template(){try{return mapper.createObjectNode().put("id","survival-web").put("version","1.0.0").put("hash",templateHash());}catch(Exception e){throw new IllegalArgumentException("Production template unavailable",e);}}
+    public JsonNode template(){
+        try {
+            var catalog = mapper.readTree(Files.readAllBytes(repo.resolve("templates/survival-web/template.json")));
+            return mapper.createObjectNode().put("id",catalog.path("id").asText())
+                    .put("version",catalog.path("version").asText()).put("hash",templateHash());
+        } catch(Exception e) {
+            throw new IllegalArgumentException("Production template unavailable",e);
+        }
+    }
     private String templateHash()throws Exception{List<String> lines=new ArrayList<>();for(String name:FILES){Path p=repo.resolve("templates/survival-web").resolve(name);if(Files.isSymbolicLink(p)||!Files.isRegularFile(p))throw new IllegalArgumentException("Invalid template file");lines.add(name+":"+hash(Files.readAllBytes(p)));}return hash(String.join("\n",lines).getBytes(StandardCharsets.UTF_8));}
     private String hash(byte[] bytes)throws Exception{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));}
     public synchronized JsonNode start(Request request){return startOwned(request,null);}

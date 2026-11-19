@@ -1,0 +1,448 @@
+{
+  "date": "2026-11-19",
+  "existing": [
+    {
+      "target": "business-game-demo",
+      "sourceRevision": "bf3e44bf2c32fd3a585cc6b982531f16ef807d13",
+      "baselineRunId": "2d53d059-0a84-460d-9dda-50f857176757",
+      "proposalId": "96c934d5-4559-4afd-b9da-00277a60b346",
+      "afterRunId": "54e34403-6190-4ee9-87dc-bd0e55762a69",
+      "baselineMetrics": {
+        "summaryErrors": 16,
+        "wins": 2
+      },
+      "candidateMetrics": {
+        "summaryErrors": 0,
+        "wins": 2
+      },
+      "beforeChecks": [
+        {
+          "id": "GD-F01",
+          "status": "FAIL",
+          "expected": "A committed or matured build must not be described as unformed solely because the run ended in defeat.",
+          "actual": "16 inconsistent summaries in 18 runs"
+        },
+        {
+          "id": "GD-engine-replay",
+          "status": "PASS",
+          "expected": "18 terminations, no invariant errors and one exact seeded replay",
+          "actual": "18 terminations, 0 invariant failures, replay=true"
+        }
+      ],
+      "afterChecks": [
+        {
+          "id": "GD-F01",
+          "status": "PASS",
+          "expected": "A committed or matured build must not be described as unformed solely because the run ended in defeat.",
+          "actual": "0 inconsistent summaries in 18 runs"
+        },
+        {
+          "id": "GD-engine-replay",
+          "status": "PASS",
+          "expected": "18 terminations, no invariant errors and one exact seeded replay",
+          "actual": "18 terminations, 0 invariant failures, replay=true"
+        }
+      ],
+      "findingIds": [
+        1
+      ],
+      "approval": "VALIDATED",
+      "originalUnchanged": true,
+      "matchedScenarios": 18,
+      "commandUnchanged": true,
+      "beforeVersion": "local-db23a1c5f610278fb7a8e700da5a906daf03e955d6406b317ad0ed4efcb0bae4",
+      "afterVersion": "local-4fc4e490bd9604c5ec8da6fc48b4083baafc7d1ec6b858bb98eb6d1bc3979dde",
+      "beforeArtifactHashes": {
+        "dist/assets/index-ZPKNiNwX.js": "12460f83fa2d5f345fc6650df6f77913f9e959c60e26eef2d0e3ba700d7ba191",
+        "dist/assets/index-kvTlPdWe.css": "eff93c7cad8d6d68aba8bbc911cc8fbc07ef1342dcef818d25be2b19eb0fe41e",
+        "dist/assets/phaser-BhHTBoCd.js": "a5c8e15e8afd49111f3a601b0050ff034fc4ac3e5470a7722129946ab7b960cb",
+        "dist/assets/preview-runtime/audio/ability_cooldown_click.wav": "60862cf26afb426c16b34e46be654d33c7a04eb4600fa70061a3c4a5052ece0d",
+        "dist/assets/preview-runtime/audio/ability_ready.wav": "09f0a8b9bbd6da90891de1ae6b6da00525fcdfc9627629cf0310789f6f74cea2",
+        "dist/assets/preview-runtime/audio/enemy_elite_spawn.wav": "5be1c425c02cc67e555fb1895aaf8390b14a18ff293d3d87c7de7c517e602d9b",
+        "dist/assets/preview-runtime/audio/enemy_relay_brute.wav": "84a6b1600022a071824c7281489573b9a423b78370c0602ee5c4f818c3104f06",
+        "dist/assets/preview-runtime/audio/enemy_relay_ranged.wav": "347c33806ed324dc275714f996d2a479abeee3f7f79b73e0bb1a86692ab9e819",
+        "dist/assets/preview-runtime/audio/enemy_relay_skirmisher.wav": "7f12b54f5b965c9e24994f891d2bb853c90df782e3282fed40f92ef6710fc56b",
+        "dist/assets/preview-runtime/audio/enemy_relay_standard.wav": "7819678b3fbc0aaea87baab08cc6c69de259c4f4a58ca97120d9beac32fb7b7a",
+        "dist/assets/preview-runtime/audio/enemy_shot_regular.wav": "910c66989938c5cd160b8751299a661b6bce02a0cc836285aca8796a20da6b9c",
+        "dist/assets/preview-runtime/audio/manifest.json": "d942c75ba3d22a7e84e643c06322cab53661f7432948e1388c39a0925eb9914d",
+        "dist/assets/preview-runtime/audio/player_crit_splash.wav": "859fa6f4f3f93d09ee706c3bb7ab169bcd8d796d70582249b8f15575dea8bd8d",
+        "dist/assets/preview-runtime/audio/player_dash_hit.wav": "030cd77233ab9c5391c20f31d8b1e7541ca296360549135a5194d4a5bf636556",
+        "dist/assets/preview-runtime/audio/player_dash_start.wav": "7410ecce920179938c0b3c148dc6755591c94b263c82b0af2af587a9078b12fd",
+        "dist/assets/preview-runtime/audio/player_hit_regular.wav": "fab7d191c095c84a6cb42e54a1c042281806c5d637cbf29de21319c5d6251058",
+        "dist/assets/preview-runtime/audio/player_hurt_core.wav": "4688fb78be81b204a92afbb8c5f54b7fdfd5fe5db52385c66c6a72ccbcb76ad7",
+        "dist/assets/preview-runtime/audio/player_kill_regular.wav": "7260ee88298b24645ee2e8a8ec3fdf5ed2fa656e269b4c0a67395b87b6fac31d",
+        "dist/assets/preview-runtime/audio/player_low_hp_warning.wav": "9f2e5fe810d707bf56eff9c156a383b832e755c99ff72b7446a5fdbb1f735575",
+        "dist/assets/preview-runtime/audio/player_move_loop.wav": "a6823535d7a10ea6c10846996c64837ed03be654c7486730b7fc1fd0db86653d",
+        "dist/assets/preview-runtime/audio/player_near_miss.wav": "91d0e9df0e9c45486312e9278f047bd66eb76de33681cd16bb9476601b10cd91",
+        "dist/assets/preview-runtime/audio/player_pickup_single.wav": "52496efcd1d9874482677e1516d263bc997f031817092ba8bb98c230ab6a8891",
+        "dist/assets/preview-runtime/audio/player_pierce_hit.wav": "acc5918505b30149eba770bbac545f31578624dc571365c3275ce075039ebb34",
+        "dist/assets/preview-runtime/audio/player_shoot_core.wav": "c3665ed6124020f427cb2118085c289823deb8d2432002c674a6cbc1dcd7fae3",
+        "dist/assets/preview-runtime/audio/route_crit_signature.wav": "085d8d948af57867475b8ffd53209d1ba7503dd185f9ac2513c47516fd6f00ad",
+        "dist/assets/preview-runtime/audio/route_dash_signature.wav": "b8399cc3ee1c1735f62e793945aaec75a556e0c86bb417494f70341203f6511f",
+        "dist/assets/preview-runtime/audio/route_matured.wav": "739d0f44ca16fe8cd780f07c945e0d7c045acf2438715d5e1872257d05ee2c98",
+        "dist/assets/preview-runtime/audio/route_pierce_signature.wav": "eea7910dd6bb5f924c0b5172c68399ccc01ad711bd06f501fa1a3f91f15efd38",
+        "dist/assets/preview-runtime/audio/state_pressure_regular.wav": "9c017f592ce7e04dc568ab00778241baf14f4924c8561653d1956d5c5e7c4602",
+        "dist/assets/preview-runtime/audio/ui_anomaly.wav": "43768615d4fc943411fc58dc3f655dd774958e9dded78e90bd9367e578daa4c2",
+        "dist/assets/preview-runtime/audio/ui_boss_alert.wav": "5849ea13a6fc5d55d113e1b7b703bc64defe5097eaafa08628de03464133c50a",
+        "dist/assets/preview-runtime/audio/ui_click.wav": "212b5d1f49627b45277ea372942cd61021976c5c84d0e6e784ad0cbdde16a51e",
+        "dist/assets/preview-runtime/audio/ui_confirm.wav": "ac0c1bc75d13901263ea3d6e04474e1070431d57a563ec95589e385b5d8a1e3f",
+        "dist/assets/preview-runtime/audio/ui_defeat.wav": "2a539f117ccb31cecb2e0aaf9f09136ce4b1ee27b70df3178d958f01744a4e33",
+        "dist/assets/preview-runtime/audio/ui_hover.wav": "30ce60d3e593f189d8e2beb2527aa4d1977d81d051d68a7a233c8ddfc6d170b9",
+        "dist/assets/preview-runtime/audio/ui_result.wav": "8b55fd6b51067529487d406f946b0b1f01c3394c4f32a7190b261085a2e5774a",
+        "dist/assets/preview-runtime/audio/ui_resume.wav": "db28319f254f062ddaf8c332847137637149dbfb735b2e9ef6097e201a60b4dc",
+        "dist/assets/preview-runtime/audio/ui_start.wav": "3e3a38fe91d2cbd39b0b65150ed9956118450bc4657df489e7d02feb484c07af",
+        "dist/assets/preview-runtime/audio/ui_upgrade.wav": "0bf1820f683cc6216dd16a0d9ae5a431f855b5016c00e69643aae5c7f3a1d5d3",
+        "dist/assets/preview-runtime/audio/ui_victory.wav": "47727085f17157f1c022b50c5b9c226bbdbf90da6a6b9a247a1a43068cb3c757",
+        "dist/assets/preview-runtime/audio/upgrade_equipped.wav": "9c3a17f2a27e69a5a8f5363a37d8e7a05e86b04e931cc6d4990aebde1c8d2d3f",
+        "dist/assets/preview-runtime/visual/bg-boss-core.svg": "e8c921a9a13889c569f0a0043fe24a90154193195c3b42cb57d1258a270478ab",
+        "dist/assets/preview-runtime/visual/bg-boss-danger.svg": "45f02fa3e2fd982672be4c2d8bdbf248a18320d651f5acfe3ce7fca1ab6b7b18",
+        "dist/assets/preview-runtime/visual/bg-debris-decal.svg": "39f3a42885aae5fc9202123f77c5d00985def4b997f7e9d1c16773f5fc595111",
+        "dist/assets/preview-runtime/visual/bg-floor-hex-tile.svg": "ecd85edc578435493abc71199dbf38974b3e8eeaa8d432eeae2497b47ca6c75a",
+        "dist/assets/preview-runtime/visual/bg-floor-holo-tile.svg": "2e4b5b488430156bc345ee2402ddd36d867ed80a8653b93c950c9e69be75d10f",
+        "dist/assets/preview-runtime/visual/bg-space-nebula.svg": "b1827403950013b6194bd428da9bfd68305c8c1dba9f5bb8a8fe06f56507afbb",
+        "dist/assets/preview-runtime/visual/boss-bastion-main.svg": "26efe0a45090e274d88f747e622f88987d57f9acea116d59cc6c25bd7d250920",
+        "dist/assets/preview-runtime/visual/boss-hunt-main.svg": "bc05200d8251b5ed33c8fa20561c0f610d31577e71035cf25bd0ffa609d41759",
+        "dist/assets/preview-runtime/visual/boss-lockdown-main.svg": "69e356bd39d7e0c88ef694ac83769509ed8a53e4ebf4ca2a891e655e912ec1c3",
+        "dist/assets/preview-runtime/visual/elite-core-crack.svg": "6993f7cb8d5c8204fa3f48bbd0342cd583f4a3a9fd44c279f96f887ab378ed06",
+        "dist/assets/preview-runtime/visual/elite-core-main.svg": "2181d2c6838a348352e72a7eac47348d0b0f67e768908ea79c4d74ab6cc1f4ff",
+        "dist/assets/preview-runtime/visual/elite-escort-unit.svg": "ee54dcf05a2022de57e13bda48b6c4dd2ebb0f55e6dc598e65fed9160d50f9ab",
+        "dist/assets/preview-runtime/visual/enemy-brute.svg": "0fa2195d2a6f56cdf7e1a57398b461fd9499d973ce0fb62bb4df9bda37d95103",
+        "dist/assets/preview-runtime/visual/enemy-projectile-core.svg": "3d93df5f70b9ad04adf4070ec03cc54af3598ed9d1f9d1009f1897a85158fa74",
+        "dist/assets/preview-runtime/visual/enemy-ranged.svg": "156f85ebb8c38fbe9b51c387c877022c16207446c3804e8e6129a166e48b95b9",
+        "dist/assets/preview-runtime/visual/enemy-skirmisher.svg": "b6ba510fde044ec529442f47e110219254b67fd27815093cf4edd7c70346ebf1",
+        "dist/assets/preview-runtime/visual/enemy-standard-a.svg": "c69f5676abe8f5c705e6b583d5570c99a57aa51bc2cbd8311e0fcb38d096e976",
+        "dist/assets/preview-runtime/visual/fx-boss-bastion-fireline.svg": "afafb698cd8e888bcf2ffb0c8100e329341916967df5220efa9e42b01b14bf82",
+        "dist/assets/preview-runtime/visual/fx-charge-glow.svg": "f157848887d70820b2b139e54bc6eaac2b45f7371fafb71ad45b2dc975d7c6f4",
+        "dist/assets/preview-runtime/visual/fx-explosion-small.svg": "8372bb19265d62a35e11690d51673d92fd15280ae74c74c2c693e2da45900f96",
+        "dist/assets/preview-runtime/visual/fx-hit-crit.svg": "fd3f13ac18a7386e8ce747cd8a2e36693d7448889f8355d57e9ea4e1ecbbe7cc",
+        "dist/assets/preview-runtime/visual/fx-hit-dash.svg": "aa1aac7b7ccfb031ac5b50977dceb6868778b360d9e6408c343f3f3764c49f5d",
+        "dist/assets/preview-runtime/visual/fx-hit-normal.svg": "4c9b1b5dc4fc670b81588f1ea51460fee14b37f027f188f8c9f7ec3c9f1b2c6d",
+        "dist/assets/preview-runtime/visual/fx-hit-pierce.svg": "b58df0d65c1f1945b795519a2fa34230d9101fdcc5dd89115bb04e140c215cba",
+        "dist/assets/preview-runtime/visual/fx-screen-flash-gold.svg": "32b64eece297ba107495d91bd0a7cce75e1d8226521748fec3f467fdfd1e62a0",
+        "dist/assets/preview-runtime/visual/fx-screen-flash-red.svg": "d8d71b602b9c1f342c068627dccc6b7ea9871ffb30ed7a801a9efb2bbd8772ed",
+        "dist/assets/preview-runtime/visual/fx-screen-flash-white.svg": "fb50c47d8b212886a558db132f1663dbf56c6fe1409f889b1af4374b6060bc22",
+        "dist/assets/preview-runtime/visual/fx-trail-crit.svg": "ffbff3b90ec46ce919c454365f74f49b18e4ced5fb3fee3692a516d5c7b39600",
+        "dist/assets/preview-runtime/visual/fx-trail-dash.svg": "b67c71155b5611aa457ee9758eeecee41ead1fbec1ced757ec3ea2fce05bf7ab",
+        "dist/assets/preview-runtime/visual/fx-trail-pierce.svg": "36e6f6befd43f31a56e767211622b7f0f016250c78e27c9cab41c407c0b31850",
+        "dist/assets/preview-runtime/visual/fx-xp-orb.svg": "4ddbcc71866eac8f2c23e7fcefec5396c544068176d915944a161ee28de257b2",
+        "dist/assets/preview-runtime/visual/player-projectile-core.svg": "8a2222917df2aa82b62252d446dbd1e7ec6cc3a8f412b28326397416527e83a0",
+        "dist/assets/preview-runtime/visual/unit-player-core.svg": "c4f7d35fad887421d302c58274aa1a86f8b9a7eeb7931337875a606c76c6d04e",
+        "dist/assets/rolldown-runtime-DF2fYuay.js": "03a76345c69f8bd751dac18894f65c0918f1690fbbb661f38052819cd5ae8209",
+        "dist/data/balance.json": "4a2dba925bd59d95bf18c65d2ca01a78c4e1e8582a7fa26885664577b5d07a95",
+        "dist/data/battleTemplates.json": "9fdb2938f813099adb6e3176f6bd732bce05378cf547c10d30ff57c5d807ce05",
+        "dist/data/enemyArchetypes.json": "2cd9b214e7ac80676a94fc75d75bf6b1496cf7a1becf0693e907913d8147baf5",
+        "dist/data/upgrades.json": "ff03dd02c6eb7e3e8f0a593312736a63855fb90f7eb8e2100fb5fb5509d1472c",
+        "dist/index.html": "f514b828163868ff6e2c8c534584303183fafa199cb0482f6ae73f19e302e624",
+        "dist/showcase-assets/boss-signature.png": "e1391218c0adb9bf2f9dbaaef3537f63ba89ddab5435c273abca4d864420db18",
+        "dist/showcase-assets/crit-payoff.png": "0198274b478525f4f0d97f48c80897ac6bd1af95fbd65c7f9013b77b122ddd88",
+        "dist/showcase-assets/dash-payoff.png": "fba1d86ed47fd67abbc0ad3a27c030df940f9e56cdc1b9310a390c0313637b50",
+        "dist/showcase-assets/home.png": "e31e60dd6ad4f2b56fc04676ae74ed1ff1587eda9647f3b891bb2707eb780407",
+        "dist/showcase-assets/pierce-payoff.png": "c6b8c690561cfc2690e1581da6bb3c30f7af501b13befd2972801ef108ca4670",
+        "dist/showcase-assets/result-detail.png": "6ab2eed2516e502ef4109bacc5e339d9da669598a0e1b9ca4951213b28369373",
+        "dist/showcase-assets/upgrade.png": "fe5da3e267db2b90b58787fa3c0aa3aa5d860ddb1d6392ae7d7225cefff66d7e",
+        "output/qa/agl-engine/summary.json": "48230ba4c409a8cfca9d93da781949edc426e8a271710ed0d5f92bb075cde25f"
+      },
+      "afterArtifactHashes": {
+        "dist/assets/index-2QRYIMHi.js": "527b16deb60c223fb0c39abe81c800f2059bbb888d46d063272b3545e7c47b73",
+        "dist/assets/index-kvTlPdWe.css": "eff93c7cad8d6d68aba8bbc911cc8fbc07ef1342dcef818d25be2b19eb0fe41e",
+        "dist/assets/phaser-BhHTBoCd.js": "a5c8e15e8afd49111f3a601b0050ff034fc4ac3e5470a7722129946ab7b960cb",
+        "dist/assets/preview-runtime/audio/ability_cooldown_click.wav": "60862cf26afb426c16b34e46be654d33c7a04eb4600fa70061a3c4a5052ece0d",
+        "dist/assets/preview-runtime/audio/ability_ready.wav": "09f0a8b9bbd6da90891de1ae6b6da00525fcdfc9627629cf0310789f6f74cea2",
+        "dist/assets/preview-runtime/audio/enemy_elite_spawn.wav": "5be1c425c02cc67e555fb1895aaf8390b14a18ff293d3d87c7de7c517e602d9b",
+        "dist/assets/preview-runtime/audio/enemy_relay_brute.wav": "84a6b1600022a071824c7281489573b9a423b78370c0602ee5c4f818c3104f06",
+        "dist/assets/preview-runtime/audio/enemy_relay_ranged.wav": "347c33806ed324dc275714f996d2a479abeee3f7f79b73e0bb1a86692ab9e819",
+        "dist/assets/preview-runtime/audio/enemy_relay_skirmisher.wav": "7f12b54f5b965c9e24994f891d2bb853c90df782e3282fed40f92ef6710fc56b",
+        "dist/assets/preview-runtime/audio/enemy_relay_standard.wav": "7819678b3fbc0aaea87baab08cc6c69de259c4f4a58ca97120d9beac32fb7b7a",
+        "dist/assets/preview-runtime/audio/enemy_shot_regular.wav": "910c66989938c5cd160b8751299a661b6bce02a0cc836285aca8796a20da6b9c",
+        "dist/assets/preview-runtime/audio/manifest.json": "d942c75ba3d22a7e84e643c06322cab53661f7432948e1388c39a0925eb9914d",
+        "dist/assets/preview-runtime/audio/player_crit_splash.wav": "859fa6f4f3f93d09ee706c3bb7ab169bcd8d796d70582249b8f15575dea8bd8d",
+        "dist/assets/preview-runtime/audio/player_dash_hit.wav": "030cd77233ab9c5391c20f31d8b1e7541ca296360549135a5194d4a5bf636556",
+        "dist/assets/preview-runtime/audio/player_dash_start.wav": "7410ecce920179938c0b3c148dc6755591c94b263c82b0af2af587a9078b12fd",
+        "dist/assets/preview-runtime/audio/player_hit_regular.wav": "fab7d191c095c84a6cb42e54a1c042281806c5d637cbf29de21319c5d6251058",
+        "dist/assets/preview-runtime/audio/player_hurt_core.wav": "4688fb78be81b204a92afbb8c5f54b7fdfd5fe5db52385c66c6a72ccbcb76ad7",
+        "dist/assets/preview-runtime/audio/player_kill_regular.wav": "7260ee88298b24645ee2e8a8ec3fdf5ed2fa656e269b4c0a67395b87b6fac31d",
+        "dist/assets/preview-runtime/audio/player_low_hp_warning.wav": "9f2e5fe810d707bf56eff9c156a383b832e755c99ff72b7446a5fdbb1f735575",
+        "dist/assets/preview-runtime/audio/player_move_loop.wav": "a6823535d7a10ea6c10846996c64837ed03be654c7486730b7fc1fd0db86653d",
+        "dist/assets/preview-runtime/audio/player_near_miss.wav": "91d0e9df0e9c45486312e9278f047bd66eb76de33681cd16bb9476601b10cd91",
+        "dist/assets/preview-runtime/audio/player_pickup_single.wav": "52496efcd1d9874482677e1516d263bc997f031817092ba8bb98c230ab6a8891",
+        "dist/assets/preview-runtime/audio/player_pierce_hit.wav": "acc5918505b30149eba770bbac545f31578624dc571365c3275ce075039ebb34",
+        "dist/assets/preview-runtime/audio/player_shoot_core.wav": "c3665ed6124020f427cb2118085c289823deb8d2432002c674a6cbc1dcd7fae3",
+        "dist/assets/preview-runtime/audio/route_crit_signature.wav": "085d8d948af57867475b8ffd53209d1ba7503dd185f9ac2513c47516fd6f00ad",
+        "dist/assets/preview-runtime/audio/route_dash_signature.wav": "b8399cc3ee1c1735f62e793945aaec75a556e0c86bb417494f70341203f6511f",
+        "dist/assets/preview-runtime/audio/route_matured.wav": "739d0f44ca16fe8cd780f07c945e0d7c045acf2438715d5e1872257d05ee2c98",
+        "dist/assets/preview-runtime/audio/route_pierce_signature.wav": "eea7910dd6bb5f924c0b5172c68399ccc01ad711bd06f501fa1a3f91f15efd38",
+        "dist/assets/preview-runtime/audio/state_pressure_regular.wav": "9c017f592ce7e04dc568ab00778241baf14f4924c8561653d1956d5c5e7c4602",
+        "dist/assets/preview-runtime/audio/ui_anomaly.wav": "43768615d4fc943411fc58dc3f655dd774958e9dded78e90bd9367e578daa4c2",
+        "dist/assets/preview-runtime/audio/ui_boss_alert.wav": "5849ea13a6fc5d55d113e1b7b703bc64defe5097eaafa08628de03464133c50a",
+        "dist/assets/preview-runtime/audio/ui_click.wav": "212b5d1f49627b45277ea372942cd61021976c5c84d0e6e784ad0cbdde16a51e",
+        "dist/assets/preview-runtime/audio/ui_confirm.wav": "ac0c1bc75d13901263ea3d6e04474e1070431d57a563ec95589e385b5d8a1e3f",
+        "dist/assets/preview-runtime/audio/ui_defeat.wav": "2a539f117ccb31cecb2e0aaf9f09136ce4b1ee27b70df3178d958f01744a4e33",
+        "dist/assets/preview-runtime/audio/ui_hover.wav": "30ce60d3e593f189d8e2beb2527aa4d1977d81d051d68a7a233c8ddfc6d170b9",
+        "dist/assets/preview-runtime/audio/ui_result.wav": "8b55fd6b51067529487d406f946b0b1f01c3394c4f32a7190b261085a2e5774a",
+        "dist/assets/preview-runtime/audio/ui_resume.wav": "db28319f254f062ddaf8c332847137637149dbfb735b2e9ef6097e201a60b4dc",
+        "dist/assets/preview-runtime/audio/ui_start.wav": "3e3a38fe91d2cbd39b0b65150ed9956118450bc4657df489e7d02feb484c07af",
+        "dist/assets/preview-runtime/audio/ui_upgrade.wav": "0bf1820f683cc6216dd16a0d9ae5a431f855b5016c00e69643aae5c7f3a1d5d3",
+        "dist/assets/preview-runtime/audio/ui_victory.wav": "47727085f17157f1c022b50c5b9c226bbdbf90da6a6b9a247a1a43068cb3c757",
+        "dist/assets/preview-runtime/audio/upgrade_equipped.wav": "9c3a17f2a27e69a5a8f5363a37d8e7a05e86b04e931cc6d4990aebde1c8d2d3f",
+        "dist/assets/preview-runtime/visual/bg-boss-core.svg": "e8c921a9a13889c569f0a0043fe24a90154193195c3b42cb57d1258a270478ab",
+        "dist/assets/preview-runtime/visual/bg-boss-danger.svg": "45f02fa3e2fd982672be4c2d8bdbf248a18320d651f5acfe3ce7fca1ab6b7b18",
+        "dist/assets/preview-runtime/visual/bg-debris-decal.svg": "39f3a42885aae5fc9202123f77c5d00985def4b997f7e9d1c16773f5fc595111",
+        "dist/assets/preview-runtime/visual/bg-floor-hex-tile.svg": "ecd85edc578435493abc71199dbf38974b3e8eeaa8d432eeae2497b47ca6c75a",
+        "dist/assets/preview-runtime/visual/bg-floor-holo-tile.svg": "2e4b5b488430156bc345ee2402ddd36d867ed80a8653b93c950c9e69be75d10f",
+        "dist/assets/preview-runtime/visual/bg-space-nebula.svg": "b1827403950013b6194bd428da9bfd68305c8c1dba9f5bb8a8fe06f56507afbb",
+        "dist/assets/preview-runtime/visual/boss-bastion-main.svg": "26efe0a45090e274d88f747e622f88987d57f9acea116d59cc6c25bd7d250920",
+        "dist/assets/preview-runtime/visual/boss-hunt-main.svg": "bc05200d8251b5ed33c8fa20561c0f610d31577e71035cf25bd0ffa609d41759",
+        "dist/assets/preview-runtime/visual/boss-lockdown-main.svg": "69e356bd39d7e0c88ef694ac83769509ed8a53e4ebf4ca2a891e655e912ec1c3",
+        "dist/assets/preview-runtime/visual/elite-core-crack.svg": "6993f7cb8d5c8204fa3f48bbd0342cd583f4a3a9fd44c279f96f887ab378ed06",
+        "dist/assets/preview-runtime/visual/elite-core-main.svg": "2181d2c6838a348352e72a7eac47348d0b0f67e768908ea79c4d74ab6cc1f4ff",
+        "dist/assets/preview-runtime/visual/elite-escort-unit.svg": "ee54dcf05a2022de57e13bda48b6c4dd2ebb0f55e6dc598e65fed9160d50f9ab",
+        "dist/assets/preview-runtime/visual/enemy-brute.svg": "0fa2195d2a6f56cdf7e1a57398b461fd9499d973ce0fb62bb4df9bda37d95103",
+        "dist/assets/preview-runtime/visual/enemy-projectile-core.svg": "3d93df5f70b9ad04adf4070ec03cc54af3598ed9d1f9d1009f1897a85158fa74",
+        "dist/assets/preview-runtime/visual/enemy-ranged.svg": "156f85ebb8c38fbe9b51c387c877022c16207446c3804e8e6129a166e48b95b9",
+        "dist/assets/preview-runtime/visual/enemy-skirmisher.svg": "b6ba510fde044ec529442f47e110219254b67fd27815093cf4edd7c70346ebf1",
+        "dist/assets/preview-runtime/visual/enemy-standard-a.svg": "c69f5676abe8f5c705e6b583d5570c99a57aa51bc2cbd8311e0fcb38d096e976",
+        "dist/assets/preview-runtime/visual/fx-boss-bastion-fireline.svg": "afafb698cd8e888bcf2ffb0c8100e329341916967df5220efa9e42b01b14bf82",
+        "dist/assets/preview-runtime/visual/fx-charge-glow.svg": "f157848887d70820b2b139e54bc6eaac2b45f7371fafb71ad45b2dc975d7c6f4",
+        "dist/assets/preview-runtime/visual/fx-explosion-small.svg": "8372bb19265d62a35e11690d51673d92fd15280ae74c74c2c693e2da45900f96",
+        "dist/assets/preview-runtime/visual/fx-hit-crit.svg": "fd3f13ac18a7386e8ce747cd8a2e36693d7448889f8355d57e9ea4e1ecbbe7cc",
+        "dist/assets/preview-runtime/visual/fx-hit-dash.svg": "aa1aac7b7ccfb031ac5b50977dceb6868778b360d9e6408c343f3f3764c49f5d",
+        "dist/assets/preview-runtime/visual/fx-hit-normal.svg": "4c9b1b5dc4fc670b81588f1ea51460fee14b37f027f188f8c9f7ec3c9f1b2c6d",
+        "dist/assets/preview-runtime/visual/fx-hit-pierce.svg": "b58df0d65c1f1945b795519a2fa34230d9101fdcc5dd89115bb04e140c215cba",
+        "dist/assets/preview-runtime/visual/fx-screen-flash-gold.svg": "32b64eece297ba107495d91bd0a7cce75e1d8226521748fec3f467fdfd1e62a0",
+        "dist/assets/preview-runtime/visual/fx-screen-flash-red.svg": "d8d71b602b9c1f342c068627dccc6b7ea9871ffb30ed7a801a9efb2bbd8772ed",
+        "dist/assets/preview-runtime/visual/fx-screen-flash-white.svg": "fb50c47d8b212886a558db132f1663dbf56c6fe1409f889b1af4374b6060bc22",
+        "dist/assets/preview-runtime/visual/fx-trail-crit.svg": "ffbff3b90ec46ce919c454365f74f49b18e4ced5fb3fee3692a516d5c7b39600",
+        "dist/assets/preview-runtime/visual/fx-trail-dash.svg": "b67c71155b5611aa457ee9758eeecee41ead1fbec1ced757ec3ea2fce05bf7ab",
+        "dist/assets/preview-runtime/visual/fx-trail-pierce.svg": "36e6f6befd43f31a56e767211622b7f0f016250c78e27c9cab41c407c0b31850",
+        "dist/assets/preview-runtime/visual/fx-xp-orb.svg": "4ddbcc71866eac8f2c23e7fcefec5396c544068176d915944a161ee28de257b2",
+        "dist/assets/preview-runtime/visual/player-projectile-core.svg": "8a2222917df2aa82b62252d446dbd1e7ec6cc3a8f412b28326397416527e83a0",
+        "dist/assets/preview-runtime/visual/unit-player-core.svg": "c4f7d35fad887421d302c58274aa1a86f8b9a7eeb7931337875a606c76c6d04e",
+        "dist/assets/rolldown-runtime-DF2fYuay.js": "03a76345c69f8bd751dac18894f65c0918f1690fbbb661f38052819cd5ae8209",
+        "dist/data/balance.json": "4a2dba925bd59d95bf18c65d2ca01a78c4e1e8582a7fa26885664577b5d07a95",
+        "dist/data/battleTemplates.json": "9fdb2938f813099adb6e3176f6bd732bce05378cf547c10d30ff57c5d807ce05",
+        "dist/data/enemyArchetypes.json": "2cd9b214e7ac80676a94fc75d75bf6b1496cf7a1becf0693e907913d8147baf5",
+        "dist/data/upgrades.json": "ff03dd02c6eb7e3e8f0a593312736a63855fb90f7eb8e2100fb5fb5509d1472c",
+        "dist/index.html": "ed07e5c951832d8cf6bf1c96468b3a73572fc1ff343bac48cca1cb38418681b9",
+        "dist/showcase-assets/boss-signature.png": "e1391218c0adb9bf2f9dbaaef3537f63ba89ddab5435c273abca4d864420db18",
+        "dist/showcase-assets/crit-payoff.png": "0198274b478525f4f0d97f48c80897ac6bd1af95fbd65c7f9013b77b122ddd88",
+        "dist/showcase-assets/dash-payoff.png": "fba1d86ed47fd67abbc0ad3a27c030df940f9e56cdc1b9310a390c0313637b50",
+        "dist/showcase-assets/home.png": "e31e60dd6ad4f2b56fc04676ae74ed1ff1587eda9647f3b891bb2707eb780407",
+        "dist/showcase-assets/pierce-payoff.png": "c6b8c690561cfc2690e1581da6bb3c30f7af501b13befd2972801ef108ca4670",
+        "dist/showcase-assets/result-detail.png": "6ab2eed2516e502ef4109bacc5e339d9da669598a0e1b9ca4951213b28369373",
+        "dist/showcase-assets/upgrade.png": "fe5da3e267db2b90b58787fa3c0aa3aa5d860ddb1d6392ae7d7225cefff66d7e",
+        "output/qa/agl-engine/summary.json": "48fef21a04338303515b931941b35de0c256ba485527d872737ea0b06bccfca2"
+      },
+      "proposalOperator": "local verification script"
+    },
+    {
+      "target": "business-2048",
+      "sourceRevision": "478b6ec346e3787f589e4af751378d06ded4cbbc",
+      "baselineRunId": "549f8e25-d855-4312-90f2-88ad2e2fd281",
+      "proposalId": "15f555ff-256c-4aab-9e39-0b71da6b19ba",
+      "afterRunId": "9a00407d-0a73-4ff6-b19f-56d0b279b155",
+      "baselineMetrics": {
+        "restartEvents": 2,
+        "directions": [
+          3,
+          1
+        ],
+        "browser": "157.0.4341.60"
+      },
+      "candidateMetrics": {
+        "restartEvents": 1,
+        "directions": [
+          3,
+          1
+        ],
+        "browser": "157.0.4341.60"
+      },
+      "beforeChecks": [
+        {
+          "id": "restart-held-key",
+          "status": "FAIL",
+          "expected": "One restart per held R key",
+          "actual": "2"
+        },
+        {
+          "id": "move-key-regression",
+          "status": "PASS",
+          "expected": "ArrowLeft and D dispatch left and right",
+          "actual": "3,1"
+        }
+      ],
+      "afterChecks": [
+        {
+          "id": "restart-held-key",
+          "status": "PASS",
+          "expected": "One restart per held R key",
+          "actual": "1"
+        },
+        {
+          "id": "move-key-regression",
+          "status": "PASS",
+          "expected": "ArrowLeft and D dispatch left and right",
+          "actual": "3,1"
+        }
+      ],
+      "findingIds": [
+        2
+      ],
+      "approval": "VALIDATED",
+      "originalUnchanged": true,
+      "commandUnchanged": true,
+      "beforeVersion": "local-d556baedbca5e9b861f9747daa789204c55b2007154cc05869315790cc7fdaab",
+      "afterVersion": "local-0146d41273801b34b06dabed549e8bf567192dd47596c7488eb9cb58aad87487",
+      "beforeArtifactHashes": {
+        "output/agl-keyboard.json": "91bc166b8c5c972ec50e3af2fcd7986efea1bc8d47e14255735ae650789a4080"
+      },
+      "afterArtifactHashes": {
+        "output/agl-keyboard.json": "9feeccdd4fff954db9c0d77a38f14cdd9e9290363f78418733f3298fd6ed88f0"
+      },
+      "proposalOperator": "local verification script"
+    }
+  ],
+  "newWorks": [
+    {
+      "name": "余热回廊",
+      "mechanic": "heat-burst",
+      "templateVersion": "1.0.1",
+      "templateHash": "a9e2dbf050a1316f2aaa541a37007354829e32ee396dae83d32d871e2b1e982c",
+      "specification": {
+        "id": "3bd9e457-af31-4dc2-acc5-e476ec28c9c5",
+        "revision": 1,
+        "hash": "54d4cf78c7ac3956301b0348dac053099f869a7e5c0a0c1f3432ddd42b16c82d"
+      },
+      "scopeConfirmedAt": "2026-11-19T06:19:21.551838400Z",
+      "productionId": "9a308b83-bb4c-43e6-a3f6-ffaba5c27128",
+      "candidateId": "3662f6dd-83cd-3421-976c-c328e053838d",
+      "archiveSha256": "6c57d0a9b6f33c90d7eb3f10e6cce97eb292f91b917d8bf735425684e025a8ff",
+      "browserExecutionId": "89c0ba28-2e21-45a1-b3ad-d1a46636d40d",
+      "engineStatus": "PASS",
+      "browserChecks": [
+        {
+          "criterionId": "resource",
+          "outcome": "PASS",
+          "field": "heat",
+          "expected": 0,
+          "actual": 0
+        },
+        {
+          "criterionId": "score",
+          "outcome": "PASS",
+          "field": "score",
+          "expected": 0,
+          "actual": 0
+        },
+        {
+          "criterionId": "health",
+          "outcome": "PASS",
+          "field": "health",
+          "expected": 100,
+          "actual": 100
+        },
+        {
+          "criterionId": "time",
+          "outcome": "PASS",
+          "field": "time",
+          "expected": 0,
+          "actual": 0
+        },
+        {
+          "criterionId": "play-mechanic",
+          "outcome": "NOT_TESTED",
+          "reason": "No mapped browser probe"
+        }
+      ],
+      "play": {
+        "before": 6,
+        "after": 50,
+        "resource": "热量",
+        "settlement": "胜利！存活目标达成"
+      },
+      "elapsedMs": 22084,
+      "deliveryEligible": false,
+      "modelRequests": 0
+    },
+    {
+      "name": "屏障穿梭",
+      "mechanic": "shield-dash",
+      "templateVersion": "1.0.1",
+      "templateHash": "a9e2dbf050a1316f2aaa541a37007354829e32ee396dae83d32d871e2b1e982c",
+      "specification": {
+        "id": "ce990539-9227-4736-b0c3-d475dfd4fbc2",
+        "revision": 1,
+        "hash": "f68fa5ab173801f0bddd3fe5f82b1fde72e50c36bcd9a8332c91ee2c7fdd0624"
+      },
+      "scopeConfirmedAt": "2026-11-19T06:19:43.527760500Z",
+      "productionId": "32552700-59cd-4828-ba40-2145e7d04e4c",
+      "candidateId": "a2d48670-4a82-3c34-b81c-e56f68cd9d08",
+      "archiveSha256": "fa1ef0d5a0f37b8d46eb94df63a9eaa10525c979a6dcbcd6cde0b31c4383b930",
+      "browserExecutionId": "e9ef35e6-3e9f-44ee-b8e8-9c11cfeddf6a",
+      "engineStatus": "PASS",
+      "browserChecks": [
+        {
+          "criterionId": "resource",
+          "outcome": "PASS",
+          "field": "energy",
+          "expected": 0,
+          "actual": 0
+        },
+        {
+          "criterionId": "score",
+          "outcome": "PASS",
+          "field": "score",
+          "expected": 0,
+          "actual": 0
+        },
+        {
+          "criterionId": "health",
+          "outcome": "PASS",
+          "field": "health",
+          "expected": 100,
+          "actual": 100
+        },
+        {
+          "criterionId": "time",
+          "outcome": "PASS",
+          "field": "time",
+          "expected": 0,
+          "actual": 0
+        },
+        {
+          "criterionId": "play-mechanic",
+          "outcome": "NOT_TESTED",
+          "reason": "No mapped browser probe"
+        }
+      ],
+      "play": {
+        "before": 65,
+        "after": 5,
+        "resource": "能量",
+        "settlement": "胜利！存活目标达成"
+      },
+      "elapsedMs": 21315,
+      "deliveryEligible": false,
+      "modelRequests": 0
+    }
+  ],
+  "portable": [
+    {
+      "work": "heat",
+      "rebuiltFiles": 5,
+      "portableFiles": 5,
+      "status": "PASS"
+    },
+    {
+      "work": "shield",
+      "rebuiltFiles": 5,
+      "portableFiles": 5,
+      "status": "PASS"
+    }
+  ],
+  "supplierValidation": {
+    "status": "NOT_RUN",
+    "reason": "No configured provider credential",
+    "requests": 0,
+    "cost": null
+  }
+}
