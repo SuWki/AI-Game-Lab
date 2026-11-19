@@ -296,6 +296,33 @@ class ProductionJobServiceTest {
   assertThat(browser.latest(second)).isEmpty();
   assertThatThrownBy(() -> browser.record(second, observation)).hasMessageContaining("different fixed package");
  }
+ @Test void inputProbeUsesFixedThresholdAndTimeoutClosesDelivery() throws Exception {
+  var content = (com.fasterxml.jackson.databind.node.ObjectNode) spec.path("content").deepCopy();
+  var criterion = (com.fasterxml.jackson.databind.node.ObjectNode) content.path("acceptanceCriteria").get(0);
+  criterion.putObject("browserProbe").put("profile", CandidateBrowserEvidenceService.INPUT_PROFILE)
+          .put("field", "heat").put("expected", 30);
+  spec = artifacts.save(new ProductionArtifactService.Request(task, null, null, 0, "GameSpec", content,
+          List.of(mapper.treeToValue(spec.path("inputRefs").get(0), ProductionArtifactService.Ref.class))));
+  String id = reviewCandidate("browser-input-gate");
+  var candidate = candidates.get(id);
+  String png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8ioAAAAASUVORK5CYII=";
+  String before = "生命 100 · 热量 6 · 得分 0 · 时间 0.1 / 6 秒";
+  var pass = new CandidateBrowserEvidenceService.Interaction(before, "生命 100 · 热量 49 · 得分 0 · 时间 0.2 / 6 秒", true, 100, png);
+  var timeout = new CandidateBrowserEvidenceService.Interaction(before, before, true, 2500, png);
+  java.util.function.Function<CandidateBrowserEvidenceService.Interaction, CandidateBrowserEvidenceService.Observation> observe =
+          input -> new CandidateBrowserEvidenceService.Observation(UUID.randomUUID().toString(),
+                  candidate.path("manifestHash").asText(), candidate.path("archiveSha256").asText(),
+                  "Chromium fixture", null, null, null, java.time.Instant.now(), input);
+  var observed = browser.record(id, observe.apply(pass)).path("checks").get(0);
+  assertThat(observed.path("actual").asInt()).isEqualTo(43);
+  assertThat(observed.path("outcome").asText()).isEqualTo("PASS");
+  assertThat(reviews.save(id, reviewRequest(id, 0, "ACCEPTED", "PASS", "Fixture observation"))
+          .path("gate").path("eligibleForDelivery").asBoolean()).isTrue();
+  assertThatThrownBy(() -> browser.record(id, observe.apply(null))).hasMessageContaining("input trace");
+  var failed = browser.record(id, observe.apply(timeout)).path("checks").get(0);
+  assertThat(failed.path("reason").asText()).isEqualTo("RESOURCE_CHANGE_TIMEOUT");
+  assertThat(reviews.view(id).path("gate").path("eligibleForDelivery").asBoolean()).isFalse();
+ }
  CandidateReviewService.Request reviewRequest(String id,int revision,String decision,String outcome,String note){return new CandidateReviewService.Request(revision,candidates.get(id).path("manifestHash").asText(),"Fixture operator","Bound fixed-build observation",decision,List.of(new CandidateReviewService.Check("A1",outcome,note)));}
  @Test void enginePassDoesNotInventManualSpecificationCoverage()throws Exception{
   String id=reviewCandidate("manual-unreviewed");var view=reviews.view(id);assertThat(view.path("revision").asInt()).isZero();assertThat(view.path("decision").asText()).isEqualTo("UNREVIEWED");assertThat(view.path("engineChecks").size()).isEqualTo(6);assertThat(view.path("checks").get(0).path("expected").asText()).isEqualTo("reset");assertThat(view.path("coverage").path("untested").asInt()).isEqualTo(1);assertThat(view.path("coverage").path("requirements").get(0).path("status").asText()).isEqualTo("NOT_TESTED");assertThat(view.path("gate").path("eligibleForDelivery").asBoolean()).isFalse();assertThatThrownBy(()->reviews.receipt(id)).hasMessageContaining("No manual review");

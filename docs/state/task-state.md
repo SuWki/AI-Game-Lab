@@ -8,6 +8,8 @@
 
 ## 当前摘要（2026-11-19 平台审查）
 
+- 固定候选增加空格技能浏览器证据。Edge 实测热量 6→51、能量 65→5，两项最低变化 30 均通过。能量变化要求 90 时记录超时、保留截图，评审接受返回 409。重开得分检查仍通过，说明清晰度保持未测。下一项为工作台接续。[浏览器验收](../platform/CANDIDATE_BROWSER_EVIDENCE.md)
+
 - 完成生产列表轮询优化。等待审批和待评审的生产在重启前后各轮询 20 次，四组写入均从 40 行降至 0 行。审批通过后用同一个回归执行恢复原 Builder Run 一次。下一项是扩展 Tester 和 QA 的浏览器交互证据。[验收记录](../reports/PRODUCTION_POLLING_ACCEPTANCE.md)
 
 - 新增 CC Switch 的本机 Claude Messages 入口。代理持有真实 Key，Lab 预检只访问本机健康端点。隔离后端连接协议夹具完成 1 次 Designer 和 6 次 Builder 调用，Builder 记录 408 token 并生成 READY 候选。代理未就绪时验收脚本创建 0 个任务。真实中转账单和用户试玩延后，下一开发项为生产列表轮询写入测量与优化。[开发顺序](../design/DEVELOPMENT_ROADMAP.md) · [接入方法](../platform/PROVIDER_ACCEPTANCE.md)
