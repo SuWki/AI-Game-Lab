@@ -8,6 +8,8 @@
 
 ## 当前摘要（2026-11-19 平台审查）
 
+- 完成生产列表轮询优化。等待审批和待评审的生产在重启前后各轮询 20 次，四组写入均从 40 行降至 0 行。审批通过后用同一个回归执行恢复原 Builder Run 一次。下一项是扩展 Tester 和 QA 的浏览器交互证据。[验收记录](../reports/PRODUCTION_POLLING_ACCEPTANCE.md)
+
 - 新增 CC Switch 的本机 Claude Messages 入口。代理持有真实 Key，Lab 预检只访问本机健康端点。隔离后端连接协议夹具完成 1 次 Designer 和 6 次 Builder 调用，Builder 记录 408 token 并生成 READY 候选。代理未就绪时验收脚本创建 0 个任务。真实中转账单和用户试玩延后，下一开发项为生产列表轮询写入测量与优化。[开发顺序](../design/DEVELOPMENT_ROADMAP.md) · [接入方法](../platform/PROVIDER_ACCEPTANCE.md)
 
 - 真实模型验收入口已实现。预检读取当前网关、重试、token 与时间配置。分阶段脚本保留规格确认和候选人工评审，报告记录请求模型、响应模型、已报告用量、未结算轮次、候选和修订。隔离 HTTP 夹具完成 1 次 Designer 和 6 次 Builder 请求，Builder 记录 408 token，产出 READY 候选；无凭据时未创建任务，未确认制造范围时未启动 Builder。真实付费调用与用户试玩接受仍待完成。[执行入口](../platform/PROVIDER_ACCEPTANCE.md)
