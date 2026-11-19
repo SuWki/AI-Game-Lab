@@ -98,26 +98,91 @@ public class ProductionJobService {
         if(job.path("iterationCancelled").asBoolean())throw BusinessException.conflict("Production cancelled");
         if(ownerRunId!=null&&job.path("ownerRunId").asLong(-1)!=ownerRunId)throw BusinessException.conflict("Production belongs to another Agent Run");
         if(!"BUILT".equals(job.path("status").asText()))throw BusinessException.conflict("A completed production build is required");
-        if(job.hasNonNull("validationRunId"))return job;
+        if (job.hasNonNull("validationRunId") && !"INTERRUPTED".equals(job.path("validationStatus").asText())) return job;
         try{
             Path workspace=Path.of(job.path("result").path("workspace").asText()).toRealPath(),directory=Path.of(job.path("jobDirectory").asText()).toRealPath();
             if(!workspace.startsWith(directory.resolve("output")))throw new IllegalArgumentException("Production workspace is outside the managed output");
-            Path contractPath=directory.resolve("acceptance-contract.json");String contractHash,programHash,builderHash;
-            if(job.hasNonNull("acceptanceContractHash")){contractHash=job.path("acceptanceContractHash").asText();programHash=job.path("acceptanceProgramHash").asText();builderHash=job.path("acceptanceBuilderHash").asText();if(!hash(Files.readAllBytes(contractPath)).equals(contractHash))throw BusinessException.conflict("Frozen acceptance contract changed");}
-            else{
-                byte[] config=Files.readAllBytes(workspace.resolve(job.path("result").path("build").path("buildId").asText()).resolve("config.json"));
-                if(!hash(config).equals(job.path("result").path("build").path("files").path("config.json").asText()))throw BusinessException.conflict("Built configuration changed");
-                ObjectNode protectedHashes=mapper.createObjectNode();for(String name:PROTECTED){Path file=workspace.resolve(name);if(Files.isSymbolicLink(file)||!Files.isRegularFile(file))throw new IllegalArgumentException("Missing protected input: "+name);protectedHashes.put(name,hash(Files.readAllBytes(file)));}
-                var contract=mapper.createObjectNode().put("schemaVersion",1).put("scope","survival-web-engine-v1").put("productionId",id).put("specHash",job.path("specHash").asText());contract.set("config",mapper.readTree(config));contract.set("protectedFiles",protectedHashes);
-                Files.writeString(contractPath,contract.toString(),StandardCharsets.UTF_8,StandardOpenOption.CREATE_NEW);contractHash=hash(Files.readAllBytes(contractPath));
-                programHash=hash(Files.readAllBytes(repo.resolve("scripts/production/acceptance/validate-game.mjs")));builderHash=hash(Files.readAllBytes(repo.resolve("scripts/production/build-project.mjs")));
-                job.put("acceptanceContractHash",contractHash).put("acceptanceProgramHash",programHash).put("acceptanceBuilderHash",builderHash);save(job);
-            }
-            var sources=new ArrayList<>(List.of("engine.mjs","game.mjs","index.html","style.css"));sources.addAll(PROTECTED);
-            var target=new LocalTestService.Target("verify-"+id,"Independent production engine verification",workspace.toString(),List.of(node,repo.resolve("scripts/production/acceptance/validate-game.mjs").toString(),contractPath.toString(),contractHash,programHash,builderHash),60,"acceptance-result.json",sources,List.of("latest-build.json","acceptance-result.json"),PROTECTED);
-            var run=ownerRunId==null?executor.startManaged(target):executor.startManaged(target,ownerRunId);job.put("validationRunId",run.id());save(job);return get(id);
+            Path contractPath = directory.resolve("acceptance-contract.json");
+            Path program = repo.resolve("scripts/production/acceptance/validate-game.mjs");
+            Path builder = repo.resolve("scripts/production/build-project.mjs");
+            prepareContract(job, workspace, contractPath, program, builder);
+
+            var sources = new ArrayList<>(List.of("engine.mjs", "game.mjs", "index.html", "style.css"));
+            sources.addAll(PROTECTED);
+            var target = new LocalTestService.Target("verify-" + id, "Independent production engine verification",
+                    workspace.toString(), List.of(node, program.toString(), contractPath.toString(),
+                    job.path("acceptanceContractHash").asText(), job.path("acceptanceProgramHash").asText(),
+                    job.path("acceptanceBuilderHash").asText()), 60, "acceptance-result.json", sources,
+                    List.of("latest-build.json", "acceptance-result.json"), PROTECTED);
+            var existing = executor.latestManagedRun(target);
+            var run = existing.filter(r -> !Set.of("INTERRUPTED", "REJECTED").contains(r.status())).orElse(null);
+            if (run == null) run = ownerRunId == null ? executor.startManaged(target) : executor.startManaged(target, ownerRunId);
+            job.put("validationRunId", run.id());
+            job.remove(List.of("validationStatus", "validationDecision", "validationChecks", "validationScope"));
+            save(job);
+            return get(id);
         }catch(java.io.IOException e){throw BusinessException.conflict("Cannot prepare frozen verification: "+e.getMessage());}catch(java.security.NoSuchAlgorithmException e){throw new IllegalStateException(e);}catch(Exception e){if(e instanceof RuntimeException re)throw re;throw new IllegalStateException(e);}
     }
+    private void prepareContract(ObjectNode job, Path workspace, Path file, Path program, Path builder) throws Exception {
+        String programHash = hash(Files.readAllBytes(program));
+        String builderHash = hash(Files.readAllBytes(builder));
+        if (!job.hasNonNull("acceptanceContractHash")) {
+            String content = buildAcceptanceContract(job, workspace);
+            String expected = hash(content.getBytes(StandardCharsets.UTF_8));
+            // A legacy process may have written the file before saving the fingerprint.
+            if (Files.exists(file, LinkOption.NOFOLLOW_LINKS)) verifyContractFile(file, expected);
+            job.put("acceptanceContractHash", expected).put("acceptanceContractText", content)
+                    .put("acceptanceProgramHash", programHash).put("acceptanceBuilderHash", builderHash);
+            save(job);
+        }
+        if (!programHash.equals(job.path("acceptanceProgramHash").asText())
+                || !builderHash.equals(job.path("acceptanceBuilderHash").asText())) {
+            throw BusinessException.conflict("Frozen verification program changed");
+        }
+        String expected = job.path("acceptanceContractHash").asText();
+        if (Files.notExists(file, LinkOption.NOFOLLOW_LINKS) && job.hasNonNull("acceptanceContractText")) {
+            byte[] content = job.path("acceptanceContractText").asText().getBytes(StandardCharsets.UTF_8);
+            if (!hash(content).equals(expected)) throw BusinessException.conflict("Persisted acceptance contract changed");
+            Path temp = Files.createTempFile(file.getParent(), "acceptance-", ".tmp");
+            try {
+                Files.write(temp, content);
+                Files.move(temp, file, StandardCopyOption.ATOMIC_MOVE);
+            } finally {
+                Files.deleteIfExists(temp);
+            }
+        }
+        verifyContractFile(file, expected);
+    }
+
+    private String buildAcceptanceContract(ObjectNode job, Path workspace) throws Exception {
+        var build = job.path("result").path("build");
+        byte[] config = Files.readAllBytes(workspace.resolve(build.path("buildId").asText()).resolve("config.json"));
+        if (!hash(config).equals(build.path("files").path("config.json").asText())) {
+            throw BusinessException.conflict("Built configuration changed");
+        }
+        ObjectNode protectedHashes = mapper.createObjectNode();
+        for (String name : PROTECTED) {
+            Path input = workspace.resolve(name);
+            if (!Files.isRegularFile(input, LinkOption.NOFOLLOW_LINKS)) {
+                throw new IllegalArgumentException("Missing protected input: " + name);
+            }
+            protectedHashes.put(name, hash(Files.readAllBytes(input)));
+        }
+        ObjectNode contract = mapper.createObjectNode().put("schemaVersion", 1)
+                .put("scope", "survival-web-engine-v1").put("productionId", job.path("id").asText())
+                .put("specHash", job.path("specHash").asText());
+        contract.set("config", mapper.readTree(config));
+        contract.set("protectedFiles", protectedHashes);
+        return contract.toString();
+    }
+
+    private void verifyContractFile(Path file, String expected) throws Exception {
+        if (!Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS) || Files.size(file) > 1024 * 1024
+                || !hash(Files.readAllBytes(file)).equals(expected)) {
+            throw BusinessException.conflict("Frozen acceptance contract missing or changed");
+        }
+    }
+
     public com.aigamelab.domain.Task createBuilderTask(long taskId,String specId,int revision,String goal){
         var spec=artifacts.get(specId,revision);if(!"GameSpec".equals(spec.path("kind").asText())||spec.path("taskId").asLong()!=taskId)throw BusinessException.conflict("Specification scope mismatch");
         if(goal==null||goal.isBlank()||goal.length()>10000)throw new IllegalArgumentException("Builder goal required, up to 10000 characters");

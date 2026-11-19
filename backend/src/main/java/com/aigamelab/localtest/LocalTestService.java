@@ -71,6 +71,16 @@ public class LocalTestService implements AutoCloseable {
         return db.query("SELECT record_json FROM local_test_run WHERE id=?",(rs,n)->decode(rs.getString(1)),id)
                 .stream().findFirst().orElseThrow(()->BusinessException.notFound("Local test run not found"));
     }
+    /** Finds a previously captured execution when the caller was interrupted before linking its ID. */
+    public Optional<TestRun> latestManagedRun(Target target) {
+        return db.query("""
+                SELECT r.record_json FROM local_test_run r
+                JOIN local_test_context c ON c.run_id = r.id
+                WHERE json_extract(r.record_json, '$.target.id') = ?
+                ORDER BY r.rowid DESC
+                """, (rs,n) -> decode(rs.getString(1)), target.id())
+                .stream().filter(run -> run.target().equals(target)).findFirst();
+    }
     public synchronized TestRun start(String targetId) {
         Target target=targets().stream().filter(t->t.id().equals(targetId)).findFirst()
                 .orElseThrow(()->BusinessException.notFound("Local test target not found"));

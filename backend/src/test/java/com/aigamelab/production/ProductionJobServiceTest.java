@@ -51,6 +51,69 @@ class ProductionJobServiceTest {
   assertThat(result.path("specHash").asText()).isEqualTo(spec.path("contentHash").asText());assertThat(jobs.start(request("once")).path("id")).isEqualTo(first.path("id"));
  }
  JsonNode verified(String key)throws Exception{var built=await(jobs.start(request(key)).path("id").asText());jobs.validate(built.path("id").asText(),null);return awaitVerification(built.path("id").asText());}
+
+ @Test void resumesAfterContractFingerprintWasSavedButFileWasNotPublished() throws Exception {
+  var built = await(jobs.start(request("resume-contract")).path("id").asText());
+  String id = built.path("id").asText();
+  executor.mode = "fail";
+  assertThatThrownBy(() -> jobs.validate(id, null)).hasMessageContaining("executor unavailable");
+  var prepared = jobs.get(id);
+  Path contract = Path.of(prepared.path("jobDirectory").asText()).resolve("acceptance-contract.json");
+  byte[] original = Files.readAllBytes(contract);
+  Files.delete(contract);
+  executor.mode = "real";
+  jobs.validate(id, null);
+  var verified = awaitVerification(id);
+  assertThat(verified.path("validationDecision").asText()).isEqualTo("PASS");
+  assertThat(verified.path("acceptanceContractHash")).isEqualTo(prepared.path("acceptanceContractHash"));
+  assertThat(Files.readAllBytes(contract)).isEqualTo(original);
+ }
+
+ @Test void linksCompletedVerificationAfterInterruptionWithoutStartingAnotherRun() throws Exception {
+  var verified = verified("resume-link");
+  String id = verified.path("id").asText();
+  db.update("UPDATE production_job SET record_json=json_remove(record_json,'$.validationRunId') WHERE id=?", id);
+  assertThat(jobs.validate(id, null).path("validationRunId")).isEqualTo(verified.path("validationRunId"));
+ }
+
+ @Test void retriesAnInterruptedExecutionWithTheSameFrozenContract() throws Exception {
+  var previous = verified("restart-execution");
+  String id = previous.path("id").asText();
+  String oldRun = previous.path("validationRunId").asText();
+  db.update("UPDATE local_test_run SET record_json=json_set(record_json,'$.status','RUNNING') WHERE id=?", oldRun);
+  // Recreate the executor startup checkpoint in the isolated test database.
+  try (var restarted = new LocalTestService(mapper, db, ROOT.resolve("unused-catalog.json").toString())) {
+   assertThat(restarted.get(oldRun).status()).isEqualTo("INTERRUPTED");
+  }
+  assertThat(jobs.get(id).path("validationStatus").asText()).isEqualTo("INTERRUPTED");
+  jobs.validate(id, null);
+  var recovered = awaitVerification(id);
+  assertThat(recovered.path("validationRunId").asText()).isNotEqualTo(oldRun);
+  assertThat(recovered.path("acceptanceContractHash")).isEqualTo(previous.path("acceptanceContractHash"));
+  assertThat(recovered.path("validationDecision").asText()).isEqualTo("PASS");
+  assertThat(executor.get(oldRun).status()).isEqualTo("INTERRUPTED");
+ }
+
+ @Test void legacyUnlinkedContractMustMatchExpectedBytes() throws Exception {
+  var built = await(jobs.start(request("legacy-contract")).path("id").asText());
+  String id = built.path("id").asText();
+  executor.mode = "fail";
+  assertThatThrownBy(() -> jobs.validate(id, null)).hasMessageContaining("executor unavailable");
+  Path contract = Path.of(built.path("jobDirectory").asText()).resolve("acceptance-contract.json");
+  byte[] original = Files.readAllBytes(contract);
+  db.update("""
+          UPDATE production_job SET record_json=json_remove(record_json,
+          '$.acceptanceContractHash','$.acceptanceContractText','$.acceptanceProgramHash','$.acceptanceBuilderHash')
+          WHERE id=?
+          """, id);
+  Files.writeString(contract, "{}");
+  executor.mode = "real";
+  assertThatThrownBy(() -> jobs.validate(id, null)).hasMessageContaining("contract missing or changed");
+  assertThat(Files.readString(contract)).isEqualTo("{}");
+  Files.write(contract, original);
+  jobs.validate(id, null);
+  assertThat(awaitVerification(id).path("validationDecision").asText()).isEqualTo("PASS");
+ }
  JsonNode awaitVerification(String id)throws Exception{long end=System.nanoTime()+20_000_000_000L;while(System.nanoTime()<end){var j=jobs.get(id);if(!Set.of("QUEUED","RUNNING").contains(j.path("validationStatus").asText()))return j;Thread.sleep(30);}throw new AssertionError("Verification timed out");}
  LocalTestService.TestRun awaitExecution(String id)throws Exception{long end=System.nanoTime()+20_000_000_000L;while(System.nanoTime()<end){var r=executor.get(id);if(!Set.of("QUEUED","RUNNING").contains(r.status()))return r;Thread.sleep(30);}throw new AssertionError("Execution timed out");}
  @Test void independentVerificationRebuildsAndProtectsItsExecutionInputs()throws Exception{

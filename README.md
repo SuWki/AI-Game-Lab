@@ -32,7 +32,7 @@ QA Phase 3 已有实现和 closure audit（16/16 PASS）；审计通过与人工
 
 接入自己的本地游戏测试程序，见 [本地测试执行协议](docs/platform/LOCAL_GAME_TEST_EXECUTION.md) 和 [目标配置示例](backend/local-test-targets.example.json)。共享执行恢复见 [Runtime 契约](docs/platform/AGENT_RUNTIME_RECOVERY.md)。单机可信目录运行，独立工作区不是操作系统沙箱，验证通过后仍需人工决定合并。
 
-当前仓库默认配置仅指定后端端口。在只供自己使用的 Windows 工作台，可在启动后端的 PowerShell 中先设置 `$env:SERVER_ADDRESS='127.0.0.1'`，并让前端代理连接该回环地址。GitHub Pages 只展示静态预览。[默认访问边界审查](docs/reports/PLATFORM_REVIEW_2026-11-19.md)
+后端和 Vite 默认监听 `127.0.0.1`。本机浏览器使用 Vite 的同源代理，命令行可直接访问回环后端。后端对非回环客户端或跨源浏览器请求返回 403。GitHub Pages 只展示静态预览。
 
 ## 技术栈与目录
 
@@ -108,7 +108,7 @@ cd frontend
 npm run dev
 ```
 
-打开 [中台](http://localhost:5173)。后端默认 `http://localhost:8080`；Vite 开发代理转发 `/api` 和 `/sse` 到后端。
+打开 [中台](http://127.0.0.1:5173)。后端默认 `http://127.0.0.1:8080`，Vite 将同源的 `/api` 和 `/sse` 转发到后端。
 
 Windows 脚本在独立窗口启动两项服务，停止时分别关闭对应窗口；Unix/macOS 脚本在当前终端后台启动，使用 Ctrl+C 停止。
 

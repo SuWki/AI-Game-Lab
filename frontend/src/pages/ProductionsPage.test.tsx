@@ -10,6 +10,17 @@ it("submits the exact selected spec revision",async()=>{const start=vi.spyOn(api
 it("exposes active-job cancellation and execution evidence",async()=>{vi.spyOn(api,"productionJobs").mockResolvedValue([job]);const cancel=vi.spyOn(api,"cancelProduction").mockResolvedValue({...job,status:"CANCELLED"});show();fireEvent.click(await screen.findByRole("button",{name:"取消生产"}));await waitFor(()=>expect(cancel).toHaveBeenCalledWith(job.id));expect(screen.getByRole("link",{name:"查看执行日志与证据"})).toHaveAttribute("href","/local-tests?runId=execution-a");});
 it("shows submission errors without claiming a build succeeded",async()=>{vi.spyOn(api,"productionJobs").mockResolvedValue([{...job,status:"FAILED",error:"Template changed"}]);show();expect(await screen.findByRole("alert")).toHaveTextContent("Template changed");expect(screen.queryByText(/项目目录/)).not.toBeInTheDocument();});
 it("starts independent verification for a built project",async()=>{vi.spyOn(api,"productionJobs").mockResolvedValue([{...job,status:"BUILT"}]);const verify=vi.spyOn(api,"validateProduction").mockResolvedValue({...job,status:"BUILT",validationRunId:"check-a",validationStatus:"QUEUED"});show();fireEvent.click(await screen.findByRole("button",{name:"执行独立验收"}));await waitFor(()=>expect(verify).toHaveBeenCalledWith(job.id));});
+it("offers a retry for an interrupted independent verification", async () => {
+  vi.spyOn(api, "productionJobs").mockResolvedValue([
+    { ...job, status: "BUILT", validationRunId: "interrupted-check", validationStatus: "INTERRUPTED" },
+  ]);
+  const verify = vi.spyOn(api, "validateProduction").mockResolvedValue({
+    ...job, status: "BUILT", validationRunId: "recovered-check", validationStatus: "QUEUED",
+  });
+  show();
+  fireEvent.click(await screen.findByRole("button", { name: "重试中断的独立验收" }));
+  await waitFor(() => expect(verify).toHaveBeenCalledWith(job.id));
+});
 it("links the current repair candidate and allows cancelling pending approval",async()=>{
  vi.spyOn(api,"productionJobs").mockResolvedValue([{...job,status:"BUILT",validationRunId:"original",iteration:{phase:"WAITING_INPUT",reason:"Pending approval",repairCount:2,repairLimit:5,currentRunId:"candidate",attempts:[{proposalId:"proposal",baseRunId:"candidate",status:"PENDING"}]}}]);
  show();expect(await screen.findByRole("heading",{name:"修复阶段 · WAITING_INPUT"})).toBeInTheDocument();expect(screen.getByText("提案次数：2 / 5")).toBeInTheDocument();expect(screen.getByRole("link",{name:"查看验收与修改源码"})).toHaveAttribute("href","/local-tests?runId=candidate");expect(screen.getByRole("button",{name:"取消生产"})).toBeEnabled();
