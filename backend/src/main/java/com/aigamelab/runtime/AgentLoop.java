@@ -166,15 +166,28 @@ public class AgentLoop {
                 throw new IllegalStateException(
                         "LlmGateway 未配置：P1 阶段请在测试中注入 FakeLlmGateway；P2-2 落地 DeepSeekClient 后生产可用");
             }
-            resp = llmGateway.complete(request(run, messages, task));
+            var request = request(run, messages, task);
+            var modelEvent = com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode()
+                    .put("stepId", step.id()).put("requestId", request.requestId()).put("requestedModel", run.model());
+            publisher.publish("LLM_REQUEST_SENT", runId, modelEvent.toString());
+            resp = llmGateway.complete(request);
             if(usage(resp).promptTokens()<0||usage(resp).completionTokens()<0||usage(resp).totalTokens()<0)throw new IllegalStateException("Model returned invalid negative token usage");
             stepRepo.updateLlmResult(step.id(), resp.finishReason(), resp.content(),
                     usage(resp).promptTokens(), usage(resp).completionTokens(),
                     System.currentTimeMillis() - t0);
             runRepo.addTokensUsed(runId, usage(resp).totalTokens());
+            modelEvent.put("responseModel", resp.rawModelId()).put("usageReported", resp.usage() != null)
+                    .put("latencyMs", resp.latencyMs());
+            if (resp.usage() != null) modelEvent.put("totalTokens", resp.usage().totalTokens());
+            publisher.publish("LLM_RESPONSE_RECEIVED", runId, modelEvent.toString());
             shared=builderSessions.check(run,false);if(shared.hit()){finalizeRun(runId,shared.target(),null,shared.reason());return;}
-            if(!"RUNNING".equals(runRepo.findById(runId).orElseThrow().status())||cancelled(runId))return;
-            if(budgetMs>0&&elapsedMs(runRepo.findById(runId).orElseThrow())>=budgetMs){finalizeRun(runId,RunStatus.TIMEOUT,null,"已到总超时预算");return;}
+            var afterResponse = runRepo.findById(runId).orElseThrow();
+            if(!"RUNNING".equals(afterResponse.status())||cancelled(runId))return;
+            if (afterResponse.tokensUsed() >= afterResponse.tokenBudget()) {
+                finalizeRun(runId, RunStatus.FAILED, null, "已到 Run token 预算");
+                return;
+            }
+            if(budgetMs>0&&elapsedMs(afterResponse)>=budgetMs){finalizeRun(runId,RunStatus.TIMEOUT,null,"已到总超时预算");return;}
 
             // ---- Parse ----
             if ("tool_calls".equals(resp.finishReason())) {

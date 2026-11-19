@@ -197,13 +197,18 @@ public class ProductionJobService {
     }
 
     public com.aigamelab.domain.Task createBuilderTask(long taskId,String specId,int revision,String goal){
+        return createBuilderTask(taskId,specId,revision,goal,20);
+    }
+
+    public com.aigamelab.domain.Task createBuilderTask(long taskId,String specId,int revision,String goal,int maxSteps){
+        if(maxSteps<1||maxSteps>20)throw new IllegalArgumentException("Builder maxSteps must be 1..20");
         var spec=artifacts.get(specId,revision);if(!"GameSpec".equals(spec.path("kind").asText())||spec.path("taskId").asLong()!=taskId)throw BusinessException.conflict("Specification scope mismatch");
         if(goal==null||goal.isBlank()||goal.length()>10000)throw new IllegalArgumentException("Builder goal required, up to 10000 characters");
         if (manufacturingScopes.find(specId, revision, spec.path("contentHash").asText()).isEmpty()) {
             throw BusinessException.conflict("Confirm manufacturing scope for this exact specification revision first");
         }
         var scope=mapper.createObjectNode().put("agent_type","BUILDER").put("productionSpecId",specId).put("productionSpecRevision",revision).put("productionSourceTaskId",taskId);
-        return tasks.insert(new com.aigamelab.domain.Task(null,"Builder: "+spec.path("content").path("title").asText(),goal,scope.toString(),20,true,"ACTIVE",null));
+        return tasks.insert(new com.aigamelab.domain.Task(null,"Builder: "+spec.path("content").path("title").asText(),goal,scope.toString(),maxSteps,true,"ACTIVE",null));
     }
     public List<JsonNode> list(){return db.queryForList("SELECT id FROM production_job ORDER BY rowid DESC LIMIT 100",String.class).stream().map(this::get).toList();}
     private ObjectNode require(String id){return db.query("SELECT record_json FROM production_job WHERE id=?",(rs,n)->decode(rs.getString(1)),id).stream().findFirst().orElseThrow(()->BusinessException.notFound("Production job not found"));}

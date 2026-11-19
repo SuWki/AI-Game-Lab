@@ -87,6 +87,22 @@ class AgentLoopTest {
     @Autowired FakeLlmGateway llm;
 
     @Test
+    void keepsUsageButRejectsAStopResponseThatExhaustsTheRunBudget() {
+        llm.thenStop("This draft exceeds the limit");
+        Run run = runRepo.insert(new Run(null, newTask(1).id(), "PENDING", null,
+                "configured-model", 0, 1, 14, 0, null, null, null, null, null));
+        loop.run(run.id());
+        Run failed = runRepo.findById(run.id()).orElseThrow();
+        assertThat(failed.status()).isEqualTo("FAILED");
+        assertThat(failed.tokensUsed()).isEqualTo(15);
+        assertThat(failed.finalResult()).isNull();
+        assertThat(jdbc.queryForList("""
+                SELECT payload_json FROM agent_event WHERE run_id=? AND type='LLM_RESPONSE_RECEIVED'
+                """, String.class, run.id().toString()))
+                .singleElement().asString().contains("\"responseModel\":\"fake\"", "\"usageReported\":true");
+    }
+
+    @Test
     void threeToolCallsThenStopCompletesRun() {
         // ---- 编排剧本：tool_calls ×3 → stop ----
         llm.thenToolCalls(new ToolCall("c1", "stub_read", "{\"k\":1}"))

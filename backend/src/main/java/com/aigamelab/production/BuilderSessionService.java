@@ -77,6 +77,10 @@ public class BuilderSessionService {
         }
     }
     public ObjectNode snapshot(long taskId){var state=stored(taskId);return state==null?null:usage(state);}
+    public int tokenBudgetForNewRun(long taskId, int defaultBudget) {
+        var state = stored(taskId);
+        return state == null ? defaultBudget : state.path("tokenLimit").asInt(defaultBudget);
+    }
     private ObjectNode usage(ObjectNode state){
         var out=state.deepCopy();long task=state.path("taskId").asLong();
         out.put("tokensUsed",db.queryForObject("SELECT COALESCE(SUM(MAX(r.tokens_used,COALESCE((SELECT SUM(s.prompt_tokens+s.completion_tokens) FROM step s WHERE s.run_id=r.id),0))),0) FROM run r WHERE r.task_id=?",Long.class,task));

@@ -11,7 +11,7 @@
 | 从规格制作新游戏 | [版本化产物](platform/PRODUCTION_ARTIFACTS.md) · [规格编辑](reports/SPECIFICATION_EDITOR_2026-11-17.md) · [可玩模板](platform/PLAYABLE_TEMPLATE.md) · [生产任务](platform/PRODUCTION_JOBS.md) |
 | 运行 Builder 与审批修改 | [身份与工具](platform/BUILDER_RUNTIME.md) · [跨 Run 会话与预算](platform/BUILDER_SESSIONS.md) · [生产修复链](platform/PRODUCTION_ITERATIONS.md) · [独立引擎验收](platform/PRODUCTION_SOURCE_REVIEW.md) |
 | 判断能否交付 | [固定候选与预览](platform/PRODUCTION_CANDIDATES.md) · [浏览器验收](platform/CANDIDATE_BROWSER_EVIDENCE.md) · [逐项人工评审](platform/CANDIDATE_HUMAN_REVIEW.md) · [两条业务线的本地验收](reports/BUSINESS_ACCEPTANCE_2026-11-19.md) |
-| 运行平台或查看公开预览 | [共享运行时与恢复](platform/AGENT_RUNTIME_RECOVERY.md) · [GitHub Pages 静态预览](platform/PAGES_PREVIEW.md) |
+| 运行平台或查看公开预览 | [共享运行时与恢复](platform/AGENT_RUNTIME_RECOVERY.md) · [真实模型验收](platform/PROVIDER_ACCEPTANCE.md) · [GitHub Pages 静态预览](platform/PAGES_PREVIEW.md) |
 | 查模块设计与历史证据 | [Designer](projects/01_AI_Game_Designer/README.md) · [Tester](projects/02_AI_Game_Tester/README.md) · [Research](projects/03_AI_Research_Agent/README.md) · [QA](projects/04_AI_Game_Agent_Team/README.md) · [Builder](projects/05_AI_Auto_Game_Developer/README.md) · [历次报告目录](reports/) |
 
 ### 治理与流程

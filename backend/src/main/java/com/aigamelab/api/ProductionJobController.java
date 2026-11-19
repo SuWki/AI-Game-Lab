@@ -9,8 +9,8 @@ import java.util.List;
 public class ProductionJobController {
     private final ProductionJobService service;
     public ProductionJobController(ProductionJobService service){this.service=service;}
-    public record AgentRequest(long taskId,String specId,int specRevision,String goal){}
-    @PostMapping("/agent-task") public ApiResp<com.aigamelab.domain.Task> agentTask(@RequestBody AgentRequest body,@RequestHeader(value="X-AGL-Local-Test",required=false)String marker,HttpServletRequest request){LocalTestController.requireLocal(marker,request);return ApiResp.ok(service.createBuilderTask(body.taskId(),body.specId(),body.specRevision(),body.goal()));}
+    public record AgentRequest(long taskId,String specId,int specRevision,String goal,Integer maxSteps){}
+    @PostMapping("/agent-task") public ApiResp<com.aigamelab.domain.Task> agentTask(@RequestBody AgentRequest body,@RequestHeader(value="X-AGL-Local-Test",required=false)String marker,HttpServletRequest request){LocalTestController.requireLocal(marker,request);return ApiResp.ok(service.createBuilderTask(body.taskId(),body.specId(),body.specRevision(),body.goal(),body.maxSteps()==null?20:body.maxSteps()));}
     @GetMapping("/template") public ApiResp<JsonNode> template(){return ApiResp.ok(service.template());}
     @GetMapping public ApiResp<List<JsonNode>> list(){return ApiResp.ok(service.list());}
     @GetMapping("/{id}") public ApiResp<JsonNode> get(@PathVariable String id){return ApiResp.ok(service.get(id));}

@@ -51,8 +51,9 @@ public class DeepSeekClient implements LlmGateway {
     public DeepSeekClient(
             @Value("${llm.gateway.api-key}") String apiKey,
             @Value("${llm.gateway.base-url:https://api.deepseek.com}") String baseUrl,
-            @Value("${llm.gateway.timeout-seconds:120}") long timeoutSeconds) {
-        this(apiKey, baseUrl, timeoutSeconds, GatewayRetry.production());
+            @Value("${llm.gateway.timeout-seconds:120}") long timeoutSeconds,
+            @Value("${llm.gateway.retry-enabled:true}") boolean retryEnabled) {
+        this(apiKey, baseUrl, timeoutSeconds, retryEnabled ? GatewayRetry.production() : null);
     }
 
     /** 测试入口：注入 ms 级退避的 GatewayRetry */
@@ -77,7 +78,11 @@ public class DeepSeekClient implements LlmGateway {
 
     @Override
     public LlmResponse complete(LlmRequest request) {
-        return retry.execute(() -> doComplete(request));
+        return retry == null ? doComplete(request) : retry.execute(() -> doComplete(request));
+    }
+
+    public boolean retryEnabled() {
+        return retry != null;
     }
 
     private LlmResponse doComplete(LlmRequest request) {
