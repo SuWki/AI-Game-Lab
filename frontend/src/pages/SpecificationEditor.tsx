@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {api,type ProductionArtifact} from "@/api";
 
-type Criterion={id:string;requirementId:string;expected:string;method:string};
+type Criterion={id:string;requirementId:string;expected:string;method:string;browserProbe?:{profile:string;field:string;expected:number}};
 type Requirement={id:string;description:string;acceptanceIds:string[]};
 type SpecContent=Record<string,unknown>&{title:string;coreLoop:string;endConditions:string;restartBehavior:string;requirements:Requirement[];acceptanceCriteria:Criterion[];systems:{survivalWeb:{mechanic:string;duration:number;enemySpeed:number;spawnInterval:number;seed:number};[key:string]:unknown}};
 function initial():SpecContent{return {title:"",genre:"survival",targetPlatform:"web",coreLoop:"移动、自动射击并存活到回合结束",endConditions:"达到时限获胜，生命耗尽失败",restartBehavior:"重开后生命、得分和时间恢复初始值",controls:["WASD / 方向键移动","空格使用技能"],states:["playing","victory","defeat"],contentScope:["单场景可玩切片"],assetNeeds:[],exclusions:["存档、多人和正式美术"],openQuestions:[],systems:{survivalWeb:{mechanic:"heat-burst",duration:20,enemySpeed:70,spawnInterval:1,seed:42}},requirements:[{id:"R1",description:"游戏能开始、结束并重新开始",acceptanceIds:["A1"]}],acceptanceCriteria:[{id:"A1",requirementId:"R1",expected:"可自然结算；点击重新开始后生命为100，得分和时间清零",method:"browser"}]};}
@@ -21,6 +21,11 @@ export function SpecificationEditor({taskId,selected,onSaved}:{taskId:number;sel
   setBase(saved);setContent(structuredClone(saved.content) as SpecContent);setMessage(`已保存规格 r${saved.revision}。保存不代表已验收；生产只使用明确选中的版本。`);await onSaved(saved);
  }catch(e){setError(String(e));}finally{setBusy(false);}}
  function addRequirement(){let n=1;while(content.requirements.some(r=>r.id===`R${n}`)||content.acceptanceCriteria.some(a=>a.id===`A${n}`))n++;change({requirements:[...content.requirements,{id:`R${n}`,description:"",acceptanceIds:[`A${n}`]}],acceptanceCriteria:[...content.acceptanceCriteria,{id:`A${n}`,requirementId:`R${n}`,expected:"",method:"browser"}]});}
+ function setProbe(id:string, field:string, expected:number){
+  change({acceptanceCriteria:content.acceptanceCriteria.map(row=>row.id===id?{
+    ...row,browserProbe:field?{profile:"survival-web-restart-frame-v1",field,expected}:undefined,
+  }:row)});
+ }
  return <section aria-label="规格编辑器" style={{border:"1px solid #ddd",padding:16,marginTop:16}}><h2>编写游戏规格</h2>
  <p>支持 survival-web 的热量爆发与护盾冲刺。需求是验收目标，模板不会自动实现所有描述；保存后可交给 Builder，产物仍需逐项验收。</p>
  {!editing&&<><button onClick={()=>{setContent(initial());setBase(null);setEditing(true);setError("");setMessage("");}}>新建规格</button>{" "}<button disabled={!selected} onClick={load}>编辑选中规格</button></>}
@@ -36,7 +41,19 @@ export function SpecificationEditor({taskId,selected,onSaved}:{taskId:number;sel
    value={Array.isArray(content.openQuestions)?content.openQuestions.map(item=>typeof item==="string"?item:JSON.stringify(item)).join("\n"):""}
    onChange={event=>change({openQuestions:event.target.value===""?[]:event.target.value.split("\n")})}/></label></p>
  <h3>需求与验收</h3>{content.requirements.map(r=><section key={r.id} style={{padding:12,borderTop:"1px solid #ddd"}}><p><label>需求 {r.id} <input aria-label={`需求 ${r.id}`} style={{width:"100%",boxSizing:"border-box"}} required value={r.description} onChange={e=>change({requirements:content.requirements.map(row=>row.id===r.id?{...row,description:e.target.value}:row)})}/></label></p>
- {content.acceptanceCriteria.filter(a=>a.requirementId===r.id).map(a=><p key={a.id}><label>验收 {a.id} 预期 <textarea aria-label={`验收 ${a.id} 预期`} rows={3} style={{display:"block",width:"100%",boxSizing:"border-box"}} required value={a.expected} onChange={e=>change({acceptanceCriteria:content.acceptanceCriteria.map(row=>row.id===a.id?{...row,expected:e.target.value}:row)})}/></label> · 方法：{a.method}</p>)}
+ {content.acceptanceCriteria.filter(a=>a.requirementId===r.id).map(a=><div key={a.id}>
+   <p><label>验收 {a.id} 预期 <textarea aria-label={`验收 ${a.id} 预期`} rows={3} style={{display:"block",width:"100%",boxSizing:"border-box"}} required value={a.expected} onChange={e=>change({acceptanceCriteria:content.acceptanceCriteria.map(row=>row.id===a.id?{...row,expected:e.target.value}:row)})}/></label> · 方法：{a.method}</p>
+   {a.method==="browser"&&<p>
+     <label>验收 {a.id} 重开首帧字段 <select value={a.browserProbe?.field??""}
+       onChange={e=>setProbe(a.id,e.target.value,a.browserProbe?.expected??NaN)}>
+       <option value="">人工观察</option><option value="health">生命</option><option value="heat">热量</option>
+       <option value="energy">能量</option><option value="score">得分</option><option value="time">时间</option>
+     </select></label>{" "}
+     {a.browserProbe&&<label>验收 {a.id} 首帧期望值 <input type="number" required min={0} max={999999999} step="any"
+       value={Number.isFinite(a.browserProbe.expected)?a.browserProbe.expected:""}
+       onChange={e=>setProbe(a.id,a.browserProbe!.field,e.target.valueAsNumber)}/></label>}
+   </p>}
+ </div>)}
  <button type="button" disabled={content.requirements.length===1} onClick={()=>change({requirements:content.requirements.filter(row=>row.id!==r.id),acceptanceCriteria:content.acceptanceCriteria.filter(a=>a.requirementId!==r.id)})}>删除需求 {r.id}</button></section>)}
  <p><button type="button" onClick={addRequirement}>添加需求及验收项</button></p><button type="submit">保存规格版本</button>{" "}<button type="button" onClick={()=>setEditing(false)}>关闭编辑</button>
  </fieldset></form>}</section>;

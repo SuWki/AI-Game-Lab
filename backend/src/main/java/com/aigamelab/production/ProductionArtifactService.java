@@ -111,5 +111,10 @@ public class ProductionArtifactService {
         for(var a:c.path("acceptanceCriteria")){for(String f:List.of("id","requirementId","expected","method"))text(a,f);String id=a.path("id").asText();if(!checks.add(id)||!reqs.contains(a.path("requirementId").asText()))throw new IllegalArgumentException("Invalid acceptance identity or requirement");owner.put(id,a.path("requirementId").asText());}
         Set<String> referenced=new HashSet<>();for(var r:c.path("requirements"))for(var id:r.path("acceptanceIds")){if(!id.isTextual()||!r.path("id").asText().equals(owner.get(id.asText())))throw new IllegalArgumentException("Acceptance reference mismatch");referenced.add(id.asText());}
         if(!referenced.equals(checks))throw new IllegalArgumentException("Unreferenced acceptance criteria");
+        for (JsonNode criterion : c.path("acceptanceCriteria")) {
+            if (criterion.has("browserProbe") && !CandidateBrowserEvidenceService.supported(criterion)) {
+                throw new IllegalArgumentException("Unsupported browser probe for criterion " + criterion.path("id").asText());
+            }
+        }
     }
 }

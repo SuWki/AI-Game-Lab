@@ -8,7 +8,7 @@ POST 同一路径提交 expectedRevision、manifestHash、reviewer、summary、d
 
 GET /{id}/review/history 按 revision 倒序返回最多 100 条；可用 beforeRevision 游标读取更早记录。GET /{id}/review/receipt 下载最新评审 JSON。写入/回执下载要求本机和 X-AGL-Local-Test: 1。没有 Agent 审批/接受工具；reviewer 是本机操作者填写的标签，不是账户认证或数字签名。
 
-门禁实时重算：仅最新 ACCEPTED、完整 PASS、固定包校验通过且仍是当前 REVIEW 候选时 eligibleForDelivery=true。新候选、未决修改、拒绝或后续草稿会关闭门禁，过去接受保留为历史。READY、引擎 PASS、人工接受、实际交付/公开发布继续分开；本轮不自动发布或伪造 DELIVERED。
+门禁要求最新人工意见为 ACCEPTED、人工逐项通过、固定包校验通过、候选仍处于当前 REVIEW，且最新浏览器证据没有失败。新候选、未决修改、失败证据、拒绝或后续草稿会关闭门禁，过去接受保留为历史。浏览器通过不会替代人工意见。[固定候选浏览器验收](CANDIDATE_BROWSER_EVIDENCE.md)
 
 评审事务只覆盖版本校验和追加写入；文件验证与生产服务读在事务外，避免单连接 SQLite 的锁顺序问题。接受事务内再次核对持久的当前候选及未决提案，防止并发评审错误接受旧版本。门禁查询再次验证固定文件和最新生产状态。
 

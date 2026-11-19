@@ -675,7 +675,7 @@ class QaPhase2OrchestrationTest {
     @Test
     @DisplayName("O1: 均衡实验（share=100/300≈0.333）→ gate PASS + dominantBuildShare 落库且统计留痕")
     void balancedExperimentPassWithSharePersisted() throws Exception {
-        seedDoneExperiment("v001-o1", buildDistJson(100, 100, 100));
+        var experiment = seedDoneExperiment("v001-o1", buildDistJson(100, 100, 100));
         Task lead = leadTask();
         Run leadRun = leadRun(lead.id());
         completeAllSevenRoles(lead, leadRun, "v001-o1");
@@ -686,6 +686,9 @@ class QaPhase2OrchestrationTest {
         assertThat(gate.automaticResult()).isEqualTo("PASS");
         assertThat(gate.dominantBuildShare()).isEqualTo(100.0 / 300.0);
         assertThat(gate.statsJson()).contains("\"dominantBuildShare\":0.333333");
+        assertThat(gate.statsJson()).contains("\"buildShareExperimentId\":" + experiment.id(),
+                "\"buildShareTotalGames\":300", "\"buildShareLargestBuildGames\":100",
+                "\"buildShareMetric\":\"max_build_game_count / total_game_count\"");
     }
 
     @Test

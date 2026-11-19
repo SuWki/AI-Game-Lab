@@ -17,7 +17,8 @@ public class CandidateReviewService {
     public record Check(String criterionId,String outcome,String evidenceNote){}
     public record Request(int expectedRevision,String manifestHash,String reviewer,String summary,String decision,List<Check> checks){}
     private final ProductionCandidateService candidates;private final ProductionJobService jobs;private final ObjectMapper mapper;private final JdbcTemplate db;private final TransactionTemplate transactions;
-    public CandidateReviewService(ProductionCandidateService candidates,ProductionJobService jobs,ObjectMapper mapper,JdbcTemplate db,PlatformTransactionManager manager){this.candidates=candidates;this.jobs=jobs;this.mapper=mapper;this.db=db;this.transactions=new TransactionTemplate(manager);}
+    private final CandidateBrowserEvidenceService browser;
+    public CandidateReviewService(ProductionCandidateService candidates,ProductionJobService jobs,ObjectMapper mapper,JdbcTemplate db,PlatformTransactionManager manager,CandidateBrowserEvidenceService browser){this.candidates=candidates;this.jobs=jobs;this.mapper=mapper;this.db=db;this.transactions=new TransactionTemplate(manager);this.browser=browser;}
     private ObjectNode read(String text){try{return (ObjectNode)mapper.readTree(text);}catch(Exception e){throw new IllegalStateException(e);}}
     private JsonNode spec(Map<String,byte[]> files,ObjectNode candidate){
         try{var envelope=mapper.readTree(files.get("source/specification.json"));if(!envelope.path("contentHash").equals(candidate.path("manifest").path("specHash")))throw BusinessException.conflict("Packaged specification differs from candidate");return envelope.path("content");}catch(java.io.IOException e){throw BusinessException.conflict("Packaged specification is unreadable");}
@@ -47,9 +48,15 @@ public class CandidateReviewService {
         value.set("checks",rows);value.set("coverage",coverage);value.set("engineChecks",candidate.path("manifest").path("checks"));value.put("engineScope",candidate.path("manifest").path("scope").asText());
         if(latest!=null)value.set("latestReview",latest);
         var job=jobs.get(candidate.path("productionId").asText());boolean current=idCurrent(candidate,job)&&"REVIEW".equals(job.path("iteration").path("phase").asText());boolean accepted="ACCEPTED".equals(value.path("decision").asText());
-        boolean eligible=current&&accepted&&coverage.path("allPassed").asBoolean();
+        var browserRecord = browser.latest(id);
+        browserRecord.ifPresent(record -> value.set("browserEvidence", record));
+        String mechanic = specification.path("systems").path("survivalWeb").path("mechanic").asText();
+        value.set("browserChecks", browser.checks(specification, browserRecord.orElse(null), mechanic));
+        boolean browserFailed = browserRecord.map(browser::hasFailure).orElse(false);
+        boolean eligible=current&&accepted&&coverage.path("allPassed").asBoolean()&&!browserFailed;
         var gate=value.putObject("gate").put("candidateCurrent",current).put("filesVerified",true).put("eligibleForDelivery",eligible).put("humanAccepted",accepted);
-        gate.put("reason",eligible?"Current fixed candidate explicitly accepted with complete manual specification coverage":!current?"Candidate is historical or production has unresolved work":!accepted?"Explicit human acceptance is missing or has been revised":"Manual specification coverage is incomplete");return value;
+        gate.put("browserFailed", browserFailed);
+        gate.put("reason",eligible?"Current fixed candidate explicitly accepted with complete manual specification coverage":!current?"Candidate is historical or production has unresolved work":browserFailed?"Fixed candidate has a failed browser probe":!accepted?"Explicit human acceptance is missing or has been revised":"Manual specification coverage is incomplete");return value;
     }
     private boolean idCurrent(JsonNode candidate,JsonNode job){return candidate.path("validationRunId").asText().equals(job.path("iteration").path("currentRunId").asText());}
     private String text(String value,String name,int max){if(value==null||value.isBlank()||value.length()>max)throw new IllegalArgumentException("Required "+name+" up to "+max+" characters");return value.trim();}
@@ -72,10 +79,14 @@ public class CandidateReviewService {
         String inputHash=ProductionCandidateService.hash(input.toString().getBytes(StandardCharsets.UTF_8));
         transactions.executeWithoutResult(status->{
             var previous=latest(id);int revision=previous==null?0:previous.path("revision").asInt();
+            if ("ACCEPTED".equals(request.decision()) && browser.latest(id).map(browser::hasFailure).orElse(false)) {
+                throw BusinessException.conflict("Fixed candidate has a failed browser probe");
+            }
             if(previous!=null&&(previous.path("baseRevision").asInt()==request.expectedRevision()||revision==request.expectedRevision())&&previous.path("inputHash").asText().equals(inputHash))return;
             if(revision!=request.expectedRevision())throw BusinessException.conflict("Review changed; reload the latest revision");
             if("ACCEPTED".equals(request.decision()))assertCurrentInTransaction(candidate);
             var record=input.deepCopy().put("candidateId",id).put("manifestHash",candidate.path("manifestHash").asText()).put("archiveSha256",candidate.path("archiveSha256").asText()).put("revision",revision+1).put("baseRevision",revision).put("inputHash",inputHash).put("recordedAt",Instant.now().toString()).put("evidenceKind","HUMAN_OBSERVATION");
+            browser.latest(id).ifPresent(evidence -> record.set("browserExecutionId", evidence.path("executionId")));
             record.put("reviewHash",ProductionCandidateService.hash(record.toString().getBytes(StandardCharsets.UTF_8)));db.update("INSERT INTO candidate_review VALUES (?,?,?)",id,revision+1,record.toString());
         });return view(id);
     }

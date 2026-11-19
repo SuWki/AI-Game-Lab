@@ -22,6 +22,7 @@ class ProductionJobServiceTest {
  @Autowired ControlledExecutor executor;
  @Autowired ProductionCandidateService candidates;
  @Autowired CandidateReviewService reviews;
+ @Autowired CandidateBrowserEvidenceService browser;
  @Autowired org.springframework.context.ApplicationContext application;
  static class ControlledExecutor extends LocalTestService {
   String mode="real";TestRun controlled;boolean cancelled;
@@ -245,6 +246,33 @@ class ProductionJobServiceTest {
   var j=verified("package-contract-drift");Files.writeString(Path.of(j.path("jobDirectory").asText()).resolve("acceptance-contract.json"),"{}");assertThatThrownBy(()->candidates.create(j.path("id").asText(),j.path("validationRunId").asText())).hasMessageContaining("Frozen acceptance inputs");
  }
  String reviewCandidate(String key)throws Exception{var j=verified(key);return candidates.create(j.path("id").asText(),j.path("validationRunId").asText()).path("id").asText();}
+
+ @Test void browserReceiptBindsTheFixedPackageAndClosesTheManualGateOnFailure() throws Exception {
+  var content = (com.fasterxml.jackson.databind.node.ObjectNode) spec.path("content").deepCopy();
+  var criterion = (com.fasterxml.jackson.databind.node.ObjectNode) content.path("acceptanceCriteria").get(0);
+  criterion.putObject("browserProbe").put("profile", CandidateBrowserEvidenceService.PROFILE).put("field", "heat").put("expected", 0);
+  spec = artifacts.save(new ProductionArtifactService.Request(task, null, null, 0, "GameSpec", content,
+          List.of(mapper.treeToValue(spec.path("inputRefs").get(0), ProductionArtifactService.Ref.class))));
+  String id = reviewCandidate("browser-gate");
+  assertThat(browser.plan(id).path("checks").get(0).path("outcome").asText()).isEqualTo("NOT_TESTED");
+  assertThat(reviews.save(id, reviewRequest(id, 0, "ACCEPTED", "PASS", "Operator observed reset"))
+          .path("gate").path("eligibleForDelivery").asBoolean()).isTrue();
+  var candidate = candidates.get(id);
+  var observation = new CandidateBrowserEvidenceService.Observation(UUID.randomUUID().toString(),
+          candidate.path("manifestHash").asText(), candidate.path("archiveSha256").asText(), "Chromium fixture",
+          "胜利！存活目标达成", "进行中", "生命 100 · 热量 6 · 得分 0 · 时间 0.0 / 6 秒", java.time.Instant.now());
+  var saved = browser.record(id, observation);
+  assertThat(browser.record(id, observation)).isEqualTo(saved);
+  assertThat(saved.path("checks").get(0).path("outcome").asText()).isEqualTo("FAIL");
+  assertThat(saved.path("checks").get(0).path("actual").asInt()).isEqualTo(6);
+  assertThat(browser.execution(id, observation.executionId()).path("specHash")).isEqualTo(spec.path("contentHash"));
+  assertThat(reviews.view(id).path("gate").path("eligibleForDelivery").asBoolean()).isFalse();
+  assertThatThrownBy(() -> reviews.save(id, reviewRequest(id, 1, "ACCEPTED", "PASS", "Still pass")))
+          .hasMessageContaining("failed browser probe");
+  String second = reviewCandidate("browser-other-candidate");
+  assertThat(browser.latest(second)).isEmpty();
+  assertThatThrownBy(() -> browser.record(second, observation)).hasMessageContaining("different fixed package");
+ }
  CandidateReviewService.Request reviewRequest(String id,int revision,String decision,String outcome,String note){return new CandidateReviewService.Request(revision,candidates.get(id).path("manifestHash").asText(),"Fixture operator","Bound fixed-build observation",decision,List.of(new CandidateReviewService.Check("A1",outcome,note)));}
  @Test void enginePassDoesNotInventManualSpecificationCoverage()throws Exception{
   String id=reviewCandidate("manual-unreviewed");var view=reviews.view(id);assertThat(view.path("revision").asInt()).isZero();assertThat(view.path("decision").asText()).isEqualTo("UNREVIEWED");assertThat(view.path("engineChecks").size()).isEqualTo(6);assertThat(view.path("checks").get(0).path("expected").asText()).isEqualTo("reset");assertThat(view.path("coverage").path("untested").asInt()).isEqualTo(1);assertThat(view.path("coverage").path("requirements").get(0).path("status").asText()).isEqualTo("NOT_TESTED");assertThat(view.path("gate").path("eligibleForDelivery").asBoolean()).isFalse();assertThatThrownBy(()->reviews.receipt(id)).hasMessageContaining("No manual review");
@@ -263,7 +291,7 @@ class ProductionJobServiceTest {
  @Test void revisionsPreserveHistoryCloseGateAndSurviveRestart()throws Exception{
   String id=reviewCandidate("manual-history");reviews.save(id,reviewRequest(id,0,"ACCEPTED","PASS","Reset observed"));var first=reviews.history(id).get(0).deepCopy();reviews.save(id,reviewRequest(id,1,"REJECTED","FAIL","Reset failed on another observation"));assertThat(reviews.view(id).path("gate").path("eligibleForDelivery").asBoolean()).isFalse();
   assertThat(reviews.history(id)).hasSize(2);assertThat(reviews.history(id,2)).containsExactly(first);assertThatThrownBy(()->reviews.save(id,reviewRequest(id,1,"DRAFT","NOT_TESTED",""))).hasMessageContaining("changed");reviews.save(id,reviewRequest(id,2,"DRAFT","NOT_TESTED",""));assertThat(reviews.view(id).path("gate").path("humanAccepted").asBoolean()).isFalse();
-  var restored=new CandidateReviewService(candidates,jobs,mapper,db,application.getBean(org.springframework.transaction.PlatformTransactionManager.class));assertThat(restored.view(id)).isEqualTo(reviews.view(id));assertThat(restored.receipt(id)).isEqualTo(reviews.receipt(id));assertThat(restored.history(id)).hasSize(3);assertThatThrownBy(()->reviews.history(id,0)).hasMessageContaining("cursor");
+  var restored=new CandidateReviewService(candidates,jobs,mapper,db,application.getBean(org.springframework.transaction.PlatformTransactionManager.class),browser);assertThat(restored.view(id)).isEqualTo(reviews.view(id));assertThat(restored.receipt(id)).isEqualTo(reviews.receipt(id));assertThat(restored.history(id)).hasSize(3);assertThatThrownBy(()->reviews.history(id,0)).hasMessageContaining("cursor");
  }
  @Test void pendingWorkAndNewCandidateInvalidateEarlierAcceptance()throws Exception{
   String id=reviewCandidate("manual-current");var c=candidates.get(id);reviews.save(id,reviewRequest(id,0,"ACCEPTED","PASS","Reset observed"));String base=c.path("validationRunId").asText();var source=evidence.source(base,"engine.mjs");var p=changes.create(base,"Next version",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText()+"\n// reviewed successor")));

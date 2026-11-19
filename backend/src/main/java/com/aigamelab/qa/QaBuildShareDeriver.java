@@ -49,7 +49,16 @@ public class QaBuildShareDeriver {
      * @param configVersion 被测配置版本（从 lead orchestration context 获取）
      * @return 主导 build 的 games 占比（0.0~1.0），数据不可用时返回 null
      */
+    public record Evidence(long experimentId, long totalGames, long largestBuildGames) {
+        public double share() { return (double) largestBuildGames / totalGames; }
+    }
+
     public Double deriveDominantBuildShare(String configVersion) {
+        Evidence evidence = deriveEvidence(configVersion);
+        return evidence == null ? null : evidence.share();
+    }
+
+    public Evidence deriveEvidence(String configVersion) {
         if (configVersion == null || configVersion.isBlank()) {
             return null;
         }
@@ -69,10 +78,10 @@ public class QaBuildShareDeriver {
         if (latest == null || latest.resultJson() == null || latest.resultJson().isBlank()) {
             return null;
         }
-        return computeShare(latest.resultJson(), latest.id());
+        return computeEvidence(latest.resultJson(), latest.id());
     }
 
-    private Double computeShare(String resultJson, long experimentId) {
+    private Evidence computeEvidence(String resultJson, long experimentId) {
         try {
             JsonNode buildDistribution = MAPPER.readTree(resultJson).get("buildDistribution");
             if (buildDistribution == null || !buildDistribution.isObject()) {
@@ -90,7 +99,7 @@ public class QaBuildShareDeriver {
             if (totalGames <= 0) {
                 return null;
             }
-            return (double) maxGames / totalGames;
+            return new Evidence(experimentId, totalGames, maxGames);
         } catch (Exception e) {
             log.warn("build share result_json 解析失败 experiment={}: {}", experimentId, e.getMessage());
             return null;

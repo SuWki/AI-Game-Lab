@@ -248,7 +248,8 @@ public class QaOrchestratorService {
         List<com.aigamelab.domain.Finding> findings = collectFindings(findingService, leadTask);
         // QA Phase 3（HD-1 A2 / HD-4）：evaluate-time 实时派生 dominant build share，
         // 作为第 6 参数传入 6-arg evaluate（纯函数保持；缺失 → null，Gate 聚合不变）。
-        Double dominantBuildShare = buildShareDeriver.deriveDominantBuildShare(configVersion);
+        var buildEvidence = buildShareDeriver.deriveEvidence(configVersion);
+        Double dominantBuildShare = buildEvidence == null ? null : buildEvidence.share();
         QaReleaseGateService.GateResult result = gateService.evaluate(
                 leadTask.id(), configVersion, assignments, findings, leadDecision,
                 dominantBuildShare);
@@ -266,10 +267,25 @@ public class QaOrchestratorService {
                 result.consistent() ? 1 : 0, result.inconclusiveCount(),
                 result.criticalBugs(), result.highBugs(), result.mediumBugs(),
                 result.softLockCount(), result.crashRate(), result.dominantBuildShare(),
-                result.statsJson());
+                statsWithExperiment(result.statsJson(), buildEvidence));
         log.info("QA orchestration: leadTask={} gate={} automatic={}",
                 leadTask.id(), gate.id(), result.automaticResult());
         return gateRepo.findById(gate.id()).orElseThrow();
+    }
+
+    private String statsWithExperiment(String stats, QaBuildShareDeriver.Evidence evidence) {
+        try {
+            var value = (ObjectNode) MAPPER.readTree(stats);
+            value.put("buildShareMetric", "max_build_game_count / total_game_count");
+            if (evidence != null) {
+                value.put("buildShareExperimentId", evidence.experimentId());
+                value.put("buildShareTotalGames", evidence.totalGames());
+                value.put("buildShareLargestBuildGames", evidence.largestBuildGames());
+            }
+            return value.toString();
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new IllegalStateException("QA produced unreadable gate statistics", e);
+        }
     }
 
     // ==================== 内部工具 ====================

@@ -10,7 +10,7 @@ AI Game Lab 是本地运行的游戏 AI 工作平台。Research 查证资料，D
 
 生产页支持从 Designer 导入可编辑草稿，也可手工编写规格。创建 Builder 任务前，用户确认所选规格版本的制造范围。[Designer 草稿与制造确认](docs/platform/PRODUCTION_ARTIFACTS.md#designer-草稿与制造范围确认)
 
-固定候选支持逐项观察、接受或拒绝、版本历史与独立回执。当前候选的全部人工检查通过且有最新接受记录时，交付门禁开放。[候选人工评审与规格覆盖](docs/platform/CANDIDATE_HUMAN_REVIEW.md)
+固定候选支持浏览器字段观测、逐项人工检查、接受或拒绝和版本回执。交付要求当前候选的人工检查全部通过、最新评审已接受、最新浏览器证据无失败。[浏览器验收](docs/platform/CANDIDATE_BROWSER_EVIDENCE.md) · [候选人工评审](docs/platform/CANDIDATE_HUMAN_REVIEW.md)
 
 ## 当前能力与边界
 

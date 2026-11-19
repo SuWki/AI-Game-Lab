@@ -351,6 +351,13 @@ CREATE TABLE IF NOT EXISTS candidate_review (
     PRIMARY KEY(candidate_id, revision)
 );
 
+CREATE TABLE IF NOT EXISTS candidate_browser_evidence (
+    candidate_id TEXT NOT NULL REFERENCES production_candidate(id),
+    execution_id TEXT NOT NULL,
+    record_json TEXT NOT NULL,
+    PRIMARY KEY(candidate_id, execution_id)
+);
+
 CREATE TABLE IF NOT EXISTS local_change_proposal (
     id TEXT PRIMARY KEY,
     status TEXT NOT NULL,
