@@ -7,7 +7,7 @@
 | 检查 | 规格配置示例 | 通过条件 |
 | --- | --- | --- |
 | 重开首帧 | `"browserProbe":{"profile":"survival-web-restart-frame-v1","field":"heat","expected":0}` | 首帧字段等于期望值。可观察生命、热量或能量、得分和显示时间。 |
-| 空格技能 | `"browserProbe":{"profile":"survival-web-space-resource-v1","field":"energy","expected":30}` | 热量至少增加指定值，或能量至少下降指定值。阈值为 1–100 的整数。 |
+| 空格技能 | `"browserProbe":{"profile":"survival-web-space-resource-v1","field":"energy","expected":30}` | 热量至少增加指定值，或能量至少下降指定值。热量阈值为 25–100，避开模板自动射击产生的短时积热。能量阈值为 1–100。 |
 
 ## 运行与回查
 

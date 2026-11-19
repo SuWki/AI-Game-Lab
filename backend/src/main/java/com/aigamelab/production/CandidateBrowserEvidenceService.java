@@ -56,7 +56,7 @@ public class CandidateBrowserEvidenceService {
         return switch (probe.path("profile").asText()) {
             case PROFILE -> FIELDS.contains(field) && expected.asDouble() >= 0 && expected.asDouble() <= 999_999_999;
             case INPUT_PROFILE -> RESOURCES.contains(field) && expected.isIntegralNumber()
-                    && expected.asDouble() >= 1 && expected.asDouble() <= 100;
+                    && expected.asDouble() >= ("heat".equals(field) ? 25 : 1) && expected.asDouble() <= 100;
             default -> false;
         };
     }

@@ -51,7 +51,7 @@ export function SpecificationEditor({taskId,selected,onSaved}:{taskId:number;sel
        setProbe(a.id,isInput?(content.systems.survivalWeb.mechanic==="heat-burst"?"heat":"energy"):"health",isInput?30:100,e.target.value);
      }}><option value={firstFrameProfile}>重开首帧或人工观察</option><option value={inputProfile}>空格技能资源变化</option></select></label>{" "}
      {a.browserProbe?.profile===inputProfile?<>
-       <label>验收 {a.id} 最低资源变化 <input type="number" required min={1} max={100} step={1}
+       <label>验收 {a.id} 最低资源变化 <input type="number" required min={a.browserProbe.field==="heat"?25:1} max={100} step={1}
          value={Number.isFinite(a.browserProbe.expected)?a.browserProbe.expected:""}
          onChange={e=>setProbe(a.id,a.browserProbe!.field,e.target.valueAsNumber,inputProfile)}/></label>{" "}
        <button type="button" onClick={()=>setProbe(a.id,"",0)}>清除浏览器检查</button>
