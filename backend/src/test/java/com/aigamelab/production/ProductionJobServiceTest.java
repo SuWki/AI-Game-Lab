@@ -53,6 +53,29 @@ class ProductionJobServiceTest {
  }
  JsonNode verified(String key)throws Exception{var built=await(jobs.start(request(key)).path("id").asText());jobs.validate(built.path("id").asText(),null);return awaitVerification(built.path("id").asText());}
 
+ @Test void listWritesOnlyWhenPersistedExecutionChanges() throws Exception {
+  var verified = verified("poll-write-count");
+  String id = verified.path("id").asText();
+  // Simulate a terminal executor outcome whose production summary is still stale.
+  db.update("UPDATE production_job SET record_json=json_remove(record_json,'$.validationDecision') WHERE id=?", id);
+  db.execute("CREATE TABLE production_poll_writes (id TEXT)");
+  db.execute("""
+      CREATE TRIGGER measure_production_poll_writes AFTER UPDATE ON production_job
+      BEGIN INSERT INTO production_poll_writes VALUES (NEW.id); END
+      """);
+  try {
+   for (int poll = 0; poll < 20; poll++) {
+    var row = jobs.list().stream().filter(job -> id.equals(job.path("id").asText())).findFirst().orElseThrow();
+    assertThat(row.path("validationDecision").asText()).isEqualTo("PASS");
+    assertThat(row.path("iteration").path("phase").asText()).isEqualTo("REVIEW");
+    assertThat(db.queryForObject("SELECT count(*) FROM production_poll_writes WHERE id=?", Integer.class, id)).isOne();
+   }
+  } finally {
+   db.execute("DROP TRIGGER measure_production_poll_writes");
+   db.execute("DROP TABLE production_poll_writes");
+  }
+ }
+
  @Test void resumesAfterContractFingerprintWasSavedButFileWasNotPublished() throws Exception {
   var built = await(jobs.start(request("resume-contract")).path("id").asText());
   String id = built.path("id").asText();

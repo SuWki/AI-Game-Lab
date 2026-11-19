@@ -62,7 +62,7 @@ public class LocalChangeService {
         Proposal p=require(id);
         iterations.getObject().checkApproval(p);
         if(db.update("UPDATE local_change_proposal SET status='APPLYING' WHERE id=? AND status='PENDING'",id)!=1)throw BusinessException.conflict("Proposal already decided");
-        Path workspace=null;String validationId=null;
+        Path workspace=null;
         try {
             evidence.verify(p.baseRunId());var base=tests.get(p.baseRunId());var binding=evidence.binding(p.baseRunId());
             Files.createDirectories(workspaceRoot);Path parent=workspaceRoot.toRealPath();workspace=Files.createDirectory(parent.resolve(p.id()));
@@ -85,13 +85,16 @@ public class LocalChangeService {
             var owners=db.queryForList("SELECT run_id FROM tool_call WHERE approval_status='PENDING' AND CASE WHEN json_valid(result_json) THEN json_extract(result_json,'$.localProposalId') END=?",Long.class,p.id());
             Long owner=owners.isEmpty()?null:owners.get(0);
             var target=base.target();var candidate=workspace;var before=p;
-            p=iterations.getObject().registerValidation(before,()->{
+            iterations.getObject().registerValidation(before,()->{
                 var run=tests.startWorkspace(new LocalTestService.Target(target.id(),target.name(),candidate.toString(),command,target.timeoutSeconds(),target.resultPath(),target.versionFiles(),target.artifactFiles(),target.protectedFiles()),owner);
                 var linked=new Proposal(before.id(),"VALIDATING",before.baseRunId(),before.title(),before.edits(),candidate.toString(),run.id(),null);
                 save(linked);return linked;
-            });validationId=p.validationRunId();
-        }catch(Exception e){p=new Proposal(p.id(),"FAILED",p.baseRunId(),p.title(),p.edits(),workspace==null?null:workspace.toString(),validationId,e.getClass().getSimpleName()+": "+e.getMessage());}
-        save(p);return get(p.id());
+            });
+        }catch(Exception e){
+            save(new Proposal(p.id(),"FAILED",p.baseRunId(),p.title(),p.edits(),
+                    workspace==null?null:workspace.toString(),null,e.getClass().getSimpleName()+": "+e.getMessage()));
+        }
+        return get(id);
     }
     public Proposal reject(String id) {
         Proposal p=require(id);
@@ -111,7 +114,15 @@ public class LocalChangeService {
             run.evidence().path("checks").forEach(c->after.add(c.path("id").asText()));
             if(after.containsAll(before))status="VALIDATED";else reason="Passing report omitted baseline checks; absence is not proof of a fix";
         } else reason="Validation execution "+run.status()+": "+(run.error()==null?assessment.path("reason").asText("Validation evidence incomplete"):run.error());
-        p=new Proposal(p.id(),status,p.baseRunId(),p.title(),p.edits(),p.workspace(),p.validationRunId(),reason);save(p);settle(p);return p;
+        var completed = new Proposal(p.id(),status,p.baseRunId(),p.title(),p.edits(),p.workspace(),p.validationRunId(),reason);
+        // Completion callbacks and polling can observe the same finished execution.
+        int updated = db.update("""
+                UPDATE local_change_proposal SET status=?, proposal_json=?
+                WHERE id=? AND status='VALIDATING'
+                """, completed.status(), encode(completed), id);
+        var settled = updated == 1 ? completed : require(id);
+        settle(settled);
+        return settled;
     }
     public void onTestFinished(String runId) {
         for(String id:db.queryForList("SELECT id FROM local_change_proposal WHERE status='VALIDATING' AND json_extract(proposal_json,'$.validationRunId')=?",String.class,runId))get(id);
@@ -130,5 +141,6 @@ public class LocalChangeService {
     }
     private Proposal require(String id){return db.query("SELECT proposal_json FROM local_change_proposal WHERE id=?",(rs,n)->read(rs.getString(1)),id).stream().findFirst().orElseThrow(()->BusinessException.notFound("Local change proposal not found"));}
     private Proposal read(String value){try{return mapper.readValue(value,Proposal.class);}catch(Exception e){throw new IllegalStateException(e);}}
-    private void save(Proposal p){try{db.update("INSERT INTO local_change_proposal(id,status,proposal_json) VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET status=excluded.status,proposal_json=excluded.proposal_json",p.id(),p.status(),mapper.writeValueAsString(p));}catch(java.io.IOException e){throw new IllegalStateException(e);}}
+    private String encode(Proposal p){try{return mapper.writeValueAsString(p);}catch(java.io.IOException e){throw new IllegalStateException(e);}}
+    private void save(Proposal p){db.update("INSERT INTO local_change_proposal(id,status,proposal_json) VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET status=excluded.status,proposal_json=excluded.proposal_json",p.id(),p.status(),encode(p));}
 }

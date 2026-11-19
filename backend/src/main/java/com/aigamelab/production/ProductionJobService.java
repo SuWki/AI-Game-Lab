@@ -90,7 +90,16 @@ public class ProductionJobService {
         return get(id);
     }
     public synchronized JsonNode get(String id){
-        var job=require(id);if(!job.path("localRunId").isNull()&&!job.path("localRunId").isMissingNode()){
+        var stored = require(id);
+        var job = stored.deepCopy();
+        refreshExecution(job);
+        if (!job.equals(stored)) save(job);
+        if(iterations!=null)job.set("iteration",iterations.getObject().snapshot(job));
+        if(sessions!=null&&job.hasNonNull("ownerRunId"))runs.findById(job.path("ownerRunId").asLong()).ifPresent(r->{var budget=sessions.snapshot(r.taskId());if(budget!=null)job.set("budget",budget);});
+        return job;
+    }
+    private void refreshExecution(ObjectNode job) {
+        if(job.hasNonNull("localRunId")){
             var run=executor.get(job.path("localRunId").asText());String state=run.status();
             if("PASSED".equals(state)){
                 var result=run.evidence()==null?null:run.evidence().get("production");
@@ -98,12 +107,19 @@ public class ProductionJobService {
                 else{state="BUILT";job.set("result",result);}
             }else if("COMPLETED".equals(state))state="INCONCLUSIVE";
             if("FAILED".equals(state)&&run.evidence()!=null&&run.evidence().path("checks").isArray())for(var check:run.evidence().path("checks"))if("FAIL".equals(check.path("status").asText())){job.put("error",check.path("actual").asText("Production command failed"));break;}
-            job.put("status",state);if(run.error()!=null)job.put("error",run.error());save(job);
+            job.put("status",state);if(run.error()!=null)job.put("error",run.error());
         }
-        if(job.hasNonNull("validationRunId")){var validation=executor.get(job.path("validationRunId").asText());job.put("validationStatus",validation.status());if(!Set.of("QUEUED","RUNNING").contains(validation.status())){job.put("validationDecision",evidence.getObject().assessment(validation).path("decision").asText());if(validation.evidence()!=null){job.set("validationChecks",validation.evidence().path("checks"));job.put("validationScope",validation.evidence().path("scope").asText());}}save(job);}
-        if(iterations!=null)job.set("iteration",iterations.getObject().snapshot(job));
-        if(sessions!=null&&job.hasNonNull("ownerRunId"))runs.findById(job.path("ownerRunId").asLong()).ifPresent(r->{var budget=sessions.snapshot(r.taskId());if(budget!=null)job.set("budget",budget);});
-        return job;
+        if (job.hasNonNull("validationRunId")) {
+            var validation = executor.get(job.path("validationRunId").asText());
+            job.put("validationStatus", validation.status());
+            if (!Set.of("QUEUED", "RUNNING").contains(validation.status())) {
+                job.put("validationDecision", evidence.getObject().assessment(validation).path("decision").asText());
+                if (validation.evidence() != null) {
+                    job.set("validationChecks", validation.evidence().path("checks"));
+                    job.put("validationScope", validation.evidence().path("scope").asText());
+                }
+            }
+        }
     }
     public synchronized JsonNode cancel(String id){var job=require(id);iterations.getObject().cancel(id);if(!job.path("localRunId").isNull()&&!job.path("localRunId").isMissingNode())executor.cancel(job.path("localRunId").asText());if(job.hasNonNull("validationRunId"))executor.cancel(job.path("validationRunId").asText());return get(id);}
     public synchronized JsonNode validate(String id,Long ownerRunId){
