@@ -122,6 +122,13 @@ public class RunController {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("run", run);
         data.put("steps", stepViews);
+        var modelEvents = jdbc.query("""
+                SELECT type, payload_json FROM agent_event
+                WHERE run_id=? AND type IN ('LLM_REQUEST_SENT','LLM_RESPONSE_RECEIVED')
+                ORDER BY id LIMIT 1000
+                """, (rs, index) -> Map.of("type", rs.getString("type"), "payloadJson", rs.getString("payload_json")),
+                Long.toString(id));
+        data.put("modelEvents", modelEvents);
         data.put("executionContext",conversation.context(id));
         var budget=builderSessions.snapshot(run.taskId());if(budget!=null)data.put("builderBudget",budget);
         return ApiResp.ok(data);

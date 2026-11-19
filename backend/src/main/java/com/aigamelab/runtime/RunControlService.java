@@ -42,6 +42,8 @@ public class RunControlService {
         return t;
     });
     @org.springframework.beans.factory.annotation.Value("${llm.gateway.model:deepseek-chat}") private String model="deepseek-chat";
+    @org.springframework.beans.factory.annotation.Value("${agent.runtime.token-budget:100000}")
+    private int tokenBudget = 100000;
 
     public RunControlService(RunRepository runRepo, TaskRepository taskRepo,
             RunStateMachine stateMachine,
@@ -117,12 +119,14 @@ public class RunControlService {
      * promptVersionId 传 null（由 AgentLoop.selectSystemPrompt 按 Task 动态选择）。
      */
     public Run start(long taskId) {
+        if (tokenBudget < 1) throw new IllegalArgumentException("Agent token budget must be positive");
         var task=taskRepo.findById(taskId).orElseThrow(
                 () -> BusinessException.notFound("Task 不存在: " + taskId));
+        boolean builder = builderSessions.isBuilder(task);
         java.util.function.Supplier<Run> create=()->runRepo.insert(new Run(null, taskId, "PENDING", null,
-                model, 0, task.maxSteps(), 100000, 0,
+                model, 0, task.maxSteps(), builder ? builderSessions.tokenBudgetForNewRun(taskId, tokenBudget) : tokenBudget, 0,
                 null, null, null, null, null));
-        Run run=builderSessions.isBuilder(task)?builderSessions.admit(task,create):create.get();
+        Run run=builder?builderSessions.admit(task,create):create.get();
         log.info("Task {} → 新建 Run {}（待 AgentLoop 执行）", taskId, run.id());
         submit(run.id(),() -> {
             try {

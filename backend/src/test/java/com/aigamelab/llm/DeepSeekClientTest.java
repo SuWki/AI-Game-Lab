@@ -70,6 +70,13 @@ class DeepSeekClientTest {
         assertThat(java.time.Duration.ofNanos(System.nanoTime()-started).toMillis()).isLessThan(4800);
     }
 
+    @Test void singleAttemptProfileDoesNotRetry429() {
+        client = new DeepSeekClient("test", wire.baseUrl(), 1, false);
+        wire.stubFor(post(urlEqualTo("/chat/completions")).willReturn(aResponse().withStatus(429)));
+        assertThatThrownBy(() -> client.complete(request())).isInstanceOf(LlmException.class);
+        wire.verify(1, postRequestedFor(urlEqualTo("/chat/completions")));
+    }
+
     @Test
     void mapsStandardStopResponse() {
         wire.stubFor(post(urlEqualTo("/chat/completions"))
