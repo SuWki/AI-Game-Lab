@@ -67,7 +67,8 @@ class ApplicationTests {
             "research_source", "research_claim",
             "qa_role_assignment", "qa_release_gate", "local_test_run",
             "runtime_context", "runtime_turn", "local_test_context", "local_change_proposal", "production_artifact",
-            "production_scope_confirmation", "production_job", "builder_session", "production_candidate", "candidate_review");
+            "production_scope_confirmation", "production_job", "builder_session", "production_candidate",
+            "candidate_review", "candidate_browser_evidence");
 
     @Test
     void contextLoads() {

@@ -3,6 +3,7 @@ import {useQuery,useQueryClient} from "react-query";
 import {api,type ProductionCandidate,type CandidateReview,type CandidateReviewInput,type CandidateReviewRecord,type ManualOutcome} from "@/api";
 
 type Draft={revision:number;manifestHash:string;reviewer:string;summary:string;checks:CandidateReviewInput["checks"]};
+const browserFields:Record<string,string>={health:"生命",heat:"热量",energy:"能量",score:"得分",time:"时间"};
 function draftFrom(view:CandidateReview):Draft{return {revision:view.revision,manifestHash:view.manifestHash,reviewer:view.latestReview?.reviewer??"",summary:view.latestReview?.summary??"",checks:view.checks.map(c=>({criterionId:c.criterionId,outcome:c.outcome,evidenceNote:c.evidenceNote}))};}
 
 export function CandidateReviewPanel({candidate,production}:{candidate:ProductionCandidate;production?:{phase:string;currentRunId:string}}){
@@ -30,6 +31,8 @@ export function CandidateReviewPanel({candidate,production}:{candidate:Productio
   const deliverable=verified&&productionCurrent&&view?.gate.eligibleForDelivery;
   const ready=Boolean(draft?.reviewer.trim()&&draft.summary.trim()&&draft.checks.every(c=>c.outcome==="NOT_TESTED"||Boolean(c.evidenceNote.trim())));
   const allPassed=Boolean(draft?.checks.length&&draft.checks.every(c=>c.outcome==="PASS"));
+  const browserChecks=view?.browserChecks??[];
+  const browser=view?.browserEvidence;
   return <section aria-label={`候选人工评审 ${candidate.id}`} style={{borderTop:"1px solid #ddd",marginTop:16,paddingTop:12}}>
     <h5>规格覆盖与人工评审</h5>
     <p>引擎检查不自动覆盖规格项。填写对这份固定构建的人工观察；接受、拒绝和修订都会留痕，原 ZIP 保持不变。</p>
@@ -39,6 +42,23 @@ export function CandidateReviewPanel({candidate,production}:{candidate:Productio
       <p>已记录意见：{view.decision} · r{view.revision} · 人工规格项通过 {view.coverage.passed} / {view.coverage.total}，未测 {view.coverage.untested}，失败 {view.coverage.failed}</p>
       <p><strong>{!verified?"门禁查询：当前状态未确认，请重新校验":deliverable?"门禁查询：此版本可交付":"门禁查询：此版本尚不可交付"}</strong></p>
       {!view.gate.candidateCurrent&&<p>该包已是历史候选，或生产存在未决工作；过去接受不代表当前版本通过。</p>}
+      {browserChecks.length>0&&<section aria-label="浏览器验收证据">
+        <h6>浏览器验收证据</h6>
+        <ul>{browserChecks.map(check=><li key={check.criterionId}>
+          {check.criterionId} · {check.outcome==="PASS"?"通过":check.outcome==="FAIL"?"失败":"未测"}
+          {check.field&&<> · {browserFields[check.field]??check.field} 期望 {check.expected}，观察 {check.actual??"—"}</>}
+        </li>)}</ul>
+        {browser&&<details><summary>查看浏览器观察与来源</summary>
+          <p>{browser.observation.observedAt} · {browser.observation.browser} · 规格 r{browser.specRevision}</p>
+          <p>{browser.observation.hud}</p>
+          <p style={{overflowWrap:"anywhere"}}>执行 {browser.executionId} · 清单 {browser.manifestHash} · ZIP {browser.archiveSha256}</p>
+        </details>}
+        {browserChecks.some(check=>check.field)&&<details><summary>如何运行本地浏览器验收</summary>
+          <p>从仓库根目录运行下面的命令，填入 Playwright 模块路径及 Chromium 安装路径。运行完点击重新载入。</p>
+          <code style={{overflowWrap:"anywhere"}}>node scripts/production/acceptance/candidate-browser.mjs {candidate.id} &quot;PLAYWRIGHT_INDEX&quot; &quot;BROWSER_EXECUTABLE&quot;</code>
+        </details>}
+        {view.gate.browserFailed&&<p role="alert">此候选有浏览器检查失败，交付门禁已关闭。</p>}
+      </section>}
       <details><summary>按需求查看覆盖</summary>{view.coverage.requirements.map(r=><p key={r.id}>{r.id} · {r.description} · {r.status}</p>)}</details>
       {draft&&<fieldset disabled={busy||Boolean(query.error)} style={{marginTop:12}}>
         <legend>编辑人工意见（基于 r{draft.revision}）</legend>
@@ -50,7 +70,7 @@ export function CandidateReviewPanel({candidate,production}:{candidate:Productio
         </section>;})}
         <p><label>评审总结 <textarea aria-label="评审总结" value={draft.summary} maxLength={4000} onChange={e=>edit({summary:e.target.value})} style={{display:"block",width:"100%",minHeight:80}}/></label></p>
         <button disabled={!ready} onClick={()=>void action(()=>save("DRAFT"))}>保存评审草稿</button>{" "}
-        <button disabled={!ready||!allPassed||!verified||!productionCurrent||!view.gate.candidateCurrent} onClick={()=>void action(()=>save("ACCEPTED"))}>接受此固定候选</button>{" "}
+        <button disabled={!ready||!allPassed||!verified||!productionCurrent||!view.gate.candidateCurrent||view.gate.browserFailed} onClick={()=>void action(()=>save("ACCEPTED"))}>接受此固定候选</button>{" "}
         <button disabled={!ready} onClick={()=>void action(()=>save("REJECTED"))}>拒绝此固定候选</button>
       </fieldset>}
       <p>评审者为本机操作者填写的标签，观察说明不等于自动测试证据；门禁以服务端重验为准，接受不会自动公开发布。</p>
