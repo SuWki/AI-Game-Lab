@@ -45,13 +45,14 @@ function simulate(seed:number, route:string, policy:string){
  return {seed,preferredRoute:route,policy,ticks,simulatedSec:Number((virtualMs/1000).toFixed(2)),status:s.status,bossSeen,maxEnemies,picks,violations,result:s.result};
 }
 const out='output/qa/agl-engine';fs.mkdirSync(out,{recursive:true});const runs=[];
-const revision=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+const isolatedSourceRevision=process.argv.find(arg=>arg.startsWith('--isolated-source-revision='))?.split('=')[1];
+const revision=isolatedSourceRevision??execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 if(revision!=='bf3e44bf2c32fd3a585cc6b982531f16ef807d13')throw new Error('Unsupported demo revision: '+revision);
 const sha=(path:string)=>createHash('sha256').update(fs.readFileSync(path)).digest('hex');
 try{
  for(const policy of ['orbit','seek-xp'])for(const route of ['crit','pierce','dash'])for(const seed of [11,29,47]){const r=simulate(seed,route,policy);runs.push(r);console.log(JSON.stringify({seed,route,policy,status:r.status,outcome:r.result?.outcome,boss:r.bossSeen,seconds:r.simulatedSec,violations:r.violations}));}
  const replay=simulate(11,'crit','orbit');const deterministic=JSON.stringify(replay)===JSON.stringify(runs[0]);
  const report={baseline:'bf3e44bf2c32fd3a585cc6b982531f16ef807d13',mode:'real RunEngine, fixed 60Hz, test-only seeded RNG/clock, no renderer, no invulnerability',deterministicReplay:deterministic,total:runs.length,completed:runs.filter(r=>r.status==='result').length,wins:runs.filter(r=>r.result?.outcome==='victory').length,bossReached:runs.filter(r=>r.bossSeen).length,invariantFailures:runs.filter(r=>r.violations.length).length,runs};
- const evidence={...report,source:{revision,engineSha256:sha('src/systems/RunEngine.ts'),lockSha256:sha('package-lock.json'),harnessSha256:sha('tools/agl-engine-baseline.ts'),policyVersion:1,clockHz:60,seeds:[11,29,47],replayScope:'seed 11 / crit / orbit'}};
+ const evidence={...report,source:{revision,revisionSource:isolatedSourceRevision?'operator-pinned source snapshot':'git HEAD',engineSha256:sha('src/systems/RunEngine.ts'),lockSha256:sha('package-lock.json'),harnessSha256:sha('tools/agl-engine-baseline.ts'),policyVersion:1,clockHz:60,seeds:[11,29,47],replayScope:'seed 11 / crit / orbit'}};
  fs.writeFileSync(out+'/summary.json',JSON.stringify(evidence,null,2));console.log(JSON.stringify({...evidence,runs:undefined}));if(!deterministic||report.invariantFailures||report.completed!==report.total)process.exitCode=1;
 }finally{Math.random=realRandom;Date.now=realNow;Object.defineProperty(globalThis,'performance',{configurable:true,value:realPerf});}

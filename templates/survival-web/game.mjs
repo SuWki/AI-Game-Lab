@@ -11,7 +11,7 @@ function start(){game=createGame(config);held.clear();action=false;last=0;status
 document.querySelector('#start').onclick=start;document.querySelector('#restart').onclick=start;
 function frame(now){
  const dt=last?Math.min((now-last)/1000,.05):0;last=now;
- if(game&&!document.hidden){game.step(dt,{left:held.has('a')||held.has('arrowleft'),right:held.has('d')||held.has('arrowright'),up:held.has('w')||held.has('arrowup'),down:held.has('s')||held.has('arrowdown'),action});action=false;}
+ if(game&&!document.hidden&&dt>0){game.step(dt,{left:held.has('a')||held.has('arrowleft'),right:held.has('d')||held.has('arrowright'),up:held.has('w')||held.has('arrowup'),down:held.has('s')||held.has('arrowdown'),action});action=false;}
  ctx.clearRect(0,0,800,520);ctx.strokeStyle='#253252';for(let x=0;x<800;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,520);ctx.stroke();}for(let y=0;y<520;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(800,y);ctx.stroke();}
  if(game){const s=game.state;ctx.fillStyle=s.shield>0?'#fef08a':'#7dd3fc';ctx.beginPath();ctx.arc(s.x,s.y,s.shield>0?22:12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fb7185';for(const e of s.enemies)ctx.fillRect(e.x-10,e.y-10,20,20);ctx.fillStyle='#a7f3d0';for(const b of s.bullets){ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill();}
  hud.textContent=`生命 ${s.hp} · ${config.mechanic==='heat-burst'?'热量':'能量'} ${Math.round(s.resource)} · 得分 ${s.score} · 时间 ${s.time.toFixed(1)} / ${config.duration} 秒`;
