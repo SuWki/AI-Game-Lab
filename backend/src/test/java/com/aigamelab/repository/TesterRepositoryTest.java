@@ -65,7 +65,7 @@ class TesterRepositoryTest extends AbstractRepositoryTest {
     // ==================== 裁决 §七.2：12 张表均存在 ====================
 
     @Test
-    void schemaHasExactlyTwentyOneTables() {
+    void schemaHasExpectedPlatformTables() {
         List<String> names = jdbc.queryForList(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
                 String.class);
@@ -76,7 +76,8 @@ class TesterRepositoryTest extends AbstractRepositoryTest {
                 "test_plan", "finding",
                 "research_source", "research_claim",
                 "qa_role_assignment", "qa_release_gate", "local_test_run",
-                "runtime_context", "runtime_turn", "local_test_context", "local_change_proposal", "production_artifact", "production_job", "builder_session", "production_candidate", "candidate_review");
+                "runtime_context", "runtime_turn", "local_test_context", "local_change_proposal", "production_artifact",
+                "production_scope_confirmation", "production_job", "builder_session", "production_candidate", "candidate_review");
     }
 
     // ==================== 裁决 §七.3：test_plan CRUD ====================
