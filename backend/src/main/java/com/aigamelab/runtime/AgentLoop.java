@@ -164,7 +164,7 @@ public class AgentLoop {
             LlmResponse resp;
             if (llmGateway == null) {
                 throw new IllegalStateException(
-                        "LlmGateway 未配置：P1 阶段请在测试中注入 FakeLlmGateway；P2-2 落地 DeepSeekClient 后生产可用");
+                        "LlmGateway 未配置，请选择直连或 CC Switch 本地代理并重启后端");
             }
             var request = request(run, messages, task);
             var modelEvent = com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode()

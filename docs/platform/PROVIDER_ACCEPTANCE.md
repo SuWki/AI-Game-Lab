@@ -1,10 +1,25 @@
 # 真实模型验收
 
-本流程在本机暂存 Designer 和 Builder 两个 Run 的验收输出。启动前检查网关凭据是否配置、单次响应上限、Run token 与时间限制，以及 Gateway 重试开关。检查在本机完成，供应商账户是否可用由实际模型响应确认。
+本流程在本机暂存 Designer 和 Builder 两个 Run 的验收输出。预检检查连接模式、单次响应上限、Run token 与时间限制及 Gateway 重试开关。账户额度、工具调用和实际计费需要供应商响应才能核实。
 
 ## 本机配置
 
-在启动后端的同一个 PowerShell 会话设置供应商凭据，凭据通过环境传入。以下示例限制一次 Designer Run 和一个 Builder 会话。没有凭据时，预检退出并列出缺项。
+在启动后端的同一个 PowerShell 会话选择一种连接方式，然后设置预算。
+
+**CC Switch 的 Claude 中转通道。** 在 CC Switch 中选择已配置的 Claude 供应商并开启本地代理。Lab 支持其 3.12.3 版本的非流式 Messages 路由，发送本地占位认证，代理负责添加中转站凭据。Lab 只连接 IPv4 回环地址，不读取 CC Switch 的配置库。CC Switch 的 Codex 和 Gemini 通道使用不同的路由。[对应版本的代理处理器](https://github.com/farion1231/cc-switch/blob/v3.12.3/src-tauri/src/proxy/handlers.rs)
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE = 'cc-switch'
+$env:CC_SWITCH_MODEL = '<本机 Claude 供应商支持或映射的模型名>'
+# 修改过 CC Switch 的监听端口时再设此项，默认 15721
+$env:CC_SWITCH_PORT = '15721'
+```
+
+该模式要求显式模型名，采样参数沿用该模型默认值，Lab 每轮只发送一次模型请求。验收期间保持 CC Switch 的供应商和映射固定，检查代理自身的重试和故障转移设置。Lab 的一次发送可能对应代理的多次上游尝试。若环境中已有 `LLM_GATEWAY_MODEL`，Spring 会优先使用它，可在预检结果里核对最终模型名。恢复默认直连可在新终端启动后端，切换前先处理等待恢复的 Run。
+
+**直连兼容端点。** 使用默认 Spring 配置并设置 `DEEPSEEK_API_KEY`。自定义服务可另设 `LLM_GATEWAY_BASE_URL` 和 `LLM_GATEWAY_MODEL`。两种模式都需要支持工具调用的模型。
+
+**验收预算。** 以下配置限制一次 Designer Run 和一个 Builder 会话。
 
 ```powershell
 $env:LLM_GATEWAY_RETRY_ENABLED = 'false'
@@ -14,7 +29,9 @@ $env:AGENT_RUNTIME_MAX_TOKENS = '2400'
 $env:AGENT_RUNTIME_TIMEOUT_MS = '180000'
 ```
 
-凭据变量为 `DEEPSEEK_API_KEY`，兼容端点可另设 `LLM_GATEWAY_BASE_URL` 和 `LLM_GATEWAY_MODEL`。启动前请使用有工具调用能力的模型。可选 Builder 估算单价与费用上限沿用[会话预算配置](BUILDER_SESSIONS.md)。token 预算在调用前和记录响应后检查，单次请求仍可能消耗超过剩余 token；实际费用以供应商账单为准。
+可选 Builder 估算单价与费用上限沿用[会话预算配置](BUILDER_SESSIONS.md)。token 预算在调用前和记录响应后检查，单次请求仍可能消耗超过剩余 token。Claude 返还的输入、缓存读取、缓存写入都计入输入 token，估算按统一输入单价计，实际费用以中转站账单为准。
+
+启动后端后运行下面的预检命令。代理模式返回 `gatewayMode=cc-switch-claude`、端口和 `proxyHealthy`。预检只调用本地 `GET /health`。代理关闭或端口填错时，命令退出码为 2，修正后可以直接重试。健康检查通过只说明代理能够应答。实际模型返回 HTTP 401/403 时核对 CC Switch 中的账户授权，400/404 时核对通道、模型名和工具协议。
 
 ## 分阶段执行
 

@@ -8,6 +8,8 @@
 
 ## 当前摘要（2026-11-19 平台审查）
 
+- 新增 CC Switch 的本机 Claude Messages 入口。代理持有真实 Key，Lab 预检只访问本机健康端点。隔离后端连接协议夹具完成 1 次 Designer 和 6 次 Builder 调用，Builder 记录 408 token 并生成 READY 候选。代理未就绪时验收脚本创建 0 个任务。真实中转账单和用户试玩延后，下一开发项为生产列表轮询写入测量与优化。[开发顺序](../design/DEVELOPMENT_ROADMAP.md) · [接入方法](../platform/PROVIDER_ACCEPTANCE.md)
+
 - 真实模型验收入口已实现。预检读取当前网关、重试、token 与时间配置。分阶段脚本保留规格确认和候选人工评审，报告记录请求模型、响应模型、已报告用量、未结算轮次、候选和修订。隔离 HTTP 夹具完成 1 次 Designer 和 6 次 Builder 请求，Builder 记录 408 token，产出 READY 候选；无凭据时未创建任务，未确认制造范围时未启动 Builder。真实付费调用与用户试玩接受仍待完成。[执行入口](../platform/PROVIDER_ACCEPTANCE.md)
 
 - 第四阶段本地子项通过。game-demo 18 局配对结算检查从 16 个错误降到 0，2048 长按 R 重开从 2 次降到 1，方向键回归一致。通过系统审批在隔离目录复跑且原文件哈希一致。共享模板升至 1.0.1，余热回廊、屏障穿梭两个固定 ZIP 的引擎验收、首帧浏览器观察、机制试玩脚本和便携重建通过。真实供应商与用户试玩接受仍待完成。[业务验收](../reports/BUSINESS_ACCEPTANCE_2026-11-19.md)

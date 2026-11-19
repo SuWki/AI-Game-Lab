@@ -73,16 +73,25 @@ npm ci
 Pop-Location
 ```
 
-### 2. 配置凭据
+### 2. 选择模型连接方式
 
-启动后端前在对应终端设置环境变量（PowerShell 示例，替换为自己的凭据）：
+如果中转站已经配在 CC Switch 的 Claude 通道，开启它的本地代理，在启动 Lab 后端的 PowerShell 里设置以下两项。模型名填写中转站支持、或已在 CC Switch 做过映射的名称。
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE = 'cc-switch'
+$env:CC_SWITCH_MODEL = '<Claude 通道的模型名>'
+```
+
+Lab 默认连接本机 15721 端口，真实 Key 由 CC Switch 管理。代理预检和自定义端口见[模型验收说明](docs/platform/PROVIDER_ACCEPTANCE.md)。
+
+使用直连模式时，在默认 Spring 配置下设置供应商凭据。网页搜索单独配置。
 
 ```powershell
 $env:DEEPSEEK_API_KEY = "<你的 DeepSeek API Key>"
 $env:SERPAPI_API_KEY = "<你的 SerpApi API Key>"
 ```
 
-- `DEEPSEEK_API_KEY`：执行真实 Agent Run 必需。未配置时可启动中台并使用独立 Experiment API，但 Agent 无可用 LlmGateway。
+- 默认直连模式通过 `DEEPSEEK_API_KEY` 启用。离线启动后仍可使用独立 Experiment API。
 - `SERPAPI_API_KEY`：使用 `web_search` 时必需；未配置则该工具返回 BLOCKED。
 - 默认模型为 `deepseek-chat`，其他配置见 [application.yml](backend/src/main/resources/application.yml)。本项目未配置自动加载 `.env`，请使用进程环境变量。
 

@@ -1,0 +1,6 @@
+llm:
+  gateway:
+    model: ${CC_SWITCH_MODEL:}
+    retry-enabled: false
+    timeout-seconds: 30
+    proxy-port: ${CC_SWITCH_PORT:15721}
