@@ -314,6 +314,15 @@ CREATE TABLE IF NOT EXISTS production_artifact (
     PRIMARY KEY(artifact_id, revision)
 );
 
+CREATE TABLE IF NOT EXISTS production_scope_confirmation (
+    artifact_id TEXT NOT NULL,
+    revision INTEGER NOT NULL,
+    content_hash TEXT NOT NULL,
+    confirmed_at TEXT NOT NULL,
+    PRIMARY KEY(artifact_id, revision),
+    FOREIGN KEY(artifact_id, revision) REFERENCES production_artifact(artifact_id, revision)
+);
+
 CREATE TABLE IF NOT EXISTS production_job (
     id TEXT PRIMARY KEY,
     task_id INTEGER NOT NULL REFERENCES task(id),

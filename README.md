@@ -8,7 +8,9 @@ AI Game Lab 是本地运行的游戏 AI 工作平台。Research 查证资料，D
 
 > 2026-11-19 更新。五模块的可用能力、代码风险与下一轮验收分别见[整体审查](docs/reports/PLATFORM_REVIEW_2026-11-19.md)和[开发路线](docs/design/DEVELOPMENT_ROADMAP.md)。实现进度见 [task-state.md](docs/state/task-state.md)，完整导航见[文档索引](docs/index.md)。
 
-生产页支持[人工编写和修订规格](docs/reports/SPECIFICATION_EDITOR_2026-11-17.md)。固定候选支持逐项观察、接受/拒绝、版本历史与独立回执。仅当前候选、完整人工 PASS 和最新显式接受同时成立时，交付门禁才开放。[候选人工评审与规格覆盖](docs/platform/CANDIDATE_HUMAN_REVIEW.md)
+生产页支持从 Designer 导入可编辑草稿，也可手工编写规格。创建 Builder 任务前，用户确认所选规格版本的制造范围。[Designer 草稿与制造确认](docs/platform/PRODUCTION_ARTIFACTS.md#designer-草稿与制造范围确认)
+
+固定候选支持逐项观察、接受或拒绝、版本历史与独立回执。当前候选的全部人工检查通过且有最新接受记录时，交付门禁开放。[候选人工评审与规格覆盖](docs/platform/CANDIDATE_HUMAN_REVIEW.md)
 
 ## 当前能力与边界
 

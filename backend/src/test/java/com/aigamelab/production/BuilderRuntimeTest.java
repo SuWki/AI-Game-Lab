@@ -22,6 +22,8 @@ class BuilderRuntimeTest {
  @Autowired ProductionArtifactService artifacts;@Autowired ProductionJobService jobs;@Autowired ProductionTools tools;@Autowired TaskRepository tasks;@Autowired RunRepository runs;@Autowired RuntimeConversation conversation;@Autowired AgentLoop loop;@Autowired CheckingGateway gateway;@Autowired ObjectMapper mapper;@Autowired AgentTypeResolver resolver;
  @Autowired com.aigamelab.localtest.LocalChangeService changes;@Autowired org.springframework.jdbc.core.JdbcTemplate db;
  @Autowired BuilderSessionService sessions;@Autowired RunControlService control;
+ @Autowired ManufacturingScopeService scopes;
+ @Autowired DesignerHandoffService handoff;
  JsonNode spec;long sourceTask;
  @BeforeEach void setup()throws Exception{
   gateway.script.clear();sourceTask=tasks.insert(new Task(null,"source","make game","{}",20,true,"ACTIVE",null)).id();
@@ -29,6 +31,61 @@ class BuilderRuntimeTest {
   var content=(com.fasterxml.jackson.databind.node.ObjectNode)mapper.readTree("""
    {"title":"Bound Builder game","genre":"survival","targetPlatform":"web","coreLoop":"survive","endConditions":"survive round","restartBehavior":"reset","systems":{"survivalWeb":{"mechanic":"heat-burst","duration":6,"enemySpeed":70,"spawnInterval":1,"seed":42}},"controls":["move"],"states":["play","end"],"contentScope":[],"assetNeeds":[],"exclusions":[],"openQuestions":[],"requirements":[{"id":"R1","description":"restart","acceptanceIds":["A1"]}],"acceptanceCriteria":[{"id":"A1","requirementId":"R1","expected":"reset","method":"browser"}]}
    """);content.put("briefRef",brief.path("artifactId").asText());spec=artifacts.save(new ProductionArtifactService.Request(sourceTask,null,null,null,"GameSpec",content,List.of(new ProductionArtifactService.Ref(brief.path("artifactId").asText(),1,brief.path("contentHash").asText()))));
+  scopes.confirm(scopeRequest(spec));
+ }
+ private ManufacturingScopeService.Request scopeRequest(JsonNode artifact) {
+  return new ManufacturingScopeService.Request(artifact.path("taskId").asLong(),
+          artifact.path("artifactId").asText(),artifact.path("revision").asInt(),artifact.path("contentHash").asText());
+ }
+
+ @Test void designerDraftUsesSharedRuntimeAndSurvivesIncompleteImport() throws Exception {
+  var task = tasks.insert(new Task(null,"Draft","Design a short survival game",
+          "{\"agent_type\":\"DESIGNER\",\"productionDraft\":true}",20,true,"ACTIVE",null));
+  var run = runs.insert(new Run(null,task.id(),"PENDING",null,"checking",0,20,100000,0,null,null,null,null,null));
+  var draft = mapper.createObjectNode();
+  draft.set("brief", mapper.readTree("""
+          {"title":"Draft","mode":"NEW","genre":"survival","targetPlatform":"web","targetPlayer":"casual","scope":"slice"}
+          """));
+  var partial = (com.fasterxml.jackson.databind.node.ObjectNode) spec.path("content").deepCopy();
+  partial.remove("coreLoop");
+  draft.set("spec", partial);
+  gateway.script.add(request -> {
+   assertThat(request.tools()).isNullOrEmpty();
+   assertThat(request.messages().getFirst().content()).contains("brief and spec", "openQuestions");
+   return new LlmResponse("test","stop",draft.toString(),null,new TokenUsage(1,1,2,null,null),0L,"test");
+  });
+  loop.run(run.id());
+  assertThat(handoff.drafts(task.id())).singleElement().satisfies(value -> assertThat(value.runId()).isEqualTo(run.id()));
+  var incomplete = new DesignerHandoffService.Save(task.id(),draft.path("brief"),partial);
+  assertThatThrownBy(() -> handoff.save(run.id(),incomplete)).hasMessageContaining("coreLoop");
+  assertThat(artifacts.list(task.id())).isEmpty();
+  assertThat(handoff.drafts(task.id()).getFirst().result()).isEqualTo(draft.toString());
+  partial.put("coreLoop","Move and survive");
+  partial.putArray("openQuestions").add("Confirm timing");
+  var saved = handoff.save(run.id(),incomplete);
+  assertThat(handoff.save(run.id(),incomplete)).isEqualTo(saved);
+  assertThat(artifacts.list(task.id())).hasSize(2);
+  assertThat(saved.path("producerRunId").asLong()).isEqualTo(run.id());
+  assertThatThrownBy(() -> scopes.confirm(scopeRequest(saved))).hasMessageContaining("Resolve open questions");
+  assertThatThrownBy(() -> handoff.save(run.id(),new DesignerHandoffService.Save(sourceTask,draft.path("brief"),partial)))
+          .hasMessageContaining("of this task");
+ }
+
+ @Test void revisedSpecificationRequiresItsOwnConfirmationAndExistingBuildKeepsOldVersion() {
+  var first = scopeRequest(spec);
+  var receipt = scopes.confirm(first);
+  assertThat(scopes.confirm(first)).isEqualTo(receipt);
+  var original = jobs.start(new ProductionJobService.Request(sourceTask,first.specId(),1,"scope-r1"));
+  var ref = mapper.convertValue(spec.path("inputRefs").get(0), ProductionArtifactService.Ref.class);
+  var newContent = ((com.fasterxml.jackson.databind.node.ObjectNode)spec.path("content")).deepCopy().put("title","Revised title");
+  var revised = artifacts.save(new ProductionArtifactService.Request(sourceTask,null,first.specId(),1,"GameSpec",newContent,List.of(ref)));
+  assertThatThrownBy(() -> jobs.createBuilderTask(sourceTask,first.specId(),2,"Build revision"))
+          .hasMessageContaining("Confirm manufacturing scope");
+  assertThatThrownBy(() -> scopes.confirm(new ManufacturingScopeService.Request(sourceTask,first.specId(),2,first.contentHash())))
+          .hasMessageContaining("exact task and specification");
+  scopes.confirm(scopeRequest(revised));
+  assertThat(jobs.createBuilderTask(sourceTask,first.specId(),2,"Build revision").constraintsJson()).contains("\"productionSpecRevision\":2");
+  assertThat(jobs.get(original.path("id").asText()).path("specHash").asText()).isEqualTo(first.contentHash());
  }
  Run builder(){var task=jobs.createBuilderTask(sourceTask,spec.path("artifactId").asText(),1,"Generate template and report evidence");return runs.insert(new Run(null,task.id(),"PENDING",null,"checking",0,20,100000,0,null,null,null,null,null));}
  static LlmResponse call(String id,String name,String args){return new LlmResponse("test","tool_calls",null,List.of(new com.aigamelab.llm.dto.ToolCall(id,name,args)),new TokenUsage(1,1,2,null,null),0L,"test");}

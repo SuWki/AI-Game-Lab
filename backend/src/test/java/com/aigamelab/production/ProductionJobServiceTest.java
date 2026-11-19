@@ -187,6 +187,8 @@ class ProductionJobServiceTest {
  }
  @Test void approvalRechecksTheWaitingBuilderSessionDeadline()throws Exception{
   var j=verified("expired-approval");String base=j.path("validationRunId").asText();var source=evidence.source(base,"engine.mjs");
+  application.getBean(ManufacturingScopeService.class).confirm(new ManufacturingScopeService.Request(
+          task,spec.path("artifactId").asText(),1,spec.path("contentHash").asText()));
   var task=jobs.createBuilderTask(this.task,spec.path("artifactId").asText(),1,"Approve within budget");var runs=application.getBean(com.aigamelab.repository.RunRepository.class);var sessions=application.getBean(BuilderSessionService.class);
   var run=runs.insert(new com.aigamelab.domain.Run(null,task.id(),"RUNNING",null,"checking",0,20,100000,0,null,null,null,null,null));sessions.claim(task,run);sessions.bind(run.id(),j.path("id").asText());db.update("UPDATE production_job SET record_json=json_set(record_json,'$.ownerRunId',?) WHERE id=?",run.id(),j.path("id").asText());
   var p=changes.create(base,"Awaiting approval",List.of(new com.aigamelab.localtest.LocalChangeService.Edit("engine.mjs",source.path("sha256").asText(),source.path("text").asText()+"\n// pending")));

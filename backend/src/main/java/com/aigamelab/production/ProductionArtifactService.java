@@ -49,25 +49,42 @@ public class ProductionArtifactService {
             for(var check:request.content().path("checks")){var original=expected.get(check.path("id").asText());if(original==null||!original.path("expected").equals(check.path("expected"))||!original.path("method").equals(check.path("method")))throw BusinessException.conflict("Acceptance meaning differs from pinned specification");}
         }
         String id=request.artifactId();int previous=0;
+        Long producerRunId = request.producerRunId();
+        JsonNode canonicalContent = canonical(request.content());
+        JsonNode referenceJson = mapper.valueToTree(refs);
         if(id!=null){
             var latest=latest(id);previous=latest.path("revision").asInt();
             if(latest.path("taskId").asLong()!=request.taskId()||!latest.path("kind").asText().equals(request.kind()))throw BusinessException.conflict("Artifact scope or kind mismatch");
+            if (latest.hasNonNull("producerRunId")) {
+                long originalProducer = latest.path("producerRunId").asLong();
+                if (producerRunId != null && producerRunId != originalProducer) {
+                    throw BusinessException.conflict("Artifact source Run is fixed across revisions");
+                }
+                producerRunId = originalProducer;
+            }
             // An exact retry is idempotent even when its previous revision is now stale.
-            if(latest.path("content").equals(canonical(request.content()))&&latest.path("inputRefs").equals(mapper.valueToTree(refs)))return latest;
+            if (samePayload(latest, canonicalContent, referenceJson, producerRunId)) return latest;
             if(request.expectedRevision()==null||request.expectedRevision()!=previous)throw BusinessException.conflict("Expected revision does not match current artifact");
         } else {
             if(request.expectedRevision()!=null&&request.expectedRevision()!=0)throw BusinessException.conflict("New artifact expects revision zero");
             id=UUID.randomUUID().toString();
             // Same task/kind/payload/reference retry reuses the existing immutable revision.
-            for(var existing:list(request.taskId()))if(existing.path("kind").asText().equals(request.kind())&&existing.path("content").equals(canonical(request.content()))&&existing.path("inputRefs").equals(mapper.valueToTree(refs)))return existing;
+            for (var existing : list(request.taskId())) {
+                if (existing.path("kind").asText().equals(request.kind())
+                        && samePayload(existing, canonicalContent, referenceJson, producerRunId)) return existing;
+            }
         }
         var envelope=mapper.createObjectNode().put("schemaVersion",1).put("kind",request.kind()).put("artifactId",id).put("revision",previous+1).put("taskId",request.taskId());
-        if(request.producerRunId()==null)envelope.putNull("producerRunId");else envelope.put("producerRunId",request.producerRunId());
-        envelope.set("inputRefs",mapper.valueToTree(refs));envelope.set("content",canonical(request.content()));
+        if(producerRunId==null)envelope.putNull("producerRunId");else envelope.put("producerRunId",producerRunId);
+        envelope.set("inputRefs",referenceJson);envelope.set("content",canonicalContent);
         envelope.put("contentHash",hash(envelope.path("content").toString()));
-        var document=documents.insert(new DesignDocument(null,request.producerRunId(),request.taskId(),request.kind()+" "+id+" r"+(previous+1),envelope.path("content").toPrettyString(),null));
+        var document=documents.insert(new DesignDocument(null,producerRunId,request.taskId(),request.kind()+" "+id+" r"+(previous+1),envelope.path("content").toPrettyString(),null));
         db.update("INSERT INTO production_artifact(artifact_id,revision,task_id,kind,document_id,envelope_json) VALUES (?,?,?,?,?,?)",id,previous+1,request.taskId(),request.kind(),document.id(),envelope.toString());
         return read(envelope.toString());
+    }
+    private boolean samePayload(JsonNode saved, JsonNode content, JsonNode refs, Long producerRunId) {
+        return saved.path("content").equals(content) && saved.path("inputRefs").equals(refs)
+                && Objects.equals(saved.hasNonNull("producerRunId") ? saved.path("producerRunId").asLong() : null, producerRunId);
     }
     public JsonNode get(String id,int revision){return db.query("SELECT envelope_json FROM production_artifact WHERE artifact_id=? AND revision=?",(rs,n)->read(rs.getString(1)),id,revision).stream().findFirst().orElseThrow(()->BusinessException.notFound("Artifact revision not found"));}
     public JsonNode latest(String id){return db.query("SELECT envelope_json FROM production_artifact WHERE artifact_id=? ORDER BY revision DESC LIMIT 1",(rs,n)->read(rs.getString(1)),id).stream().findFirst().orElseThrow(()->BusinessException.notFound("Artifact not found"));}

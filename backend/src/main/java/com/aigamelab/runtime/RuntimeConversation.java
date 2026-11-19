@@ -39,6 +39,24 @@ public class RuntimeConversation {
         value.put("model",run.model()).put("temperature",temperature).put("maxTokens",maxTokens).put("timeoutMs",timeoutMs).put("approvalWaitCountsTowardDeadline",true);
         value.put("deadlineEpochMs",(run.startedAt()==null?System.currentTimeMillis():run.startedAt().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli())+timeoutMs);
         JsonNode constraints=read(task.constraintsJson()==null?"{}":task.constraintsJson());
+        if (type == AgentType.DESIGNER && constraints.path("productionDraft").asBoolean()) {
+            allowed = Set.of();
+            value.put("productionDraft", true);
+            value.put("system", """
+                    You are designing one original, small survival-web game. Use the task goal as input.
+                    Return a single JSON object with two object properties, brief and spec. Do not call tools.
+                    brief fields: title, mode ("NEW"), genre ("survival"), targetPlatform ("web"), targetPlayer and scope.
+                    spec text fields: title, genre, targetPlatform, coreLoop, endConditions, restartBehavior.
+                    spec array fields: controls, states, contentScope, assetNeeds, exclusions, openQuestions,
+                    requirements (objects with id, description, acceptanceIds array), and acceptanceCriteria
+                    (objects with id, requirementId, expected and method). Each requirement needs a check.
+                    spec.systems.survivalWeb contains mechanic ("heat-burst" or "shield-dash"), duration
+                    (seconds, 1–300), enemySpeed (20–180), spawnInterval (seconds, 0.3–3), and seed (uint32).
+                    Record unresolved scope questions as strings in openQuestions. Design independently of any existing
+                    game's distinctive assets. Keep the brief and the specification concise and use the user's language.
+                    The result is a draft for human review. Report no implementation or validation as completed.
+                    """);
+        }
         if(type==AgentType.BUILDER){
             if(!constraints.path("productionSpecId").isTextual()||constraints.path("productionSpecRevision").asInt()<1||constraints.path("productionSourceTaskId").asLong()<1)throw new IllegalArgumentException("Builder requires a task-bound specification");
             for(String field:List.of("productionSpecId","productionSpecRevision","productionSourceTaskId"))value.set(field,constraints.path(field).deepCopy());
