@@ -10,7 +10,7 @@ const sha="a".repeat(64);
 const run:LocalTestRun={id:"test-a",target:{id:"game",name:"Game",workingDirectory:"/games/a",command:["node","test.mjs"],timeoutSeconds:30,resultPath:"result.json",versionFiles:["source"]},status:"FAILED",startedAt:"now",finishedAt:"now",exitCode:1,output:"",evidence:{},error:null};
 const assessment:LocalAssessment={localTestRunId:run.id,decision:"FAIL",failedChecks:1,totalChecks:1,binding:{versioned:true,version:"local-123",source:{"source/config.txt":sha}}};
 const proposal:LocalChange={id:"proposal-a",status:"PENDING",baseRunId:run.id,title:"Fix config",edits:[{path:"source/config.txt",beforeSha256:sha,beforeText:"bad",afterText:"good"}],workspace:null,validationRunId:null,error:null};
-function show(node:React.ReactNode){const qc=new QueryClient({defaultOptions:{queries:{retry:false,cacheTime:0}}});return render(<QueryClientProvider client={qc}><MemoryRouter>{node}</MemoryRouter></QueryClientProvider>);}
+function show(node:React.ReactNode,entry="/"){const qc=new QueryClient({defaultOptions:{queries:{retry:false,cacheTime:0}}});return render(<QueryClientProvider client={qc}><MemoryRouter initialEntries={[entry]}>{node}</MemoryRouter></QueryClientProvider>);}
 beforeEach(()=>{vi.restoreAllMocks();vi.spyOn(api,"localAssessment").mockResolvedValue(assessment);});
 describe("Versioned local workflow",()=>{
  it("keeps protected execution inputs read-only in the proposal editor",async()=>{
@@ -40,5 +40,18 @@ describe("Versioned local workflow",()=>{
  it("does not offer finding import or a patch editor for incomplete evidence",async()=>{
   vi.spyOn(api,"localAssessment").mockResolvedValue({...assessment,decision:"INCONCLUSIVE",reason:"Missing coverage"});show(<LocalEvidencePanel run={run}/>);
   expect(await screen.findByRole("button",{name:"导入测试计划与 Finding"})).toBeDisabled();expect(screen.queryByRole("button",{name:"读取源文件"})).not.toBeInTheDocument();
+ });
+ it("restores the exact proposal and displays the paired regression",async()=>{
+  const list=vi.spyOn(api,"localChanges").mockResolvedValue([]);
+  const detail=vi.spyOn(api,"localChange").mockResolvedValue({...proposal,status:"VALIDATED",validationRunId:"regression-a"});
+  vi.spyOn(api,"localAssessment").mockImplementation(async id=>id===run.id?assessment:{
+    ...assessment,localTestRunId:id,decision:"PASS",failedChecks:0,
+  });
+  show(<LocalChangesPage/>,"/local-tests/changes?proposalId=proposal-a");
+  expect(await screen.findByText("Fix config · VALIDATED")).toBeInTheDocument();
+  expect(await screen.findByText(/PASS · 失败 0/)).toBeInTheDocument();
+  expect(screen.getByRole("link",{name:"打开回归证据"})).toHaveAttribute("href","/local-tests?runId=regression-a");
+  expect(detail).toHaveBeenCalledWith(proposal.id);
+  expect(list).not.toHaveBeenCalled();
  });
 });
