@@ -36,13 +36,18 @@ public class BudgetGuard {
             return Verdict.stop(RunStatus.FAILED, "已到 Max Steps，目标未验证完成");
         }
         // 2. token 预算
-        if (run.tokensUsed() >= run.tokenBudget()) {
-            return Verdict.stop(RunStatus.FAILED, "已到 Token 预算，目标未验证完成");
-        }
+        var tokens = checkTokens(run);
+        if (tokens.hit()) return tokens;
         // 3. 时间预算
         if (timeoutMs > 0 && elapsedMs >= timeoutMs) {
             return Verdict.stop(RunStatus.TIMEOUT, "已到总超时预算");
         }
         return Verdict.pass();
+    }
+
+    public Verdict checkTokens(Run run) {
+        return run.tokensUsed() >= run.tokenBudget()
+                ? Verdict.stop(RunStatus.FAILED, "已到 Token 预算，目标未验证完成")
+                : Verdict.pass();
     }
 }

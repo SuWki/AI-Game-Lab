@@ -183,8 +183,9 @@ public class AgentLoop {
             shared=builderSessions.check(run,false);if(shared.hit()){finalizeRun(runId,shared.target(),null,shared.reason());return;}
             var afterResponse = runRepo.findById(runId).orElseThrow();
             if(!"RUNNING".equals(afterResponse.status())||cancelled(runId))return;
-            if (afterResponse.tokensUsed() >= afterResponse.tokenBudget()) {
-                finalizeRun(runId, RunStatus.FAILED, null, "已到 Run token 预算");
+            var tokenLimit = budgetGuard.checkTokens(afterResponse);
+            if (tokenLimit.hit()) {
+                finalizeRun(runId, tokenLimit.target(), null, tokenLimit.reason());
                 return;
             }
             if(budgetMs>0&&elapsedMs(afterResponse)>=budgetMs){finalizeRun(runId,RunStatus.TIMEOUT,null,"已到总超时预算");return;}

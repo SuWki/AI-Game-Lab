@@ -126,6 +126,8 @@ class BudgetGuardTest {
         assertThat(done.status()).isEqualTo("FAILED");
         assertThat(done.errorMessage()).contains("Token 预算");
         assertThat(llm.callCount() - baseCalls).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM tool_call WHERE run_id=?", Integer.class, run.id()))
+                .isEqualTo(1);
     }
 
     @Test
